@@ -60,7 +60,6 @@ class Subtask(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='subtasks')
     text = models.CharField(max_length=200)
-    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_subtasks')
     assignee = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_subtasks')
     is_completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

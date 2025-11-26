@@ -24,8 +24,8 @@ class TaskAdmin(admin.ModelAdmin):
 
 @admin.register(Subtask)
 class SubtaskAdmin(admin.ModelAdmin):
-    list_display = ('text', 'creator', 'task', 'is_completed', 'created_at', 'updated_at')
-    list_filter = ('creator', 'task', 'is_completed', 'created_at', 'updated_at')
+    list_display = ('text', 'task', 'is_completed', 'created_at', 'updated_at')
+    list_filter = ('task', 'is_completed', 'created_at', 'updated_at')
     search_fields = ('text', 'description')
     ordering = ('-created_at',)
 
