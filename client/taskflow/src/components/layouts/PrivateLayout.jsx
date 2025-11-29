@@ -29,8 +29,16 @@ const PrivateLayout = () => {
             <Navbar />
             {isMobile && !collapsed && (
                 <div
-                    className="fixed inset-0 bg-opacity-50 z-10"
+                    className="fixed inset-0 z-30"
                     onClick={() => setCollapsed(true)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Escape' || e.key === 'Enter') {
+                            setCollapsed(true);
+                        }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Close sidebar"
                 />
             )}
             <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} isMobile={isMobile} />

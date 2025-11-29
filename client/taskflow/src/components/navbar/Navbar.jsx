@@ -10,7 +10,7 @@ const Navbar = () => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-30 flex justify-between items-center p-4 bg-white shadow-sm border-b border-gray-200">
+        <nav className="fixed top-0 left-0 right-0 z-40 flex justify-between items-center p-4 bg-white shadow-sm border-b border-gray-200">
             <div className="flex items-center gap-8">
                 <Logo />
             </div>
@@ -27,8 +27,10 @@ const Navbar = () => {
                 </div>
                 {/* Mobile Search Icon */}
                 <button
-                    className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-full"
+                    className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors duration-200"
                     onClick={() => setIsSearchOpen(!isSearchOpen)}
+                    aria-label={isSearchOpen ? "Close search" : "Open search"}
+                    aria-expanded={isSearchOpen}
                 >
                     {isSearchOpen ? <FiX size={20} /> : <FiSearch size={20} />}
                 </button>
