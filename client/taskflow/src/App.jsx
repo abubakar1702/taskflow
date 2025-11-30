@@ -1,5 +1,4 @@
 import { Routes, Route } from "react-router-dom";
-import './App.css'
 import Tasks from './pages/Tasks';
 import Login from './components/auth/Login';
 import SignUp from './components/auth/SignUp';
@@ -15,7 +14,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
       </Route>
       <Route element={<PrivateLayout />}>
-        <Route path="/tasks" element={<Tasks />} />
+        <Route path="/" element={<Tasks />} />
       </Route>
     </Routes>
   )
