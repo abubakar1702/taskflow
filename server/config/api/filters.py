@@ -1,22 +1,12 @@
 import django_filters
 from .models import Task, Project
 from django.utils.timezone import now
-from rest_framework.filters import OrderingFilter
 
 class TaskFilter(django_filters.FilterSet):
     priority = django_filters.CharFilter(field_name='priority', lookup_expr='iexact')
     status = django_filters.CharFilter(field_name='status', lookup_expr='iexact')
     creator = django_filters.UUIDFilter(field_name='creator')
     
-    ordering = django_filters.OrderingFilter(
-        fields=(
-            ('created_at', 'Date Created (Desc)'),
-            ('-created_at', 'Date Created'),
-            ('due_date', 'Due Date'),
-            ('-due_date', 'Due Date (Desc)'),
-        ),
-        label='Sort By'
-    )
 
     assigned_to_me = django_filters.BooleanFilter(method='filter_assigned_to_me')
     created_by_me = django_filters.BooleanFilter(method='filter_created_by_me')

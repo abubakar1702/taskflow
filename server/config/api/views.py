@@ -5,6 +5,8 @@ from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 from .filters import TaskFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter
 
 class TaskAPIView(generics.ListCreateAPIView):
     queryset = Task.objects.all()
@@ -12,6 +14,10 @@ class TaskAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     filterset_class = TaskFilter
     
+    filter_backends = [DjangoFilterBackend, OrderingFilter] 
+
+    ordering_fields = ['created_at', 'due_date']
+
     def get_queryset(self):
         return (
             Task.objects.filter(
@@ -37,14 +43,3 @@ class TaskAPIView(generics.ListCreateAPIView):
                 })
         
         serializer.save(creator=self.request.user)
-    
-    def filter_queryset(self, queryset):
-        for backend in list(self.filter_backends):
-            queryset = backend().filter_queryset(self.request, queryset, self)
-        
-        filterset = self.filterset_class(
-            self.request.GET, 
-            queryset=queryset,
-            request=self.request
-        )
-        return filterset.qs
