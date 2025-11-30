@@ -3,7 +3,7 @@ from .models import Project, ProjectMember, Task, Subtask
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('name', 'creator', 'created_at', 'updated_at')
+    list_display = ('id','name', 'creator', 'created_at', 'updated_at')
     list_filter = ('creator', 'created_at', 'updated_at')
     search_fields = ('name', 'description')
     ordering = ('-created_at',) 

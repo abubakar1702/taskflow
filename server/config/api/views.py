@@ -1,10 +1,50 @@
 from django.shortcuts import render
 from .serializers import ProjectSerializer, ProjectMemberSerializer, TaskSerializer
 from .models import Project, ProjectMember, Task
-from rest_framework import generics
+from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
+from .filters import TaskFilter
 
 class TaskAPIView(generics.ListCreateAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
+    filterset_class = TaskFilter
+    
+    def get_queryset(self):
+        return (
+            Task.objects.filter(
+                Q(creator=self.request.user) |
+                Q(assignees__in=[self.request.user]) |
+                Q(project__members__in=[self.request.user])
+            )
+            .distinct()
+            .select_related('project', 'creator')
+            .prefetch_related('assignees')
+        )
+    
+    def perform_create(self, serializer):
+        project = serializer.validated_data.get('project')
+        
+        if project:
+            if not (
+                project.members.filter(id=self.request.user.id).exists() or 
+                project.creator == self.request.user
+            ):
+                raise serializers.ValidationError({
+                    "project": "You must be a project member to create tasks in this project"
+                })
+        
+        serializer.save(creator=self.request.user)
+    
+    def filter_queryset(self, queryset):
+        for backend in list(self.filter_backends):
+            queryset = backend().filter_queryset(self.request, queryset, self)
+        
+        filterset = self.filterset_class(
+            self.request.GET, 
+            queryset=queryset,
+            request=self.request
+        )
+        return filterset.qs
