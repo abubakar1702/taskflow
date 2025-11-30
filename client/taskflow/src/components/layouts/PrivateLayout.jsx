@@ -1,11 +1,16 @@
 import { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
+import { isAuthenticated } from "../../utils/auth";
 import Sidebar from "../sidebar/Sidebar";
 import Navbar from "../navbar/Navbar";
 
 const PrivateLayout = () => {
     const [collapsed, setCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+
+    if (!isAuthenticated()) {
+        return <Navigate to="/login" replace />;
+    }
 
     useEffect(() => {
         const handleResize = () => {
@@ -17,7 +22,6 @@ const PrivateLayout = () => {
             }
         };
 
-        // Initial check
         handleResize();
 
         window.addEventListener("resize", handleResize);

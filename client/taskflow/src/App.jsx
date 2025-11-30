@@ -13,6 +13,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
       </Route>
+
       <Route element={<PrivateLayout />}>
         <Route path="/" element={<Tasks />} />
       </Route>
