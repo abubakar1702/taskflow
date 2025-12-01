@@ -15,22 +15,29 @@ class TaskFilter(django_filters.FilterSet):
 
     class Meta:
         model = Task
-        fields = ['priority', 'status', 'creator']
+        fields = ['priority', 'status', 'creator', 'assigned_to_me', 'created_by_me', 'due_today', 'overdue']
         
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
     def filter_assigned_to_me(self, queryset, name, value):
-        if value and getattr(self.request, "user", None) and self.request.user.is_authenticated:
-            return queryset.filter(assignees=self.request.user).distinct()
+        user = getattr(self.request, "user", None) if self.request else None
+        if not user or not user.is_authenticated:
+            return queryset
+        if value is True:
+            return queryset.filter(assignees=user).distinct()
+        if value is False:
+            return queryset.exclude(assignees=user)
         return queryset
 
     def filter_created_by_me(self, queryset, name, value):
-        user = getattr(self.request, "user", None)
-        if value is True and user and user.is_authenticated:
+        user = getattr(self.request, "user", None) if self.request else None
+        if not user or not user.is_authenticated:
+            return queryset
+        if value is True:
             return queryset.filter(creator=user)
-        if value is False and user and user.is_authenticated:
+        if value is False:
             return queryset.exclude(creator=user)
         return queryset
 

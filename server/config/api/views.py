@@ -29,6 +29,20 @@ class TaskAPIView(generics.ListCreateAPIView):
             .select_related('project', 'creator')
             .prefetch_related('assignees')
         )
+        
+    def filter_queryset(self, queryset):
+        for backend in list(self.filter_backends):
+            if backend == DjangoFilterBackend:
+                filterset = self.filterset_class(
+                    self.request.GET, 
+                    queryset=queryset,
+                    request=self.request
+                )
+                if filterset.is_valid():
+                    queryset = filterset.qs
+            else:
+                queryset = backend().filter_queryset(self.request, queryset, self)
+        return queryset
     
     def perform_create(self, serializer):
         project = serializer.validated_data.get('project')
