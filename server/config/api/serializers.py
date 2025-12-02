@@ -23,6 +23,18 @@ class SubtaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subtask
         fields = ['id', 'text','assignee_id', 'assignee', 'is_completed', 'task', 'created_at', 'updated_at']
+        
+    def validate(self, attrs):
+        task = attrs.get('task') or self.instance.task
+        assignee = attrs.get('assignee')
+
+        if assignee:
+            if assignee != task.creator and assignee not in task.assignees.all():
+                raise serializers.ValidationError({
+                "assignee": "Subtask assignee must be a task assignee or the task creator."
+            })
+
+        return attrs
 
 class TaskSerializer(serializers.ModelSerializer):
     creator = UserSerializer(read_only=True)
@@ -52,7 +64,19 @@ class TaskSerializer(serializers.ModelSerializer):
         task.assignees.set(assignees)
 
         for subtask_data in subtasks_data:
-            assignee = subtask_data.pop('assignee', None)
+            assignee_id = subtask_data.pop('assignee_id', None)
+    
+            assignee = None
+            if assignee_id:
+                assignee = User.objects.get(id=assignee_id)
+
+            if assignee:
+                if assignee != task.creator and assignee not in task.assignees.all():
+                    raise serializers.ValidationError({
+                        "subtasks_data": "Each subtask assignee must be one of the task assignees or the task creator."
+                })
+
             Subtask.objects.create(task=task, assignee=assignee, **subtask_data)
+
 
         return task

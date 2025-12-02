@@ -43,7 +43,7 @@ class Task(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_tasks')
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks', null=True, blank=True)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.TODO)
     priority = models.CharField(max_length=20, choices=Priority.choices, default=Priority.MEDIUM)
     assignees = models.ManyToManyField(User, related_name='assigned_tasks', blank=True)

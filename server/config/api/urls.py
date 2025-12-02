@@ -3,4 +3,5 @@ from .views import TaskAPIView
 
 urlpatterns = [
     path('tasks/', TaskAPIView.as_view(), name='task-list-create'),
+    path('tasks/<uuid:pk>/', TaskAPIView.as_view(), name='task-detail'),
 ]
