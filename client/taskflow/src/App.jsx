@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Tasks from './pages/Tasks';
-import Task from './pages/Task';
+import TaskDetail from "./pages/TaskDetail/TaskDetail";
 import Login from './components/auth/Login';
 import SignUp from './components/auth/SignUp';
 import PrivateLayout from './components/layouts/PrivateLayout';
@@ -17,7 +17,7 @@ function App() {
 
       <Route element={<PrivateLayout />}>
         <Route path="/" element={<Tasks />} />
-        <Route path="/tasks/:id" element={<Task />} />
+        <Route path="/tasks/:id" element={<TaskDetail />} />
       </Route>
     </Routes>
   )
