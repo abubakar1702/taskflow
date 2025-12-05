@@ -19,22 +19,35 @@ class ProjectSerializer(serializers.ModelSerializer):
     
 class SubtaskSerializer(serializers.ModelSerializer):
     assignee = UserSerializer(read_only=True)
-    assignee_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='assignee', write_only=True)
+    assignee_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        source='assignee',
+        write_only=True,
+        required=False,
+        allow_null=True
+    )
+
     class Meta:
         model = Subtask
-        fields = ['id', 'text','assignee_id', 'assignee', 'is_completed', 'task', 'created_at', 'updated_at']
-        
+        fields = [
+            'id', 'text', 'assignee_id', 'assignee',
+            'is_completed', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'assignee', 'created_at', 'updated_at']
+
     def validate(self, attrs):
-        task = attrs.get('task') or self.instance.task
+        request = self.context['request']
+        parent_task = self.context.get('parent_task')  
+        task = parent_task or getattr(self.instance, 'task', None)
+
         assignee = attrs.get('assignee')
 
-        if assignee:
-            if assignee != task.creator and assignee not in task.assignees.all():
-                raise serializers.ValidationError({
+        if assignee and assignee != task.creator and assignee not in task.assignees.all():
+            raise serializers.ValidationError({
                 "assignee": "Subtask assignee must be a task assignee or the task creator."
             })
-
         return attrs
+
 
 class TaskSerializer(serializers.ModelSerializer):
     creator = UserSerializer(read_only=True)

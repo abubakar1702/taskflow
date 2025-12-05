@@ -1,6 +1,7 @@
 from django.shortcuts import render
-from .serializers import ProjectSerializer, ProjectMemberSerializer, TaskSerializer
-from .models import Project, ProjectMember, Task
+from .serializers import ProjectSerializer, ProjectMemberSerializer, TaskSerializer, SubtaskSerializer
+from django.shortcuts import get_object_or_404  
+from .models import Project, ProjectMember, Task, Subtask
 from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
@@ -73,4 +74,47 @@ class TaskDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
             .distinct()
             .select_related('project', 'creator')
             .prefetch_related('assignees')
+        )
+
+
+
+class SubtasksApiView(generics.ListCreateAPIView):
+    serializer_class = SubtaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        parent_id = self.kwargs['parent_task_id']
+
+        return (
+            Subtask.objects.filter(task_id=parent_id)
+            .select_related('task', 'assignee')
+        )
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        parent_task_id = self.kwargs.get('parent_task_id')
+        parent_task = get_object_or_404(Task, id=parent_task_id)
+        context['parent_task'] = parent_task
+        return context
+
+    def perform_create(self, serializer):
+        parent_task_id = self.kwargs.get('parent_task_id')
+        parent_task = get_object_or_404(Task, id=parent_task_id)
+
+        serializer.save(task=parent_task)
+        
+class SubtaskActionAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Subtask.objects.all()
+    serializer_class = SubtaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return (
+            Subtask.objects.filter(
+                Q(task__creator=self.request.user) |
+                Q(task__assignees__in=[self.request.user]) |
+                Q(task__project__members__in=[self.request.user])
+            )
+            .distinct()
+            .select_related('task', 'assignee')
         )
