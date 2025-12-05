@@ -57,3 +57,20 @@ class TaskAPIView(generics.ListCreateAPIView):
                 })
         
         serializer.save(creator=self.request.user)
+        
+class TaskDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        return (
+            Task.objects.filter(
+                Q(creator=self.request.user) |
+                Q(assignees__in=[self.request.user]) |
+                Q(project__members__in=[self.request.user])
+            )
+            .distinct()
+            .select_related('project', 'creator')
+            .prefetch_related('assignees')
+        )
