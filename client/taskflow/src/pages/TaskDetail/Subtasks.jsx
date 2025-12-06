@@ -7,6 +7,7 @@ import SubtaskAction from "./SubtaskAction";
 import EditSubtaskModal from "../../components/modals/EditSubtaskModal";
 import AddSubtaskModal from "../../components/modals/AddSubtaskModal";
 import { PiUserCirclePlusLight, PiUserCircleMinusThin } from "react-icons/pi";
+import { FiCheckCircle } from "react-icons/fi";
 
 const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) => {
     const [showAddModal, setShowAddModal] = useState(false);
@@ -46,13 +47,7 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
     if (!subtasks.length && !showAddModal) {
         return (
             <div className="text-center py-4">
-                <p className="text-gray-500 mb-4">No subtasks yet</p>
-                <button
-                    onClick={() => setShowAddSubtaskModal(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                    Add Subtask
-                </button>
+                <p className="text-xl font-semibold text-gray-500 mb-4">No subtasks yet</p>
             </div>
         );
     }
@@ -152,20 +147,18 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                     return (
                         <div
                             key={subtask.id}
-                            className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                            className={`${subtask.is_completed ? "border border-green-400 flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors" : ""}flex items-center p-3 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors`}
                         >
                             {canToggle && (
                                 <button
                                     onClick={() => handleToggleSubtask(subtask.id, subtask.is_completed)}
-                                    className={`w-6 h-6 flex-shrink-0 flex items-center justify-center border-2 rounded mr-3 ${subtask.is_completed
+                                    className={`w-6 h-6 flex-shrink-0 flex items-center justify-center border-2 rounded-full mr-3 ${subtask.is_completed
                                         ? "bg-green-500 border-green-500"
                                         : "border-gray-300 hover:border-gray-400"
                                         }`}
                                 >
                                     {subtask.is_completed && (
-                                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                        </svg>
+                                        <FiCheckCircle color="white" />
                                     )}
                                 </button>
                             )}
@@ -205,7 +198,7 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                                 <div className="relative">
                                     <button
                                         onClick={() => setShowSubtaskAction(showSubtaskAction === subtask.id ? null : subtask.id)}
-                                        className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-200 rounded transition-colors"
+                                        className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-200 rounded-full transition-colors"
                                         title="Subtask actions"
                                     >
                                         <PiDotsThreeCircleVertical className="w-5 h-5" />
