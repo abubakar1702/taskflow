@@ -82,10 +82,11 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                 const renderSubtask = (subtask) => {
                     const isCreator = currentUser.id === creator?.id;
                     const isAssignedToMe = subtask.assignee?.id === currentUser.id;
+                    const isMember = assignees.some(a => a.id === currentUser.id);
                     const canToggle = subtask.assignee && isAssignedToMe;
 
-                    //toggle access -> creator of the task, assignee of the subtask
-                    const accessToggle = isCreator || isAssignedToMe || !subtask.assignee;
+                    //toggle access -> creator of the task, assignee of the subtask, member of the team
+                    const accessToggle = isCreator || isAssignedToMe || isMember;
 
                     return (
                         <div
