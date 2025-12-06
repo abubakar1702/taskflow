@@ -12,10 +12,9 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
     // Permission checks
     const isCreator = currentUser.id === creator?.id;
     const isAssignedToMe = subtask.assignee?.id === currentUser.id;
-    const isUnassigned = !subtask.assignee;
 
     // User can edit/delete if they are creator OR if subtask is assigned to them OR if it's unassigned
-    const canModify = isCreator || isAssignedToMe || isUnassigned;
+    const canModify = isCreator || isAssignedToMe;
 
     const canEdit = isCreator
 
@@ -54,6 +53,23 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
         }
     };
 
+    const handleAssignToMe = async () => {
+        setIsSubmitting(true);
+        try {
+            await makeRequest(`/api/tasks/${taskId}/subtasks/${subtask.id}/`, "PATCH", {
+                assignee_id: currentUser.id,
+                is_completed: false,
+            });
+            onUpdated();
+            onClose();
+        } catch (error) {
+            console.error("Failed to assign subtask:", error);
+            alert("Failed to assign subtask. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const handleUnassign = async () => {
         if (!subtask.assignee) {
             alert("This subtask is already unassigned.");
@@ -71,23 +87,6 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
         } catch (error) {
             console.error("Failed to unassign subtask:", error);
             alert("Failed to unassign subtask. Please try again.");
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const handleAssignToMe = async () => {
-        setIsSubmitting(true);
-        try {
-            await makeRequest(`/api/tasks/${taskId}/subtasks/${subtask.id}/`, "PATCH", {
-                assignee_id: currentUser.id,
-                is_completed: false,
-            });
-            onUpdated();
-            onClose();
-        } catch (error) {
-            console.error("Failed to assign subtask:", error);
-            alert("Failed to assign subtask. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
@@ -122,8 +121,9 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
                 </button>
             )}
 
-            {/* Assign to me - only for unassigned subtasks */}
-            {isUnassigned && (
+            {/* Assign to me */}
+
+            {isCreator && !subtask.assignee && (
                 <button
                     onClick={handleAssignToMe}
                     disabled={isSubmitting}
@@ -139,12 +139,13 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2}
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                         />
                     </svg>
                     <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">Assign to me</span>
                 </button>
             )}
+            
 
 
             {/* Unassign Option - only if assigned and user can modify */}

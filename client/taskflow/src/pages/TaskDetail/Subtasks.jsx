@@ -6,6 +6,7 @@ import { FaPlus } from "react-icons/fa6";
 import SubtaskAction from "./SubtaskAction";
 import EditSubtaskModal from "../../components/modals/EditSubtaskModal";
 import AddSubtaskModal from "../../components/modals/AddSubtaskModal";
+import { PiUserCirclePlusLight, PiUserCircleMinusThin } from "react-icons/pi";
 
 const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) => {
     const [showAddModal, setShowAddModal] = useState(false);
@@ -16,7 +17,7 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
 
     const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
 
-    const mySubtasks = subtasks.filter(st => st.assignee?.id === currentUser.id);
+    const mySubtasks = subtasks.filter(st => currentUser.id && st.assignee?.id === currentUser.id);
     const teamSubtasks = subtasks.filter(st => st.assignee && st.assignee.id !== currentUser.id);
     const unassignedSubtasks = subtasks.filter(st => !st.assignee);
 
@@ -56,6 +57,67 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
         );
     }
 
+    const handleAssignToMe = async (subtaskId) => {
+        console.log("handleAssignToMe triggered", { subtaskId, taskId, currentUser });
+
+        if (!taskId) {
+            console.error("Missing taskId");
+            return;
+        }
+
+        if (!currentUser || !currentUser.id) {
+            console.error("Missing user ID", currentUser);
+            return;
+        }
+
+        try {
+            console.log("Sending request to assign subtask...");
+            await makeRequest(`/api/tasks/${taskId}/subtasks/${subtaskId}/`, "PATCH", {
+                assignee_id: currentUser.id,
+                is_completed: false,
+            });
+            console.log("Subtask assigned successfully");
+            refetch();
+        } catch (error) {
+            console.error("Failed to assign subtask:", error);
+            if (error.data) {
+                console.error("Error details:", JSON.stringify(error.data, null, 2));
+            }
+            alert("Failed to assign subtask. Please try again.");
+        }
+    };
+
+    const handleUnassignToMe = async (subtaskId) => {
+        console.log("handleUnassignToMe triggered", { subtaskId, taskId, currentUser });
+
+        if (!taskId) {
+            console.error("Missing taskId");
+            return;
+        }
+
+        if (!currentUser || !currentUser.id) {
+            console.error("Missing user ID", currentUser);
+            return;
+        }
+
+        try {
+            console.log("Sending request to unassign subtask...");
+            await makeRequest(`/api/tasks/${taskId}/subtasks/${subtaskId}/`, "PATCH", {
+                assignee_id: null,
+                is_completed: false,
+            });
+            console.log("Subtask unassigned successfully");
+            refetch();
+        } catch (error) {
+            console.error("Failed to unassign subtask:", error);
+            if (error.data) {
+                console.error("Error details:", JSON.stringify(error.data, null, 2));
+            }
+            alert("Failed to unassign subtask. Please try again.");
+        }
+
+    }
+
     return (
         <div className="space-y-4">
             {/* Progress bar */}
@@ -85,9 +147,7 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                     const isAssignedToMe = subtask.assignee?.id === currentUser.id;
                     const isMember = assignees.some(a => a.id === currentUser.id);
                     const canToggle = subtask.assignee && isAssignedToMe;
-
-                    //toggle access -> creator of the task, assignee of the subtask, member of the team
-                    const accessToggle = isCreator || isAssignedToMe || isMember;
+                    const isUnassigned = !subtask.assignee;
 
                     return (
                         <div
@@ -141,7 +201,7 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                             </div>
 
                             {/* Action menu - only for creator or assignee of the subtask */}
-                            {accessToggle && (
+                            {isCreator && (
                                 <div className="relative">
                                     <button
                                         onClick={() => setShowSubtaskAction(showSubtaskAction === subtask.id ? null : subtask.id)}
@@ -162,6 +222,30 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                                             onEdit={() => handleEditSubtask(subtask)}
                                         />
                                     )}
+                                </div>
+                            )}
+
+                            {!isCreator && isMember && isAssignedToMe && (
+                                <div className="relative">
+                                    <button
+                                        onClick={() => handleUnassignToMe(subtask.id)}
+                                        className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-200 rounded-full transition-colors"
+                                        title="Subtask actions"
+                                    >
+                                        <PiUserCircleMinusThin className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            )}
+
+                            {isUnassigned && isMember && !isCreator && (
+                                <div className="relative">
+                                    <button
+                                        onClick={() => handleAssignToMe(subtask.id)}
+                                        className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-200 rounded-full transition-colors"
+                                        title="Subtask actions"
+                                    >
+                                        <PiUserCirclePlusLight className="w-5 h-5" />
+                                    </button>
                                 </div>
                             )}
                         </div>
@@ -199,6 +283,7 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                                 </div>
                             </div>
                         )}
+
 
                         {/* Unassigned Subtasks */}
                         {unassignedSubtasks.length > 0 && (
