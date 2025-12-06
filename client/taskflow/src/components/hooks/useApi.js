@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
 export function useApi(url, method = "GET", body = null, deps = []) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -62,10 +64,14 @@ export function useApi(url, method = "GET", body = null, deps = []) {
         localStorage.getItem("accessToken") ||
         sessionStorage.getItem("accessToken");
 
+      const fullUrl = requestUrl.startsWith('http')
+        ? requestUrl
+        : `${API_BASE_URL}${requestUrl}`;
+
       try {
         const res = await axios({
           method: requestMethod,
-          url: requestUrl,
+          url: fullUrl,
           ...(requestMethod.toUpperCase() !== "GET" && requestBody
             ? { data: requestBody }
             : {}),

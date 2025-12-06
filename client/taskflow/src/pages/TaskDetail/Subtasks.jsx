@@ -1,66 +1,52 @@
 import { useState } from "react";
 import { useApi } from "../../components/hooks/useApi";
+import Avatar from "../../components/common/Avatar";
+import { PiDotsThreeCircleVertical } from "react-icons/pi";
+import SubtaskAction from "./SubtaskAction";
+import EditSubtaskModal from "../../components/modals/EditSubtaskModal";
+import AddSubtaskModal from "../../components/modals/AddSubtaskModal";
 
-const Subtasks = ({ subtasks = [], taskId, refetch }) => {
-    const [showAddForm, setShowAddForm] = useState(false);
-    const [newSubtaskText, setNewSubtaskText] = useState("");
-    const [isAdding, setIsAdding] = useState(false);
+const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) => {
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [showAddSubtaskModal, setShowAddSubtaskModal] = useState(false);
+    const [showSubtaskAction, setShowSubtaskAction] = useState(null);
+    const [editingSubtask, setEditingSubtask] = useState(null);
     const { makeRequest } = useApi();
 
-    const handleAddSubtask = async (e) => {
-        e.preventDefault();
-        if (!newSubtaskText.trim() || !taskId) return;
+    const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
 
-        setIsAdding(true);
-        try {
-            await makeRequest(`/api/tasks/${taskId}/subtasks/`, "POST", {
-                text: newSubtaskText.trim(),
-                is_completed: false,
-            });
-            setNewSubtaskText("");
-            setShowAddForm(false);
-            refetch(); // This will refresh the entire task with updated subtasks
-        } catch (error) {
-            console.error("Failed to add subtask:", error);
-            alert("Failed to add subtask. Please try again.");
-        } finally {
-            setIsAdding(false);
-        }
-    };
+    const mySubtasks = subtasks.filter(st => st.assignee?.id === currentUser.id);
+    const teamSubtasks = subtasks.filter(st => st.assignee && st.assignee.id !== currentUser.id);
+    const unassignedSubtasks = subtasks.filter(st => !st.assignee);
 
     const handleToggleSubtask = async (subtaskId, currentStatus) => {
+        if (!taskId) return;
+
         try {
-            await makeRequest(`/api/subtasks/${subtaskId}/`, "PATCH", {
+            await makeRequest(`/api/tasks/${taskId}/subtasks/${subtaskId}/`, "PATCH", {
                 is_completed: !currentStatus,
             });
-            refetch(); // This will refresh the entire task with updated subtasks
+            refetch();
         } catch (error) {
             console.error("Failed to update subtask:", error);
             alert("Failed to update subtask. Please try again.");
         }
     };
 
-    const handleDeleteSubtask = async (subtaskId) => {
-        if (!window.confirm("Are you sure you want to delete this subtask?")) return;
-
-        try {
-            await makeRequest(`/api/subtasks/${subtaskId}/`, "DELETE");
-            refetch(); // This will refresh the entire task with updated subtasks
-        } catch (error) {
-            console.error("Failed to delete subtask:", error);
-            alert("Failed to delete subtask. Please try again.");
-        }
+    const handleEditSubtask = (subtask) => {
+        setEditingSubtask(subtask);
+        setShowSubtaskAction(null);
     };
 
     const completedSubtasks = subtasks.filter((st) => st.is_completed).length;
     const totalSubtasks = subtasks.length;
 
-    if (!subtasks.length && !showAddForm) {
+    if (!subtasks.length && !showAddModal) {
         return (
             <div className="text-center py-4">
                 <p className="text-gray-500 mb-4">No subtasks yet</p>
                 <button
-                    onClick={() => setShowAddForm(true)}
+                    onClick={() => setShowAddSubtaskModal(true)}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                     Add Subtask
@@ -91,118 +77,166 @@ const Subtasks = ({ subtasks = [], taskId, refetch }) => {
                 </div>
             )}
 
-            {/* Subtasks list */}
-            <div className="space-y-2">
-                {subtasks.map((subtask) => (
-                    <div
-                        key={subtask.id}
-                        className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                        <button
-                            onClick={() => handleToggleSubtask(subtask.id, subtask.is_completed)}
-                            className={`w-6 h-6 flex-shrink-0 flex items-center justify-center border-2 rounded mr-3 ${subtask.is_completed
-                                    ? "bg-green-500 border-green-500"
-                                    : "border-gray-300 hover:border-gray-400"
-                                }`}
-                        >
-                            {subtask.is_completed && (
-                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                            )}
-                        </button>
+            {/* Render subtask items helper function */}
+            {(() => {
+                const renderSubtask = (subtask) => {
+                    const isCreator = currentUser.id === creator?.id;
+                    const isAssignedToMe = subtask.assignee?.id === currentUser.id;
+                    const canToggle = subtask.assignee && isAssignedToMe;
 
-                        <div className="flex-grow">
-                            <p
-                                className={`font-medium ${subtask.is_completed
+                    //toggle access -> creator of the task, assignee of the subtask
+                    const accessToggle = isCreator || isAssignedToMe || !subtask.assignee;
+
+                    return (
+                        <div
+                            key={subtask.id}
+                            className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                        >
+                            {canToggle && (
+                                <button
+                                    onClick={() => handleToggleSubtask(subtask.id, subtask.is_completed)}
+                                    className={`w-6 h-6 flex-shrink-0 flex items-center justify-center border-2 rounded mr-3 ${subtask.is_completed
+                                        ? "bg-green-500 border-green-500"
+                                        : "border-gray-300 hover:border-gray-400"
+                                        }`}
+                                >
+                                    {subtask.is_completed && (
+                                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    )}
+                                </button>
+                            )}
+                            <div className="flex-grow">
+                                <p
+                                    className={`font-medium ${subtask.is_completed
                                         ? "text-gray-500 line-through"
                                         : "text-gray-900"
-                                    }`}
-                            >
-                                {subtask.text}
-                            </p>
-                            {subtask.assignee && (
-                                <div className="flex items-center mt-1">
-                                    <span className="text-xs text-gray-500 mr-2">Assigned to:</span>
-                                    <div className="flex items-center">
-                                        {subtask.assignee.avatar ? (
-                                            <img
-                                                src={subtask.assignee.avatar}
-                                                alt={subtask.assignee.display_name}
-                                                className="w-5 h-5 rounded-full mr-1"
-                                            />
-                                        ) : (
-                                            <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mr-1">
-                                                <span className="text-xs font-semibold text-blue-800">
-                                                    {subtask.assignee.display_name?.charAt(0) || "?"}
-                                                </span>
-                                            </div>
-                                        )}
-                                        <span className="text-xs text-gray-600">{subtask.assignee.display_name}</span>
+                                        }`}
+                                >
+                                    {subtask.text}
+                                </p>
+                                {subtask.assignee && (
+                                    <div className="flex items-center mt-1">
+                                        <div className="flex items-center">
+                                            {subtask.assignee.avatar ? (
+                                                <img
+                                                    src={subtask.assignee.avatar}
+                                                    alt={subtask.assignee.display_name}
+                                                    className="w-5 h-5 rounded-full mr-1"
+                                                />
+                                            ) : (
+                                                <Avatar
+                                                    name={subtask.assignee.display_name}
+                                                    size={4}
+                                                    className="mr-1"
+                                                />
+                                            )}
+                                            <span className="text-xs text-gray-600">{subtask.assignee.display_name}</span>
+                                        </div>
                                     </div>
+                                )}
+                            </div>
+
+                            {/* Action menu - only for creator or assignee of the subtask */}
+                            {accessToggle && (
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowSubtaskAction(showSubtaskAction === subtask.id ? null : subtask.id)}
+                                        className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-200 rounded transition-colors"
+                                        title="Subtask actions"
+                                    >
+                                        <PiDotsThreeCircleVertical className="w-5 h-5" />
+                                    </button>
+
+                                    {showSubtaskAction === subtask.id && (
+                                        <SubtaskAction
+                                            taskId={taskId}
+                                            subtask={subtask}
+                                            creator={creator}
+                                            assignees={assignees}
+                                            onClose={() => setShowSubtaskAction(null)}
+                                            onUpdated={refetch}
+                                            onEdit={() => handleEditSubtask(subtask)}
+                                        />
+                                    )}
                                 </div>
                             )}
                         </div>
+                    );
+                };
 
-                        <button
-                            onClick={() => handleDeleteSubtask(subtask.id)}
-                            className="text-red-500 hover:text-red-700 p-2"
-                            title="Delete subtask"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
+                return (
+                    <div className="space-y-6">
+                        {/* My Subtasks */}
+                        {mySubtasks.length > 0 && (
+                            <div>
+                                <div className="flex items-center mb-3">
+                                    <h3 className="text-sm font-semibold text-blue-900">Assigned to You</h3>
+                                    <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
+                                        {mySubtasks.length}
+                                    </span>
+                                </div>
+                                <div className="space-y-2">
+                                    {mySubtasks.map(renderSubtask)}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Team Subtasks */}
+                        {teamSubtasks.length > 0 && (
+                            <div>
+                                <div className="flex items-center mb-3">
+                                    <h3 className="text-sm font-semibold text-purple-900">Team</h3>
+                                    <span className="ml-2 px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
+                                        {teamSubtasks.length}
+                                    </span>
+                                </div>
+                                <div className="space-y-2">
+                                    {teamSubtasks.map(renderSubtask)}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Unassigned Subtasks */}
+                        {unassignedSubtasks.length > 0 && (
+                            <div>
+                                <div className="flex items-center mb-3">
+                                    <h3 className="text-sm font-semibold text-gray-700">Unassigned</h3>
+                                    <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full">
+                                        {unassignedSubtasks.length}
+                                    </span>
+                                </div>
+                                <div className="space-y-2">
+                                    {unassignedSubtasks.map(renderSubtask)}
+                                </div>
+                            </div>
+                        )}
                     </div>
-                ))}
-            </div>
+                );
+            })()}
 
-            {/* Add subtask form */}
-            {showAddForm && (
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                    <h3 className="font-semibold text-gray-900 mb-3">Add New Subtask</h3>
-                    <form onSubmit={handleAddSubtask} className="space-y-3">
-                        <textarea
-                            value={newSubtaskText}
-                            onChange={(e) => setNewSubtaskText(e.target.value)}
-                            placeholder="Enter subtask description"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            rows="3"
-                            required
-                            disabled={isAdding}
-                        />
-                        <div className="flex justify-end space-x-2">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setShowAddForm(false);
-                                    setNewSubtaskText("");
-                                }}
-                                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                                disabled={isAdding}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={isAdding || !newSubtaskText.trim()}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isAdding ? "Adding..." : "Add Subtask"}
-                            </button>
-                        </div>
-                    </form>
-                </div>
+            {/* Edit Subtask Modal */}
+            {editingSubtask && (
+                <EditSubtaskModal
+                    taskId={taskId}
+                    subtask={editingSubtask}
+                    creator={creator}
+                    assignees={assignees}
+                    onClose={() => setEditingSubtask(null)}
+                    onUpdated={refetch}
+                />
             )}
 
-            {/* Add subtask button (when form is hidden) */}
-            {!showAddForm && subtasks.length > 0 && (
-                <button
-                    onClick={() => setShowAddForm(true)}
-                    className="w-full px-4 py-2 text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors"
-                >
-                    + Add Subtask
-                </button>
+            {/* Add Subtask Modal */}
+            {showAddSubtaskModal && (
+                <AddSubtaskModal
+                    taskId={taskId}
+                    creator={creator}
+                    assignees={assignees}
+                    onClose={() => setShowAddSubtaskModal(false)}
+                    onUpdated={refetch}
+                />
             )}
         </div>
     );

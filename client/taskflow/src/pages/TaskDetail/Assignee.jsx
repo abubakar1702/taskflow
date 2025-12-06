@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useApi } from "../../components/hooks/useApi";
+import Avatar from "../../components/common/Avatar";
 
 const Assignee = ({ assignees = [], taskId, refetch }) => {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -70,11 +71,11 @@ const Assignee = ({ assignees = [], taskId, refetch }) => {
                   className="w-10 h-10 rounded-full mr-3"
                 />
               ) : (
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-sm font-semibold text-blue-800">
-                    {assignee.display_name?.charAt(0) || "?"}
-                  </span>
-                </div>
+                <Avatar
+                  name={assignee.display_name}
+                  size={40}
+                  className="mr-3"
+                />
               )}
               <div>
                 <p className="font-medium text-gray-900">{assignee.display_name}</p>

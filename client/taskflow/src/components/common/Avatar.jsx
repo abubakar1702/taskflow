@@ -26,6 +26,8 @@ const Avatar = ({ name = "User", url = null, className = "", size = 8 }) => {
     const { avatarUrl, initials } = useAvatar(name, url);
 
     const sizeConfig = {
+        2: { container: 'w-2 h-2', text: 'text-[10px]' },
+        4: { container: 'w-4 h-4', text: 'text-[10px]' },
         6: { container: 'w-6 h-6', text: 'text-[10px]' },
         8: { container: 'w-8 h-8', text: 'text-xs' },
         10: { container: 'w-10 h-10', text: 'text-sm' },
