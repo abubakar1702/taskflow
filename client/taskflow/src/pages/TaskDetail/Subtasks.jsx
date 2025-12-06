@@ -1,26 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useApi } from "../../components/hooks/useApi";
 import Avatar from "../../components/common/Avatar";
 import { PiDotsThreeCircleVertical } from "react-icons/pi";
-import { FaPlus } from "react-icons/fa6";
 import SubtaskAction from "./SubtaskAction";
 import EditSubtaskModal from "../../components/modals/EditSubtaskModal";
 import AddSubtaskModal from "../../components/modals/AddSubtaskModal";
 import { PiUserCirclePlusLight, PiUserCircleMinusThin } from "react-icons/pi";
 import { FiCheckCircle } from "react-icons/fi";
 
-const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) => {
+const Subtasks = ({ taskId, creator, assignees = [], refetch }) => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showAddSubtaskModal, setShowAddSubtaskModal] = useState(false);
     const [showSubtaskAction, setShowSubtaskAction] = useState(null);
     const [editingSubtask, setEditingSubtask] = useState(null);
+    const [subtasks, setSubtasks] = useState([]);
     const { makeRequest } = useApi();
 
     const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
 
+
+    const fetchSubtasks = async () => {
+        try {
+            const response = await makeRequest(`/api/tasks/${taskId}/subtasks/`, "GET");
+            setSubtasks(Array.isArray(response) ? response : []);
+        } catch (error) {
+            console.error("Failed to fetch subtasks:", error);
+            setSubtasks([]);
+        }
+    };
+
+    useEffect(() => {
+        fetchSubtasks();
+    }, [taskId]);
+
     const mySubtasks = subtasks.filter(st => currentUser.id && st.assignee?.id === currentUser.id);
     const teamSubtasks = subtasks.filter(st => st.assignee && st.assignee.id !== currentUser.id);
     const unassignedSubtasks = subtasks.filter(st => !st.assignee);
+
+
+
+    console.log(subtasks)
 
     const handleToggleSubtask = async (subtaskId, currentStatus) => {
         if (!taskId) return;
@@ -29,7 +48,7 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
             await makeRequest(`/api/tasks/${taskId}/subtasks/${subtaskId}/`, "PATCH", {
                 is_completed: !currentStatus,
             });
-            refetch();
+            fetchSubtasks();
         } catch (error) {
             console.error("Failed to update subtask:", error);
             alert("Failed to update subtask. Please try again.");
@@ -72,7 +91,7 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                 is_completed: false,
             });
             console.log("Subtask assigned successfully");
-            refetch();
+            fetchSubtasks();
         } catch (error) {
             console.error("Failed to assign subtask:", error);
             if (error.data) {
@@ -102,7 +121,7 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                 is_completed: false,
             });
             console.log("Subtask unassigned successfully");
-            refetch();
+            fetchSubtasks();
         } catch (error) {
             console.error("Failed to unassign subtask:", error);
             if (error.data) {
@@ -219,7 +238,9 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                                             creator={creator}
                                             assignees={assignees}
                                             onClose={() => setShowSubtaskAction(null)}
-                                            onUpdated={refetch}
+                                            onUpdated={() => {
+                                                fetchSubtasks();
+                                            }}
                                             onEdit={() => handleEditSubtask(subtask)}
                                         />
                                     )}
@@ -320,7 +341,9 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                     creator={creator}
                     assignees={assignees}
                     onClose={() => setEditingSubtask(null)}
-                    onUpdated={refetch}
+                    onUpdated={() => {
+                        fetchSubtasks();
+                    }}
                 />
             )}
 
@@ -331,7 +354,9 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                     creator={creator}
                     assignees={assignees}
                     onClose={() => setShowAddSubtaskModal(false)}
-                    onUpdated={refetch}
+                    onUpdated={() => {
+                        fetchSubtasks();
+                    }}
                 />
             )}
         </div>

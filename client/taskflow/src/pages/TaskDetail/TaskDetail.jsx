@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import Avatar from "../../components/common/Avatar";
 import AddSubtaskModal from "../../components/modals/AddSubtaskModal";
 import { FaPlus } from "react-icons/fa6";
+import { ClipLoader } from "react-spinners";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
@@ -24,10 +25,8 @@ const TaskDetail = () => {
         }
     }, [taskData]);
 
-    // Get logged-in user
     const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
 
-    // Check if user can add subtasks (creator or team member)
     const canAddSubtask = task && (
         currentUser.id === task.creator?.id
     );
@@ -69,9 +68,6 @@ const TaskDetail = () => {
         );
     }
 
-    console.log("taskId:", id);
-    console.log("API URL:", id ? `${API_BASE_URL}/api/tasks/${id}` : "Skipped");
-
     if (!task) {
         return (
             <div className="p-6">
@@ -79,8 +75,6 @@ const TaskDetail = () => {
             </div>
         );
     }
-
-    console.log("task", task);
 
     const formatDateTime = () => {
         if (!task.due_date) return "No due date";
@@ -104,10 +98,6 @@ const TaskDetail = () => {
         } catch (error) {
             return fallback;
         }
-    };
-
-    const handleAddSubtask = () => {
-        setShowAddSubtaskModal(true);
     };
 
     return (
