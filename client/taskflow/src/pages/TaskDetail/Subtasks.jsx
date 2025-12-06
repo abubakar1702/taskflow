@@ -151,7 +151,11 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                         >
                             {canToggle && (
                                 <button
-                                    onClick={() => handleToggleSubtask(subtask.id, subtask.is_completed)}
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        handleToggleSubtask(subtask.id, subtask.is_completed);
+                                    }}
                                     className={`w-6 h-6 flex-shrink-0 flex items-center justify-center border-2 rounded-full mr-3 ${subtask.is_completed
                                         ? "bg-green-500 border-green-500"
                                         : "border-gray-300 hover:border-gray-400"
@@ -197,7 +201,11 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                             {isCreator && (
                                 <div className="relative">
                                     <button
-                                        onClick={() => setShowSubtaskAction(showSubtaskAction === subtask.id ? null : subtask.id)}
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setShowSubtaskAction(showSubtaskAction === subtask.id ? null : subtask.id);
+                                        }}
                                         className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-200 rounded-full transition-colors"
                                         title="Subtask actions"
                                     >
@@ -221,7 +229,11 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                             {!isCreator && isMember && isAssignedToMe && (
                                 <div className="relative">
                                     <button
-                                        onClick={() => handleUnassignToMe(subtask.id)}
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            handleUnassignToMe(subtask.id);
+                                        }}
                                         className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-200 rounded-full transition-colors"
                                         title="Subtask actions"
                                     >
@@ -233,7 +245,11 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                             {isUnassigned && isMember && !isCreator && (
                                 <div className="relative">
                                     <button
-                                        onClick={() => handleAssignToMe(subtask.id)}
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            handleAssignToMe(subtask.id);
+                                        }}
                                         className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-200 rounded-full transition-colors"
                                         title="Subtask actions"
                                     >

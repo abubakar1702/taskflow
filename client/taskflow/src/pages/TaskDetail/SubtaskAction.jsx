@@ -26,12 +26,14 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [onClose]);
 
-    const handleEditClick = () => {
+    const handleEditClick = (e) => {
+        e?.preventDefault();
         onEdit();
         onClose();
     };
 
-    const handleDelete = async () => {
+    const handleDelete = async (e) => {
+        e?.preventDefault();
         if (!window.confirm("Are you sure you want to delete this subtask?")) return;
 
         setIsSubmitting(true);
@@ -47,7 +49,8 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
         }
     };
 
-    const handleAssignToMe = async () => {
+    const handleAssignToMe = async (e) => {
+        e?.preventDefault();
         setIsSubmitting(true);
         try {
             await makeRequest(`/api/tasks/${taskId}/subtasks/${subtask.id}/`, "PATCH", {
@@ -64,7 +67,8 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
         }
     };
 
-    const handleUnassign = async () => {
+    const handleUnassign = async (e) => {
+        e?.preventDefault();
         if (!subtask.assignee) {
             alert("This subtask is already unassigned.");
             return;
@@ -94,6 +98,7 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
             {/* Edit Option - only if user can modify */}
             {canEdit && (
                 <button
+                    type="button"
                     onClick={handleEditClick}
                     disabled={isSubmitting}
                     className="w-full px-4 py-2.5 text-left flex items-center space-x-3 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
@@ -119,6 +124,7 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
 
             {isCreator && !subtask.assignee && (
                 <button
+                    type="button"
                     onClick={handleAssignToMe}
                     disabled={isSubmitting}
                     className="w-full px-4 py-2.5 text-left flex items-center space-x-3 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
@@ -133,6 +139,7 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
             {/* Unassign Option - only if assigned and user can modify */}
             {subtask.assignee && canModify && (
                 <button
+                    type="button"
                     onClick={handleUnassign}
                     disabled={isSubmitting}
                     className="w-full px-4 py-2.5 text-left flex items-center space-x-3 hover:bg-orange-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
@@ -148,6 +155,7 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
             {/* Delete Option - only if user can modify */}
             {canDelete && (
                 <button
+                    type="button"
                     onClick={handleDelete}
                     disabled={isSubmitting}
                     className="w-full px-4 py-2.5 text-left flex items-center space-x-3 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
