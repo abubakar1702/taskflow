@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useApi } from "../../components/hooks/useApi";
 import Avatar from "../../components/common/Avatar";
 import { PiDotsThreeCircleVertical } from "react-icons/pi";
+import { FaPlus } from "react-icons/fa6";
 import SubtaskAction from "./SubtaskAction";
 import EditSubtaskModal from "../../components/modals/EditSubtaskModal";
 import AddSubtaskModal from "../../components/modals/AddSubtaskModal";

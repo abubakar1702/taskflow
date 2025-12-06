@@ -140,7 +140,7 @@ const EditSubtaskModal = ({ taskId, subtask, creator, assignees = [], onClose, o
 
                         <select
                             value={assigneeId || ""}
-                            onChange={(e) => setAssigneeId(e.target.value || null)}
+                            onChange={(e) => setAssigneeId(e.target.value ? Number(e.target.value) : null)}
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white cursor-pointer"
                             disabled={isSubmitting || (!creator && filteredAssignees.length === 0)}
                         >

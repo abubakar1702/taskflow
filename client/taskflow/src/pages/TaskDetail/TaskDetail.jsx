@@ -6,6 +6,7 @@ import { useApi } from "../../components/hooks/useApi";
 import { format } from "date-fns";
 import Avatar from "../../components/common/Avatar";
 import AddSubtaskModal from "../../components/modals/AddSubtaskModal";
+import { FaPlus } from "react-icons/fa6";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
@@ -172,8 +173,8 @@ const TaskDetail = () => {
                                     </div>
                                     {canAddSubtask && (
                                         <div>
-                                            <button onClick={() => setShowAddSubtaskModal(true)} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
-                                                Add Subtask
+                                            <button onClick={() => setShowAddSubtaskModal(true)} className="flex items-center px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                                                <FaPlus className="mr-2" /> Add Subtask
                                             </button>
                                         </div>
                                     )}
