@@ -9,7 +9,6 @@ const EditSubtaskModal = ({ taskId, subtask, creator, assignees = [], onClose, o
     const [isVisible, setIsVisible] = useState(false);
     const { makeRequest } = useApi();
 
-    // Filter out creator from assignees to avoid duplication
     const filteredAssignees = assignees.filter(a => a.id !== creator?.id);
 
     useEffect(() => {
@@ -41,10 +40,9 @@ const EditSubtaskModal = ({ taskId, subtask, creator, assignees = [], onClose, o
         }
     };
 
-    // Find selected assignee from both creator and filtered assignees
-    const selectedAssignee = assigneeId === creator?.id
+    const selectedAssignee = (creator && String(assigneeId) === String(creator.id))
         ? creator
-        : filteredAssignees.find(a => a.id === assigneeId);
+        : filteredAssignees.find(a => String(a.id) === String(assigneeId));
 
     return (
         <div
@@ -140,7 +138,17 @@ const EditSubtaskModal = ({ taskId, subtask, creator, assignees = [], onClose, o
 
                         <select
                             value={assigneeId !== null ? String(assigneeId) : ""}
-                            onChange={(e) => setAssigneeId(e.target.value ? Number(e.target.value) : null)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (!val) {
+                                    setAssigneeId(null);
+                                    return;
+                                }
+
+                                const allUsers = creator ? [creator, ...filteredAssignees] : filteredAssignees;
+                                const user = allUsers.find(u => String(u.id) === val);
+                                setAssigneeId(user ? user.id : val);
+                            }}
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white cursor-pointer"
                             disabled={isSubmitting || (!creator && filteredAssignees.length === 0)}
                         >

@@ -45,9 +45,10 @@ const AddSubtaskModal = ({ taskId, creator, assignees = [], onClose, onAdded }) 
     };
 
     // Find selected assignee from both creator and filtered assignees
-    const selectedAssignee = assigneeId === creator?.id
+    // Find selected assignee from both creator and filtered assignees
+    const selectedAssignee = (creator && String(assigneeId) === String(creator.id))
         ? creator
-        : filteredAssignees.find(a => a.id === assigneeId);
+        : filteredAssignees.find(a => String(a.id) === String(assigneeId));
 
     return (
         <div
@@ -142,7 +143,17 @@ const AddSubtaskModal = ({ taskId, creator, assignees = [], onClose, onAdded }) 
 
                         <select
                             value={assigneeId || ""}
-                            onChange={(e) => setAssigneeId(e.target.value || null)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (!val) {
+                                    setAssigneeId(null);
+                                    return;
+                                }
+                                // Find the user to get the correct ID type (number or string)
+                                const allUsers = creator ? [creator, ...filteredAssignees] : filteredAssignees;
+                                const user = allUsers.find(u => String(u.id) === val);
+                                setAssigneeId(user ? user.id : val);
+                            }}
                             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white cursor-pointer"
                             disabled={isSubmitting || (!creator && filteredAssignees.length === 0)}
                         >

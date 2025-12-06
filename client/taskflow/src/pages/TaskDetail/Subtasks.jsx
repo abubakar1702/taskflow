@@ -165,7 +165,7 @@ const Subtasks = ({ subtasks = [], taskId, creator, assignees = [], refetch }) =
                             <div className="flex-grow">
                                 <p
                                     className={`font-medium ${subtask.is_completed
-                                        ? "text-gray-500 line-through"
+                                        ? "text-gray-500"
                                         : "text-gray-900"
                                         }`}
                                 >
