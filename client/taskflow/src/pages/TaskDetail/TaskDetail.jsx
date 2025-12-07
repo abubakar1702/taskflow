@@ -5,12 +5,16 @@ import Subtasks from "./Subtasks";
 import { useApi } from "../../components/hooks/useApi";
 import { format } from "date-fns";
 import Avatar from "../../components/common/Avatar";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import TaskInfoAction from "./TaskInfoAction";
+import { FaProjectDiagram } from "react-icons/fa";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 const TaskDetail = () => {
     const { id } = useParams();
     const [task, setTask] = useState(null);
+    const [showActionMenu, setShowActionMenu] = useState(false);
     const { data: taskData, loading, error, refetch } = useApi(
         id ? `${API_BASE_URL}/api/tasks/${id}` : null
     );
@@ -115,11 +119,18 @@ const TaskDetail = () => {
                         <div className="bg-white rounded-lg shadow p-6">
                             <div className="flex justify-between items-start mb-4">
                                 <h1 className="text-3xl font-bold text-gray-900">{task.title}</h1>
-                                <button className="text-gray-500 hover:text-gray-700 p-2">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                    </svg>
-                                </button>
+                                <div className="relative">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setShowActionMenu(!showActionMenu);
+                                        }}
+                                        className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                                    >
+                                        <BsThreeDotsVertical className="w-5 h-5" />
+                                    </button>
+                                    <TaskInfoAction showActionMenu={showActionMenu} setShowActionMenu={setShowActionMenu} />
+                                </div>
                             </div>
 
                             {/* Status and Priority badges */}
@@ -131,7 +142,8 @@ const TaskDetail = () => {
                                     {task.priority}
                                 </span>
                                 {task.project && (
-                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800 border border-purple-300">
+                                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800 border border-purple-300 flex items-center gap-2">
+                                        <FaProjectDiagram className="w-4 h-4" />
                                         {task.project.name}
                                     </span>
                                 )}
@@ -147,10 +159,14 @@ const TaskDetail = () => {
                                 </div>
                             </div>
 
-                            {/* Subtasks section */}
-                            <div className="mb-6">
-                                <Subtasks taskId={task.id} creator={task.creator} assignees={task.assignees} refetch={refetch} />
+                            <div className="flex justify-between items-center">
+                                <div className="text-sm text-gray-500">Created at: {safeFormatDate(task.created_at)}</div>
+                                <div className="text-sm text-gray-500">Updated at: {safeFormatDate(task.updated_at)}</div>
                             </div>
+                        </div>
+                        {/* Subtasks section */}
+                        <div className="mb-6 border border-gray-200 rounded-lg p-6 bg-white">
+                            <Subtasks taskId={task.id} creator={task.creator} assignees={task.assignees} refetch={refetch} />
                         </div>
                     </div>
 
@@ -159,78 +175,107 @@ const TaskDetail = () => {
                         {/* Due date card */}
                         <div className="bg-white rounded-lg shadow p-6">
                             <h2 className="text-lg font-semibold text-gray-900 mb-4">Due Date</h2>
-                            <div className="flex items-center text-gray-700">
-                                <svg className="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span className="font-medium">{formatDateTime()}</span>
-                            </div>
+                            {(() => {
+                                const now = new Date();
+                                const dueDate = new Date(task.due_date);
+                                const isCompleted = task.status === 'Done' || task.status === 'Completed';
+
+                                const isTodayDate = dueDate.toDateString() === now.toDateString();
+
+                                if (task.due_time) {
+                                    const [hours, minutes] = task.due_time.split(':');
+                                    dueDate.setHours(hours, minutes, 0);
+                                } else {
+                                    dueDate.setHours(23, 59, 59, 999);
+                                }
+
+                                const isOverdue = dueDate < now && !isCompleted;
+                                const isDueToday = isTodayDate && !isOverdue && !isCompleted;
+
+                                let textColor = 'text-gray-700';
+                                let iconColor = 'text-gray-400';
+                                let label = null;
+
+                                if (isOverdue) {
+                                    textColor = 'text-red-600';
+                                    iconColor = 'text-red-500';
+                                    label = <span className="ml-2 text-sm font-semibold text-red-600">(Overdue)</span>;
+                                } else if (isDueToday) {
+                                    textColor = 'text-purple-600';
+                                    iconColor = 'text-purple-500';
+                                    label = <span className="ml-2 text-sm font-semibold text-purple-600">(Today)</span>;
+                                }
+
+                                return (
+                                    <div className={`flex items-center ${textColor}`}>
+                                        <svg className={`w-5 h-5 mr-3 ${iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <span className="font-medium">
+                                            {formatDateTime()}
+                                            {label}
+                                        </span>
+                                    </div>
+                                );
+                            })()}
                         </div>
 
-                        {/* Assignees card */}
-                        <div className="bg-white rounded-lg shadow p-6">
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-lg font-semibold text-gray-900">Assignees</h2>
-                                <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                                    {task.assignees?.length || 0}
-                                </span>
-                            </div>
-                            <Assignee assignees={task.assignees} taskId={task.id} refetch={refetch} />
-                        </div>
+                        {/* Creator and Assignees Card */}
+                        <div className="bg-white rounded-xl shadow-sm p-6 space-y-6 border border-gray-100">
+                            {/* Creator */}
+                            <div className="space-y-3">
+                                <p className="text-sm font-semibold">
+                                    Created by
+                                </p>
 
-                        {/* Task details card */}
-                        <div className="bg-white rounded-lg shadow p-6">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-4">Task Details</h2>
-                            <div className="space-y-4">
-                                <div>
-                                    <p className="text-sm text-gray-500">Created by</p>
-                                    <div className="flex items-center mt-1">
-                                        {task.creator?.avatar ? (
-                                            <img
-                                                src={task.creator.avatar}
-                                                alt={task.creator.display_name}
-                                                className="w-8 h-8 rounded-full mr-3"
-                                            />
-                                        ) : (
-                                            <Avatar
-                                                name={task.creator.display_name}
-                                                size={6}
-                                                className="mr-3"
-                                            />
-                                        )}
-                                        <span className="font-medium text-gray-900">{task.creator?.display_name}</span>
+                                <div className="flex items-center gap-3">
+                                    {task.creator?.avatar ? (
+                                        <img
+                                            src={task.creator.avatar}
+                                            alt={task.creator.display_name}
+                                            className="w-10 h-10 rounded-full object-cover"
+                                        />
+                                    ) : (
+                                        <Avatar
+                                            name={task.creator.display_name}
+                                            size={10}
+                                        />
+                                    )}
+
+                                    <div className="flex flex-col">
+                                        <span className="font-medium text-gray-900 text-base">
+                                            {task.creator?.display_name}
+                                        </span>
+                                        <span className="text-sm text-gray-500">
+                                            {task.creator?.email}
+                                        </span>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div>
-                                    <p className="text-sm text-gray-500">Created at</p>
-                                    <p className="font-medium text-gray-900">
-                                        {safeFormatDate(task.created_at)}
-                                    </p>
+                            {/* Divider */}
+                            <div className="h-px bg-gray-200" />
+
+                            {/* Assignees */}
+                            <div>
+                                <div className="flex justify-between items-center mb-3">
+                                    <h2 className="text-sm font-semibold">
+                                        Assignees
+                                    </h2>
+
+                                    <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                                        {task.assignees?.length || 0}
+                                    </span>
                                 </div>
 
-                                <div>
-                                    <p className="text-sm text-gray-500">Last updated</p>
-                                    <p className="font-medium text-gray-900">
-                                        {safeFormatDate(task.updated_at)}
-                                    </p>
-                                </div>
-
-                                {task.project && (
-                                    <div>
-                                        <p className="text-sm text-gray-500">Project</p>
-                                        <div className="flex items-center mt-1">
-                                            <Avatar
-                                                name={task.project.name}
-                                                size={6}
-                                                className="mr-3"
-                                            />
-                                            <span className="font-medium text-gray-900">{task.project.name}</span>
-                                        </div>
-                                    </div>
-                                )}
+                                <Assignee
+                                    assignees={task.assignees}
+                                    taskId={task.id}
+                                    refetch={refetch}
+                                />
                             </div>
                         </div>
+
                     </div>
                 </div>
 
