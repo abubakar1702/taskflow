@@ -10,7 +10,6 @@ const AddSubtaskModal = ({ taskId, creator, assignees = [], onClose, onUpdated }
     const [assigneeId, setAssigneeId] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
-    const [canUnassign, setCanUnassign] = useState(false);
     const { makeRequest } = useApi();
 
     const filteredAssignees = assignees.filter(a => a.id !== creator?.id);
@@ -136,8 +135,6 @@ const AddSubtaskModal = ({ taskId, creator, assignees = [], onClose, onUpdated }
                                 </option>
                             ))}
                         </select>
-
-                        <label className="flex items-center mt-2 text-gray-700"><input onChange={(e)=> setCanUnassign(e.target.checked)} checked={canUnassign} className="mr-2" type="checkbox" />Can not unassign this subtask</label>
 
                         {!creator && filteredAssignees.length === 0 && (
                             <p className="text-xs text-amber-600 flex items-center">
