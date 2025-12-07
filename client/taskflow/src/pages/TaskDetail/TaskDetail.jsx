@@ -5,16 +5,12 @@ import Subtasks from "./Subtasks";
 import { useApi } from "../../components/hooks/useApi";
 import { format } from "date-fns";
 import Avatar from "../../components/common/Avatar";
-import AddSubtaskModal from "../../components/modals/AddSubtaskModal";
-import { FaPlus } from "react-icons/fa6";
-import { ClipLoader } from "react-spinners";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 const TaskDetail = () => {
     const { id } = useParams();
     const [task, setTask] = useState(null);
-    const [showAddSubtaskModal, setShowAddSubtaskModal] = useState(false);
     const { data: taskData, loading, error, refetch } = useApi(
         id ? `${API_BASE_URL}/api/tasks/${id}` : null
     );
@@ -26,10 +22,6 @@ const TaskDetail = () => {
     }, [taskData]);
 
     const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
-
-    const canAddSubtask = task && (
-        currentUser.id === task.creator?.id
-    );
 
     const priorityColors = {
         Urgent: "bg-red-100 text-red-800 border-red-300",
@@ -157,19 +149,7 @@ const TaskDetail = () => {
 
                             {/* Subtasks section */}
                             <div className="mb-6">
-                                <div className="flex justify-between items-center mb-3">
-                                    <div>
-                                        <h2 className="text-lg font-semibold text-gray-900 mb-3">Subtasks</h2>
-                                    </div>
-                                    {canAddSubtask && (
-                                        <div>
-                                            <button onClick={() => setShowAddSubtaskModal(true)} className="flex items-center px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
-                                                <FaPlus className="mr-2" /> Add Subtask
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                                <Subtasks subtasks={task.subtasks} taskId={task.id} creator={task.creator} assignees={task.assignees} refetch={refetch} />
+                                <Subtasks taskId={task.id} creator={task.creator} assignees={task.assignees} refetch={refetch} />
                             </div>
                         </div>
                     </div>
@@ -254,16 +234,6 @@ const TaskDetail = () => {
                     </div>
                 </div>
 
-                {/* Add Subtask Modal */}
-                {showAddSubtaskModal && (
-                    <AddSubtaskModal
-                        taskId={task.id}
-                        creator={task.creator}
-                        assignees={task.assignees}
-                        onClose={() => setShowAddSubtaskModal(false)}
-                        onAdded={refetch}
-                    />
-                )}
             </div>
         </div>
     );

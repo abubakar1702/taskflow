@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useApi } from "../../components/hooks/useApi";
 import { LuUserPlus, LuUserMinus, LuTrash } from "react-icons/lu";
 
-const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUpdated, onEdit }) => {
+const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUpdated, onEdit, onDelete }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { makeRequest } = useApi();
     const dropdownRef = useRef(null);
@@ -32,21 +32,10 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
         onClose();
     };
 
-    const handleDelete = async (e) => {
+    const handleDelete = (e) => {
         e?.preventDefault();
-        if (!window.confirm("Are you sure you want to delete this subtask?")) return;
-
-        setIsSubmitting(true);
-        try {
-            await makeRequest(`/api/tasks/${taskId}/subtasks/${subtask.id}/`, "DELETE");
-            onUpdated();
-            onClose();
-        } catch (error) {
-            console.error("Failed to delete subtask:", error);
-            alert("Failed to delete subtask. Please try again.");
-        } finally {
-            setIsSubmitting(false);
-        }
+        onDelete();
+        onClose();
     };
 
     const handleAssignToMe = async (e) => {

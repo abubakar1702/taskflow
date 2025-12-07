@@ -5,18 +5,23 @@ import { PiDotsThreeCircleVertical } from "react-icons/pi";
 import SubtaskAction from "./SubtaskAction";
 import EditSubtaskModal from "../../components/modals/EditSubtaskModal";
 import AddSubtaskModal from "../../components/modals/AddSubtaskModal";
+import DeleteModal from "../../components/modals/DeleteModal";
 import { PiUserCirclePlusLight, PiUserCircleMinusThin } from "react-icons/pi";
 import { FiCheckCircle } from "react-icons/fi";
+import { FaPlus } from "react-icons/fa6";
 
 const Subtasks = ({ taskId, creator, assignees = [], refetch }) => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showAddSubtaskModal, setShowAddSubtaskModal] = useState(false);
     const [showSubtaskAction, setShowSubtaskAction] = useState(null);
     const [editingSubtask, setEditingSubtask] = useState(null);
+    const [deletingSubtask, setDeletingSubtask] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [subtasks, setSubtasks] = useState([]);
     const { makeRequest } = useApi();
 
     const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+    const isCreator = currentUser.id === creator?.id;
 
 
     const fetchSubtasks = async () => {
@@ -58,6 +63,27 @@ const Subtasks = ({ taskId, creator, assignees = [], refetch }) => {
     const handleEditSubtask = (subtask) => {
         setEditingSubtask(subtask);
         setShowSubtaskAction(null);
+    };
+
+    const handleDeleteSubtask = (subtask) => {
+        setDeletingSubtask(subtask);
+        setShowSubtaskAction(null);
+    };
+
+    const confirmDeleteSubtask = async () => {
+        if (!deletingSubtask) return;
+
+        setIsDeleting(true);
+        try {
+            await makeRequest(`/api/tasks/${taskId}/subtasks/${deletingSubtask.id}/`, "DELETE");
+            fetchSubtasks();
+            setDeletingSubtask(null);
+        } catch (error) {
+            console.error("Failed to delete subtask:", error);
+            alert("Failed to delete subtask. Please try again.");
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     const completedSubtasks = subtasks.filter((st) => st.is_completed).length;
@@ -134,6 +160,19 @@ const Subtasks = ({ taskId, creator, assignees = [], refetch }) => {
 
     return (
         <div className="space-y-4">
+            <div className="flex justify-between items-center mb-3">
+                <div>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-3">Subtasks</h2>
+                </div>
+                {isCreator && (
+                    <div>
+                        <button onClick={() => setShowAddSubtaskModal(true)} className="flex items-center px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                            <FaPlus className="mr-2" /> Add Subtask
+                        </button>
+                    </div>
+                )}
+            </div>
+
             {/* Progress bar */}
             {totalSubtasks > 0 && (
                 <div className="mb-6">
@@ -157,7 +196,6 @@ const Subtasks = ({ taskId, creator, assignees = [], refetch }) => {
             {/* Render subtask items helper function */}
             {(() => {
                 const renderSubtask = (subtask) => {
-                    const isCreator = currentUser.id === creator?.id;
                     const isAssignedToMe = subtask.assignee?.id === currentUser.id;
                     const isMember = assignees.some(a => a.id === currentUser.id);
                     const canToggle = subtask.assignee && isAssignedToMe;
@@ -242,6 +280,7 @@ const Subtasks = ({ taskId, creator, assignees = [], refetch }) => {
                                                 fetchSubtasks();
                                             }}
                                             onEdit={() => handleEditSubtask(subtask)}
+                                            onDelete={() => handleDeleteSubtask(subtask)}
                                         />
                                     )}
                                 </div>
@@ -359,6 +398,16 @@ const Subtasks = ({ taskId, creator, assignees = [], refetch }) => {
                     }}
                 />
             )}
+
+            {/* Delete Confirmation Modal */}
+            <DeleteModal
+                isOpen={!!deletingSubtask}
+                onClose={() => setDeletingSubtask(null)}
+                onConfirm={confirmDeleteSubtask}
+                title="Delete Subtask"
+                message="Are you sure you want to delete this subtask? This action cannot be undone."
+                isLoading={isDeleting}
+            />
         </div>
     );
 };
