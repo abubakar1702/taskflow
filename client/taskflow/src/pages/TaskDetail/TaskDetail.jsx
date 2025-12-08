@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Assignee from "./Assignee";
 import Subtasks from "./Subtasks";
 import { useApi } from "../../components/hooks/useApi";
@@ -8,18 +8,24 @@ import Avatar from "../../components/common/Avatar";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import TaskInfoAction from "./TaskInfoAction";
 import EditTaskInfoModal from "../../components/modals/EditTaskInfoModal";
+import DeleteModal from "../../components/modals/DeleteModal";
 import { FaProjectDiagram } from "react-icons/fa";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 const TaskDetail = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [task, setTask] = useState(null);
     const [showActionMenu, setShowActionMenu] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
     const { data: taskData, loading, error, refetch } = useApi(
         id ? `${API_BASE_URL}/api/tasks/${id}` : null
     );
+
+    const { makeRequest: deleteTask, loading: deleteLoading } = useApi();
 
     useEffect(() => {
         if (taskData) {
@@ -99,6 +105,15 @@ const TaskDetail = () => {
         }
     };
 
+    const handleDeleteTask = async () => {
+        try {
+            await deleteTask(`/api/tasks/${id}/`, "DELETE");
+            navigate("/");
+        } catch (err) {
+            console.error("Failed to delete task:", err);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-6xl mx-auto">
@@ -136,6 +151,7 @@ const TaskDetail = () => {
                                         showActionMenu={showActionMenu}
                                         setShowActionMenu={setShowActionMenu}
                                         onEdit={() => setShowEditModal(true)}
+                                        onDelete={() => setShowDeleteModal(true)}
                                         task={task}
                                     />
                                 </div>
@@ -296,6 +312,15 @@ const TaskDetail = () => {
                     onUpdate={refetch}
                 />
             )}
+
+            <DeleteModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDeleteTask}
+                title="Delete Task"
+                message="Are you sure you want to delete this task? This action cannot be undone."
+                isLoading={deleteLoading}
+            />
         </div>
     );
 };

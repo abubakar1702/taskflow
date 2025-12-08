@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { FaEdit, FaTrash, FaUser } from "react-icons/fa";
 import { LuSquareArrowOutDownRight } from "react-icons/lu";
 
-const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, task }) => {
+const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, onDelete, task }) => {
     const menuRef = useRef(null);
 
     useEffect(() => {
@@ -52,16 +52,16 @@ const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, task }) => 
                     <LuSquareArrowOutDownRight className="mr-3 w-4 h-4" />
                     Leave Task
                 </button>
-                <button
+                {isCreator && (<button
                     onClick={() => {
-                        console.log("Delete clicked");
+                        onDelete();
                         setShowActionMenu(false);
                     }}
                     className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center transition-colors duration-150"
                 >
                     <FaTrash className="mr-3 w-4 h-4" />
                     Delete Task
-                </button>
+                </button>)}
             </div>
         </div>
     );
