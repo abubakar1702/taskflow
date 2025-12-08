@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { FaEdit, FaTrash, FaUser } from "react-icons/fa";
 import { LuSquareArrowOutDownRight } from "react-icons/lu";
 
-const TaskInfoAction = ({ showActionMenu, setShowActionMenu }) => {
+const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, task }) => {
     const menuRef = useRef(null);
 
     useEffect(() => {
@@ -23,22 +23,25 @@ const TaskInfoAction = ({ showActionMenu, setShowActionMenu }) => {
 
     if (!showActionMenu) return null;
 
+    const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+    const isCreator = task?.creator?.id === currentUser.id;
+
     return (
         <div
             ref={menuRef}
             className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-20 transform origin-top-right transition-all animate-fade-in-up"
         >
             <div className="py-1">
-                <button
+                {isCreator && (<button
                     onClick={() => {
-                        console.log("Edit clicked");
+                        onEdit();
                         setShowActionMenu(false);
                     }}
                     className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 flex items-center transition-colors duration-150"
                 >
                     <FaEdit className="mr-3 w-4 h-4" />
                     Edit Task
-                </button>
+                </button>)}
                 <button
                     onClick={() => {
                         console.log("Leave Task clicked");

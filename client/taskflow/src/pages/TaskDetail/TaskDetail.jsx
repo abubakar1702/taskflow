@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import Avatar from "../../components/common/Avatar";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import TaskInfoAction from "./TaskInfoAction";
+import EditTaskInfoModal from "../../components/modals/EditTaskInfoModal";
 import { FaProjectDiagram } from "react-icons/fa";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
@@ -15,6 +16,7 @@ const TaskDetail = () => {
     const { id } = useParams();
     const [task, setTask] = useState(null);
     const [showActionMenu, setShowActionMenu] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const { data: taskData, loading, error, refetch } = useApi(
         id ? `${API_BASE_URL}/api/tasks/${id}` : null
     );
@@ -27,6 +29,7 @@ const TaskDetail = () => {
 
     const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
 
+    const isCreator = task?.creator?.id === currentUser.id;
     const priorityColors = {
         Urgent: "bg-red-100 text-red-800 border-red-300",
         High: "bg-orange-100 text-orange-800 border-orange-300",
@@ -129,7 +132,12 @@ const TaskDetail = () => {
                                     >
                                         <BsThreeDotsVertical className="w-5 h-5" />
                                     </button>
-                                    <TaskInfoAction showActionMenu={showActionMenu} setShowActionMenu={setShowActionMenu} />
+                                    <TaskInfoAction
+                                        showActionMenu={showActionMenu}
+                                        setShowActionMenu={setShowActionMenu}
+                                        onEdit={() => setShowEditModal(true)}
+                                        task={task}
+                                    />
                                 </div>
                             </div>
 
@@ -278,8 +286,16 @@ const TaskDetail = () => {
 
                     </div>
                 </div>
-
             </div>
+
+            {task && (
+                <EditTaskInfoModal
+                    isOpen={showEditModal}
+                    onClose={() => setShowEditModal(false)}
+                    task={task}
+                    onUpdate={refetch}
+                />
+            )}
         </div>
     );
 };
