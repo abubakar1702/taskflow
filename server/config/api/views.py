@@ -8,6 +8,7 @@ from django.db.models import Q
 from .filters import TaskFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
+from rest_framework.response import Response
 
 class TaskAPIView(generics.ListCreateAPIView):
     queryset = Task.objects.all()
@@ -118,3 +119,57 @@ class SubtaskActionAPIView(generics.RetrieveUpdateDestroyAPIView):
             .distinct()
             .select_related('task', 'assignee')
         )
+        
+class SearchTaskAssigneesAPIView(generics.ListAPIView):
+    serializer_class = ProjectMemberSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        project_id = self.kwargs['project_id']
+        search_query = self.request.GET.get('member', '')
+
+        if not search_query or '@' not in search_query:
+            return ProjectMember.objects.none()
+
+        return ProjectMember.objects.filter(
+            project_id=project_id,
+            user__email__icontains=search_query
+        ).select_related('user', 'project')
+
+
+class AddAssigneeAPIView(generics.UpdateAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    lookup_field = "id"
+    lookup_url_kwarg = "task_id"
+
+    def patch(self, request, *args, **kwargs):
+        task = self.get_object()
+        assignee_ids = request.data.get("assignee_ids", [])
+        
+        if not isinstance(assignee_ids, list) or not assignee_ids:
+            return Response({"detail": "assignee_ids must be a non-empty list"}, status=status.HTTP_400_BAD_REQUEST)
+
+        task.assignees.add(*assignee_ids)
+        return Response({"detail": "Assignees added successfully."})
+    
+
+class RemoveAssigneeAPIView(generics.DestroyAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    lookup_field = "id"
+    lookup_url_kwarg = "task_id"
+
+    def delete(self, request, *args, **kwargs):
+        task = self.get_object()
+        assignee_id = kwargs.get("assignee_id")
+
+        if not assignee_id:
+            return Response({"detail": "assignee_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        task.assignees.remove(assignee_id)
+        return Response({"detail": "Assignee removed successfully."})
