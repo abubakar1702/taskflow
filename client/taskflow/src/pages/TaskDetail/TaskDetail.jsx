@@ -9,6 +9,7 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import TaskInfoAction from "./TaskInfoAction";
 import EditTaskInfoModal from "../../components/modals/EditTaskInfoModal";
 import DeleteModal from "../../components/modals/DeleteModal";
+import AddAssigneeModal from "../../components/modals/AddAssigneeModal";
 import { FaProjectDiagram } from "react-icons/fa";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
@@ -20,6 +21,7 @@ const TaskDetail = () => {
     const [showActionMenu, setShowActionMenu] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showAddAssigneeModal, setShowAddAssigneeModal] = useState(false);
 
     const { data: taskData, loading, error, refetch } = useApi(
         id ? `${API_BASE_URL}/api/tasks/${id}` : null
@@ -112,6 +114,10 @@ const TaskDetail = () => {
         } catch (err) {
             console.error("Failed to delete task:", err);
         }
+    };
+
+    const handleOpenAddModal = () => {
+        setShowAddAssigneeModal(true);
     };
 
     return (
@@ -284,17 +290,17 @@ const TaskDetail = () => {
                             <div>
                                 <div className="flex justify-between items-center mb-3">
                                     <h2 className="text-sm font-semibold">
-                                        Assignees
+                                        Assignees <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                                            {task.assignees?.length || 0}
+                                        </span>
                                     </h2>
-
-                                    <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                                        {task.assignees?.length || 0}
-                                    </span>
+                                    <button onClick={handleOpenAddModal} className="text-blue-600 hover:text-blue-700 p-2">Add Assignee</button>
                                 </div>
 
                                 <Assignee
                                     assignees={task.assignees}
                                     taskId={task.id}
+                                    project={task.project}
                                     refetch={refetch}
                                 />
                             </div>
@@ -321,6 +327,17 @@ const TaskDetail = () => {
                 message="Are you sure you want to delete this task? This action cannot be undone."
                 isLoading={deleteLoading}
             />
+
+            {task && (
+                <AddAssigneeModal
+                    isOpen={showAddAssigneeModal}
+                    onClose={() => setShowAddAssigneeModal(false)}
+                    taskId={task.id}
+                    project={task.project}
+                    currentAssignees={task.assignees}
+                    onAdd={refetch}
+                />
+            )}
         </div>
     );
 };

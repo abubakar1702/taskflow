@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useApi } from "../../components/hooks/useApi";
-import { FaTimes, FaSpinner } from "react-icons/fa";
 import ClipLoader from "react-spinners/ClipLoader";
 import { BsSave2 } from "react-icons/bs";
+import { FaClock, FaCalendarDays, FaBarsProgress, FaArrowRightArrowLeft, FaFilePen, FaXmark } from "react-icons/fa6";
 
 const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
     const [title, setTitle] = useState("");
@@ -57,15 +57,15 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/6 bg-opacity-50 animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 transition-opacity duration-200">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
                 <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50">
-                    <h2 className="text-xl font-bold text-gray-800">Edit Task</h2>
+                    <span className="font-semibold uppercase">Edit Task</span>
                     <button
                         onClick={onClose}
                         className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-200"
                     >
-                        <FaTimes className="w-5 h-5" />
+                        <FaXmark className="w-5 h-5" />
                     </button>
                 </div>
 
@@ -101,7 +101,7 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                                <label className="flex items-center block text-sm font-medium text-gray-600 mb-1"><FaArrowRightArrowLeft size={16} className="mr-2 rotate-180" />Priority</label>
                                 <select
                                     value={priority}
                                     onChange={(e) => setPriority(e.target.value)}
@@ -114,7 +114,7 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                <label className="flex items-center block text-sm font-medium text-gray-600 mb-1"><FaBarsProgress size={16} className="mr-2" />Status</label>
                                 <select
                                     value={status}
                                     onChange={(e) => setStatus(e.target.value)}
@@ -129,7 +129,7 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+                                <label className="flex items-center block text-sm font-medium text-gray-600 mb-1"><FaCalendarDays size={16} className="mr-2" />Due Date</label>
                                 <input
                                     type="date"
                                     value={dueDate}
@@ -138,7 +138,7 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Due Time</label>
+                                <label className="flex items-center block text-sm font-medium text-gray-600 mb-1"><FaClock size={16} className="mr-2" />Due Time</label>
                                 <input
                                     type="time"
                                     value={dueTime}
