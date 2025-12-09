@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .serializers import ProjectSerializer, ProjectMemberSerializer, TaskSerializer, SubtaskSerializer
+from .serializers import ProjectSerializer, ProjectMemberSerializer, TaskSerializer, SubtaskSerializer, SearchForAssigneeSerializer
 from django.shortcuts import get_object_or_404  
 from .models import Project, ProjectMember, Task, Subtask
 from rest_framework import generics, serializers
@@ -9,6 +9,9 @@ from .filters import TaskFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
+from rest_framework import status
+from user.models import User
+from rest_framework.exceptions import ValidationError
 
 class TaskAPIView(generics.ListCreateAPIView):
     queryset = Task.objects.all()
@@ -78,7 +81,6 @@ class TaskDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         )
 
 
-
 class SubtasksApiView(generics.ListCreateAPIView):
     serializer_class = SubtaskSerializer
     permission_classes = [IsAuthenticated]
@@ -119,22 +121,6 @@ class SubtaskActionAPIView(generics.RetrieveUpdateDestroyAPIView):
             .distinct()
             .select_related('task', 'assignee')
         )
-        
-class SearchTaskAssigneesAPIView(generics.ListAPIView):
-    serializer_class = ProjectMemberSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        project_id = self.kwargs['project_id']
-        search_query = self.request.GET.get('member', '')
-
-        if not search_query or '@' not in search_query:
-            return ProjectMember.objects.none()
-
-        return ProjectMember.objects.filter(
-            project_id=project_id,
-            user__email__icontains=search_query
-        ).select_related('user', 'project')
 
 
 class AddAssigneeAPIView(generics.UpdateAPIView):
@@ -148,12 +134,19 @@ class AddAssigneeAPIView(generics.UpdateAPIView):
     def patch(self, request, *args, **kwargs):
         task = self.get_object()
         assignee_ids = request.data.get("assignee_ids", [])
-        
-        if not isinstance(assignee_ids, list) or not assignee_ids:
-            return Response({"detail": "assignee_ids must be a non-empty list"}, status=status.HTTP_400_BAD_REQUEST)
+        print("Adding assignees IDs:", assignee_ids)
 
-        task.assignees.add(*assignee_ids)
+        if not isinstance(assignee_ids, list) or not assignee_ids:
+            return Response({"detail": "assignee_ids must be a non-empty list"}, status=400)
+
+        users = User.objects.filter(id__in=assignee_ids)
+        if users.count() != len(assignee_ids):
+            missing = set(assignee_ids) - set(users.values_list('id', flat=True))
+            return Response({"detail": f"Invalid user IDs: {missing}"}, status=400)
+
+        task.assignees.add(*users)
         return Response({"detail": "Assignees added successfully."})
+
     
 
 class RemoveAssigneeAPIView(generics.DestroyAPIView):
@@ -173,3 +166,24 @@ class RemoveAssigneeAPIView(generics.DestroyAPIView):
 
         task.assignees.remove(assignee_id)
         return Response({"detail": "Assignee removed successfully."})
+    
+
+class SearchForAssigneeAPIView(generics.ListAPIView):
+    serializer_class = SearchForAssigneeSerializer
+
+    def get_queryset(self):
+        search = self.request.query_params.get('user')
+        project = self.request.query_params.get('project')
+
+        if not search:
+            raise ValidationError({"error": "Missing 'user' query parameter"})
+
+        if project:
+            return ProjectMember.objects.filter(
+                project_id=project,
+                user__email__icontains=search
+            ).select_related("user")
+
+        return User.objects.filter(
+            email__icontains=search
+        )

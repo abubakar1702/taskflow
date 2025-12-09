@@ -9,6 +9,39 @@ class ProjectMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectMember
         fields = ['id', 'project', 'user', 'role', 'created_at', 'updated_at']
+    
+class SearchForAssigneeSerializer(serializers.Serializer):
+    id = serializers.UUIDField(read_only=True)
+    email = serializers.CharField(read_only=True)
+    username = serializers.CharField(read_only=True)
+    first_name = serializers.CharField(read_only=True)
+    last_name = serializers.CharField(read_only=True)
+    display_name = serializers.CharField(read_only=True)
+    avatar = serializers.CharField(read_only=True)
+
+    def to_representation(self, obj):
+        # If obj is ProjectMember
+        if hasattr(obj, 'user'):
+            user = obj.user
+        else:
+            user = obj
+
+        request = self.context.get("request")
+
+        return {
+            "id": user.id,
+            "email": user.email,
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "display_name": user.full_name,
+            "avatar": (
+                request.build_absolute_uri(user.avatar.url)
+                if user.avatar else None
+            )
+        }
+
+
 
 class ProjectSerializer(serializers.ModelSerializer):
     members = ProjectMemberSerializer(source='projectmember_set', many=True, read_only=True)
