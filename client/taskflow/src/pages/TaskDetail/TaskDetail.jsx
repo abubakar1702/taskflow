@@ -6,11 +6,11 @@ import { useApi } from "../../components/hooks/useApi";
 import { format } from "date-fns";
 import Avatar from "../../components/common/Avatar";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { FaProjectDiagram } from "react-icons/fa";
 import TaskInfoAction from "./TaskInfoAction";
 import EditTaskInfoModal from "../../components/modals/EditTaskInfoModal";
 import DeleteModal from "../../components/modals/DeleteModal";
 import AddAssigneeModal from "../../components/modals/AddAssigneeModal";
-import { FaProjectDiagram } from "react-icons/fa";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 

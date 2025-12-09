@@ -66,7 +66,7 @@ const Assignee = ({ assignees = [], taskId, refetch }) => {
                                     className="w-10 h-10 rounded-full"
                                 />
                             ) : (
-                                <Avatar name={a.display_name} size={40} />
+                                <Avatar name={a.display_name} size={10} />
                             )}
                             <div>
                                 <p className="font-medium">{a.display_name}</p>
