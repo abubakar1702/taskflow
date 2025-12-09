@@ -165,7 +165,11 @@ class RemoveAssigneeAPIView(generics.DestroyAPIView):
             return Response({"detail": "assignee_id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         task.assignees.remove(assignee_id)
-        return Response({"detail": "Assignee removed successfully."})
+
+        Subtask.objects.filter(task=task, assignee_id=assignee_id).update(assignee=None)
+
+        return Response({"detail": "Assignee removed successfully and related subtasks unassigned."})
+
     
 
 class SearchForAssigneeAPIView(generics.ListAPIView):
