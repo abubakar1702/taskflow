@@ -1,15 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { useApi } from "../../components/hooks/useApi";
 import { LuUserPlus, LuUserMinus, LuTrash } from "react-icons/lu";
+import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
 
 const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUpdated, onEdit, onDelete }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { makeRequest } = useApi();
     const dropdownRef = useRef(null);
+    const { isCreator, currentUser } = useTaskPermissions(taskId);
 
-    const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
-
-    const isCreator = currentUser.id === creator?.id;
     const isAssignedToMe = subtask.assignee?.id === currentUser.id;
     const canModify = isCreator || isAssignedToMe;
     const canEdit = isCreator

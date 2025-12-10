@@ -5,7 +5,7 @@ import UploadModal from "../../components/modals/UploadModal";
 import DeleteModal from "../../components/modals/DeleteModal";
 import { ClipLoader } from "react-spinners";
 
-const AssetSection = ({ taskId, projectId }) => {
+const AssetSection = ({ taskId, projectId, total_assets }) => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -18,8 +18,8 @@ const AssetSection = ({ taskId, projectId }) => {
   const endpoint = taskId
     ? `/api/tasks/${taskId}/assets/`
     : projectId
-    ? `/api/projects/${projectId}/assets/`
-    : null;
+      ? `/api/projects/${projectId}/assets/`
+      : null;
 
   const { data, loading, error, refetch, makeRequest } = useApi(endpoint, "GET", null, [taskId, projectId]);
   const assets = data || [];
@@ -92,7 +92,7 @@ const AssetSection = ({ taskId, projectId }) => {
     <>
       <div className="bg-white rounded-lg p-6 shadow">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Assets</h2>
+          <h2 className="text-lg font-semibold">Assets ({total_assets})</h2>
           <button onClick={handleUploadClick} className="flex items-center gap-2 px-2 py-1 border border-blue-600 text-blue-600 hover:bg-blue-50 rounded">
             <IoCloudUploadOutline className="w-5 h-5" /> Upload
           </button>

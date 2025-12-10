@@ -1,18 +1,14 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import Avatar from "../common/Avatar"
 import {
     FaClock,
     FaCalendarAlt,
-    FaCheckCircle,
-    FaCircle,
-    FaUser,
+    FaPaperclip,
 } from "react-icons/fa";
 
 const TaskCard = ({
     id,
     title,
-    description,
     status,
     priority,
     assignees = [],
@@ -21,6 +17,7 @@ const TaskCard = ({
     due_time,
     project,
     creator,
+    total_assets,
 }) => {
     const getPriorityColor = (priority) => {
         switch (priority) {
@@ -161,7 +158,7 @@ const TaskCard = ({
 
                 {/* Assignees */}
                 {assignees.length > 0 && (
-                    <div className="border-t pt-3 mt-auto">
+                    <div className="flex justify-between items-center border-t pt-3 mt-auto">
                         <div className="flex items-center gap-2">
                             <div className="flex -space-x-2">
                                 {assignees.slice(0, 4).map((assignee, index) => (
@@ -187,6 +184,9 @@ const TaskCard = ({
                                     </div>
                                 )}
                             </div>
+                        </div>
+                        <div>
+                            {total_assets > 0 && (<span className="flex items-center gap-2 text-gray-400"><FaPaperclip size={20} />({total_assets})</span>)}
                         </div>
                     </div>
                 )}

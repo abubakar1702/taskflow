@@ -9,6 +9,7 @@ import AssetSection from "./AssetSection";
 import TaskCreator from "./TaskCreator";
 import DueDate from "./DueDate";
 import TaskInfo from "./TaskInfo";
+import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
@@ -17,14 +18,11 @@ const TaskDetail = () => {
     const navigate = useNavigate();
     const [task, setTask] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const { isCreator, isAssignee } = useTaskPermissions(task);
 
     const { data: taskData, loading, error, refetch } = useApi(
         id ? `${API_BASE_URL}/api/tasks/${id}` : null
     );
-
-    const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
-    
-    const isCreator = currentUser.id === task?.creator?.id;
 
     const { makeRequest: deleteTask, loading: deleteLoading } = useApi();
 
@@ -36,8 +34,8 @@ const TaskDetail = () => {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-screen">
-                <ClipLoader color="#000" size={100} />
+            <div className="flex items-center justify-center h-full">
+                <ClipLoader color="#021af3ff" size={100} />
             </div>
         );
     }
@@ -127,7 +125,7 @@ const TaskDetail = () => {
                         </div>
 
                         {/* Asset Section */}
-                        <AssetSection taskId={task.id} projectId={task.project?.id || null} />
+                        <AssetSection total_assets ={task.total_assets} taskId={task.id} projectId={task.project?.id || null} />
 
                     </div>
                 </div>

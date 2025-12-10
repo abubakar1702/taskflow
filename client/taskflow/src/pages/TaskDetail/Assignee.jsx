@@ -4,8 +4,9 @@ import Avatar from "../../components/common/Avatar";
 import DeleteModal from "../../components/modals/DeleteModal";
 import AddAssigneeModal from "../../components/modals/AddAssigneeModal";
 import { FiUserPlus } from "react-icons/fi";
+import { FaXmark } from "react-icons/fa6";
 
-const Assignee = ({ assignees = [], taskId, refetch, project }) => {
+const Assignee = ({ assignees = [], taskId, refetch, project, isCreator }) => {
     const { makeRequest: removeAssignee } = useApi();
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -55,12 +56,12 @@ const Assignee = ({ assignees = [], taskId, refetch, project }) => {
                         {assignees.length || 0}
                     </span>
                 </h2>
-                <button
+                {isCreator && (<button
                     onClick={openAddModal}
                     className="text-blue-600 hover:bg-blue-100 px-2 py-1 rounded-md flex items-center gap-2 border border-blue-600"
                 >
                     <FiUserPlus /> Add New
-                </button>
+                </button>)}
             </div>
 
             {/* Assignee list */}
@@ -91,24 +92,12 @@ const Assignee = ({ assignees = [], taskId, refetch, project }) => {
                                 </div>
                             </div>
 
-                            <button
+                            {isCreator && (<button
                                 onClick={() => openDeleteModal(a)}
-                                className="text-red-500 hover:text-red-700 p-2"
+                                className="text-gray-500 hover:text-gray-700 p-2"
                             >
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                </svg>
-                            </button>
+                                <FaXmark size={20} title="Remove Assignee" />
+                            </button>)}
                         </div>
                     ))}
                 </div>

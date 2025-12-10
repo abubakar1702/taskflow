@@ -1,9 +1,11 @@
 import { useEffect, useRef } from "react";
 import { FaEdit, FaTrash, FaUser } from "react-icons/fa";
 import { LuSquareArrowOutDownRight } from "react-icons/lu";
+import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
 
-const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, onDelete, task }) => {
+const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, onDelete, onLeave, task }) => {
     const menuRef = useRef(null);
+    const { isCreator } = useTaskPermissions(task);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -23,9 +25,6 @@ const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, onDelete, t
 
     if (!showActionMenu) return null;
 
-    const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
-    const isCreator = currentUser.id === task.creator.id;
-
     return (
         <div
             ref={menuRef}
@@ -42,15 +41,21 @@ const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, onDelete, t
                     <FaEdit className="mr-3 w-4 h-4" />
                     Edit Task
                 </button>)}
-                {!isCreator && (<button
-                    onClick={() => {
-                        setShowActionMenu(false);
-                    }}
-                    className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 flex items-center transition-colors duration-150"
-                >
-                    <LuSquareArrowOutDownRight className="mr-3 w-4 h-4" />
-                    Leave Task
-                </button>)}
+
+                {!isCreator && (
+                    <button
+                        onClick={() => {
+                            onLeave();
+                            setShowActionMenu(false);
+                        }}
+                        className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 flex items-center transition-colors duration-150"
+                    >
+                        <LuSquareArrowOutDownRight className="mr-3 w-4 h-4" />
+                        Leave Task
+                    </button>
+
+                )}
+
                 {isCreator && (<button
                     onClick={() => {
                         onDelete();

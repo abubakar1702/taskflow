@@ -9,6 +9,7 @@ import DeleteModal from "../../components/modals/DeleteModal";
 import { PiUserCirclePlusLight, PiUserCircleMinusThin } from "react-icons/pi";
 import { FiCheckCircle } from "react-icons/fi";
 import { FaPlus } from "react-icons/fa6";
+import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
 
 const Subtasks = ({ taskId, creator, assignees = [], refetch }) => {
     const [showAddModal, setShowAddModal] = useState(false);
@@ -19,10 +20,7 @@ const Subtasks = ({ taskId, creator, assignees = [], refetch }) => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [subtasks, setSubtasks] = useState([]);
     const { makeRequest } = useApi();
-
-    const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
-    const isCreator = currentUser.id === creator?.id;
-
+    const { isCreator, currentUser } = useTaskPermissions(taskId);
 
     const fetchSubtasks = async () => {
         try {
