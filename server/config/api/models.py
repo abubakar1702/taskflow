@@ -1,6 +1,7 @@
 from django.db import models
 from user.models import User
 import uuid
+from .validators import validate_file_size, validate_file_type
 
 class Project(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -67,3 +68,16 @@ class Subtask(models.Model):
 
     def __str__(self):
         return self.text
+
+class Asset(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    file = models.FileField(upload_to='assets/', validators=[validate_file_size])
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True, related_name='assets')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True, blank=True, related_name='assets')
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploaded_assets')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def delete(self, *args, **kwargs):
+        if self.file:
+            self.file.delete(save=False)
+        super().delete(*args, **kwargs)
