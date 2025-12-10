@@ -22,6 +22,10 @@ const TaskDetail = () => {
         id ? `${API_BASE_URL}/api/tasks/${id}` : null
     );
 
+    const currentUser = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+    
+    const isCreator = currentUser.id === task?.creator?.id;
+
     const { makeRequest: deleteTask, loading: deleteLoading } = useApi();
 
     useEffect(() => {
@@ -118,6 +122,7 @@ const TaskDetail = () => {
                                 taskId={task.id}
                                 project={task.project}
                                 refetch={refetch}
+                                isCreator={isCreator}
                             />
                         </div>
 
