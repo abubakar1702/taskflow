@@ -21,12 +21,14 @@ export function useApi(url, method = "GET", body = null, deps = []) {
         localStorage.getItem("accessToken") ||
         sessionStorage.getItem("accessToken");
 
+      const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+
       setLoading(true);
       setError(null);
       try {
         const res = await axios({
           method,
-          url,
+          url: fullUrl,
           ...(method.toUpperCase() !== "GET" && body ? { data: body } : {}),
           headers: token ? { Authorization: `Bearer ${token}` } : {},
           signal: controller?.signal,

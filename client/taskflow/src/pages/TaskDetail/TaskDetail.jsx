@@ -5,7 +5,7 @@ import { useApi } from "../../components/hooks/useApi";
 import Assignee from "./Assignee";
 import Subtasks from "./Subtasks";
 import DeleteModal from "../../components/modals/DeleteModal";
-import AssetSection from "../../components/task/AssetSection";
+import AssetSection from "./AssetSection";
 import TaskCreator from "./TaskCreator";
 import DueDate from "./DueDate";
 import TaskInfo from "./TaskInfo";

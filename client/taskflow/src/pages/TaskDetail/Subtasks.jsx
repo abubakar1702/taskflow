@@ -166,7 +166,7 @@ const Subtasks = ({ taskId, creator, assignees = [], refetch }) => {
                 </div>
                 {isCreator && (
                     <div>
-                        <button onClick={() => setShowAddSubtaskModal(true)} className="flex items-center px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                        <button onClick={() => setShowAddSubtaskModal(true)} className="flex items-center px-2 py-1 border border-blue-600 text-blue-600 rounded hover:bg-blue-50 transition-colors">
                             <FaPlus className="mr-2" /> Add Subtask
                         </button>
                     </div>

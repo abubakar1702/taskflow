@@ -57,9 +57,9 @@ const Assignee = ({ assignees = [], taskId, refetch, project }) => {
                 </h2>
                 <button
                     onClick={openAddModal}
-                    className="text-blue-600 hover:bg-blue-100 p-2 rounded-md flex items-center gap-2"
+                    className="text-blue-600 hover:bg-blue-100 px-2 py-1 rounded-md flex items-center gap-2 border border-blue-600"
                 >
-                    <FiUserPlus /> Add Assignee
+                    <FiUserPlus /> Add New
                 </button>
             </div>
 
