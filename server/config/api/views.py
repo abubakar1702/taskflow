@@ -167,7 +167,7 @@ class RemoveAssigneeAPIView(generics.DestroyAPIView):
 
         task.assignees.remove(assignee_id)
 
-        Subtask.objects.filter(task=task, assignee_id=assignee_id).update(assignee=None)
+        Subtask.objects.filter(task=task, assignee_id=assignee_id).update(assignee=None, is_completed=False)
 
         return Response({"detail": "Assignee removed successfully and related subtasks unassigned."})
 
@@ -193,8 +193,27 @@ class SearchForAssigneeAPIView(generics.ListAPIView):
             email__icontains=search
         )
 
+#if an assignee leaves a task, he will be removed from the assignees list and all his subtasks will be unassigned and all the assets he uploaded to that task will be deleted. I he checked a subtask as completed, it will be set to false.
 class LeaveTaskAPIView(generics.UpdateAPIView):
-    pass
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    lookup_field = "id"
+    lookup_url_kwarg = "task_id"
+
+    def patch(self, request, *args, **kwargs):
+        task = self.get_object()
+        user = request.user
+
+        if user not in task.assignees.all():
+            return Response({"detail": "You are not an assignee of this task."}, status=400)
+        task.assignees.remove(user)
+        
+        Subtask.objects.filter(task=task, assignee=user).update(assignee=None, is_completed=False)
+        Asset.objects.filter(task=task, uploaded_by=user).delete()
+        
+        return Response({"detail": "You have left the task successfully."})
 
 class AssetCreateAPIView(generics.CreateAPIView):
     queryset = Asset.objects.all()
@@ -205,6 +224,7 @@ class AssetCreateAPIView(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(uploaded_by=self.request.user)
 
+#not in use
 class AssetListAPIView(generics.ListAPIView):
     queryset = Asset.objects.all()
     serializer_class = AssetSerializer

@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from .models import Project, ProjectMember, Task, Subtask
+from .models import Project, ProjectMember, Task, Subtask, Asset
 from user.serializers import UserSerializer
 from user.models import User
+from django.db.models import Count
 
 
 class ProjectMemberSerializer(serializers.ModelSerializer):
@@ -20,7 +21,6 @@ class SearchForAssigneeSerializer(serializers.Serializer):
     avatar = serializers.CharField(read_only=True)
 
     def to_representation(self, obj):
-        # If obj is ProjectMember
         if hasattr(obj, 'user'):
             user = obj.user
         else:
@@ -97,9 +97,12 @@ class TaskSerializer(serializers.ModelSerializer):
     
     assignees = UserSerializer(many=True, read_only=True)
     subtasks = SubtaskSerializer(many=True, read_only=True)
+    
+    total_assets = serializers.SerializerMethodField()
+    
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'creator','project_id', 'project','assignees_ids', 'assignees', 'status', 'priority','subtasks','subtasks_data', 'due_date', 'due_time', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'description', 'creator','project_id', 'project','assignees_ids', 'assignees', 'status', 'priority','subtasks','subtasks_data','total_assets', 'due_date', 'due_time', 'created_at', 'updated_at']
         
     def create(self, validated_data):
         subtasks_data = validated_data.pop('subtasks_data', [])
@@ -126,3 +129,26 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
         return task
+    
+    def get_total_assets(self, obj):
+        return obj.assets.count()
+
+
+class AssetSerializer(serializers.ModelSerializer):
+    uploaded_by = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Asset
+        fields = ['id', 'file', 'task', 'project',
+                  'uploaded_by', 'uploaded_at']
+
+    def validate(self, data):
+        task = data.get('task')
+        project = data.get('project')
+        if not task and not project:
+            raise serializers.ValidationError(
+                "Asset must belong to either a task or a project.")
+        if task and project:
+            raise serializers.ValidationError(
+                "Asset cannot belong to both a task and a project.")
+        return data
