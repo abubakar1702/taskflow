@@ -5,6 +5,7 @@ import DeleteModal from "../../components/modals/DeleteModal";
 import AddAssigneeModal from "../../components/modals/AddAssigneeModal";
 import { FiUserPlus } from "react-icons/fi";
 import { FaXmark } from "react-icons/fa6";
+import { toast } from 'react-toastify';
 
 const Assignee = ({ assignees = [], taskId, refetch, project, isCreator }) => {
     const { makeRequest: removeAssignee } = useApi();
@@ -36,11 +37,12 @@ const Assignee = ({ assignees = [], taskId, refetch, project, isCreator }) => {
             );
             setIsDeleting(false);
             closeDeleteModal();
+            toast.success("Assignee removed successfully");
             refetch();
         } catch (err) {
             setIsDeleting(false);
             console.error("Failed to remove assignee:", err);
-            alert("Failed to remove assignee. Please try again.");
+            toast.error("Failed to remove assignee. Please try again.");
         }
     };
 

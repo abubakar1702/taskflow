@@ -5,6 +5,7 @@ import { FaRegUser, FaCircleInfo, FaUserLargeSlash } from "react-icons/fa6";
 import { MdOutlineTask } from "react-icons/md";
 import { BsSave2 } from "react-icons/bs";
 import { ClipLoader } from 'react-spinners'
+import { toast } from "react-toastify";
 
 const EditSubtaskModal = ({ taskId, subtask, creator, assignees = [], onClose, onUpdated }) => {
     const [text, setText] = useState(subtask.text);
@@ -37,11 +38,12 @@ const EditSubtaskModal = ({ taskId, subtask, creator, assignees = [], onClose, o
                 text: text.trim(),
                 assignee_id: assigneeId || null,
             });
+            toast.success("Subtask updated successfully");
             onUpdated?.();
             handleClose();
         } catch (error) {
             console.error("Failed to update subtask:", error);
-            alert("Failed to update subtask. Please try again.");
+            toast.error("Failed to update subtask. Please try again.");
         } finally {
             setIsSubmitting(false);
         }

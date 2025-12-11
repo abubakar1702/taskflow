@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useApi } from "../../components/hooks/useApi";
 import Avatar from "../../components/common/Avatar";
 import { FiSearch, FiX, FiCheck } from "react-icons/fi";
+import { toast } from "react-toastify";
 
 const getPlainUser = (result) => (result ? result.user || result : {});
 
@@ -110,9 +111,11 @@ const AddAssigneeModal = ({ isOpen, onClose, taskId, currentAssignees = [], proj
                 assignee_ids: selectedUsers.map(u => u.id)
             });
             onAdd();
+            toast.success("Assignees added successfully");
             onClose();
         } catch (err) {
             console.error("Failed to add assignees:", err);
+            toast.error("Failed to add assignees. Please try again.");
         }
     };
 

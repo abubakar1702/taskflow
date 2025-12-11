@@ -4,6 +4,7 @@ import Avatar from "../common/Avatar";
 import { FaPlus, FaRegUser, FaCircleInfo } from "react-icons/fa6";
 import { MdOutlineTask } from "react-icons/md";
 import { ClipLoader } from "react-spinners";
+import { toast } from "react-toastify";
 
 const AddSubtaskModal = ({ taskId, creator, assignees = [], onClose, onUpdated }) => {
     const [text, setText] = useState("");
@@ -34,14 +35,14 @@ const AddSubtaskModal = ({ taskId, creator, assignees = [], onClose, onUpdated }
                 assignee_id: assigneeId || null,
                 is_completed: false,
             });
-            alert("Subtask added successfully");
+            toast.success("Subtask added successfully");
             setText("");
             setAssigneeId(null);
             onUpdated?.();
             handleClose();
         } catch (error) {
             console.error("Failed to add subtask:", error);
-            alert("Failed to add subtask. Please try again.");
+            toast.error("Failed to add subtask. Please try again.");
         } finally {
             setIsSubmitting(false);
         }

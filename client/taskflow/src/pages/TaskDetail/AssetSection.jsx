@@ -4,6 +4,7 @@ import { IoCloudUploadOutline, IoTrashOutline } from "react-icons/io5";
 import UploadModal from "../../components/modals/UploadModal";
 import DeleteModal from "../../components/modals/DeleteModal";
 import { ClipLoader } from "react-spinners";
+import { toast } from "react-toastify";
 
 const AssetSection = ({ taskId, projectId, total_assets }) => {
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -53,9 +54,10 @@ const AssetSection = ({ taskId, projectId, total_assets }) => {
       await makeRequest(endpoint, "POST", formData);
       setShowUploadModal(false);
       setSelectedFile(null);
+      toast.success("Asset uploaded successfully");
       refetch();
     } catch (err) {
-      setUploadError(err.message || "Failed to upload file");
+      toast.error("Failed to upload asset: " + (err.message || "Unknown error"));
     } finally {
       setUploading(false);
     }
@@ -74,9 +76,10 @@ const AssetSection = ({ taskId, projectId, total_assets }) => {
       await makeRequest(`/api/assets/${deletingAsset.id}/`, "DELETE");
       setShowDeleteModal(false);
       setDeletingAsset(null);
-      refetch();
+      refetch();  
+      toast.success("Asset deleted successfully");
     } catch (err) {
-      alert("Failed to delete asset: " + (err.message || "Unknown error"));
+      toast.error("Failed to delete asset: " + (err.message || "Unknown error"));
     } finally {
       setIsDeleting(false);
     }

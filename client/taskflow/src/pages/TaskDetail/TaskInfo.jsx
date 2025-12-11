@@ -8,6 +8,7 @@ import EditTaskInfoModal from "../../components/modals/EditTaskInfoModal";
 import DeleteModal from "../../components/modals/DeleteModal";
 import { useApi } from "../../components/hooks/useApi";
 import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
+import { toast } from "react-toastify";
 
 const TaskInfo = ({ task, onUpdate }) => {
     const [showActionMenu, setShowActionMenu] = useState(false);
@@ -22,9 +23,11 @@ const TaskInfo = ({ task, onUpdate }) => {
     const handleLeaveTask = async () => {
         try {
             await leaveTask(`/api/tasks/${task.id}/leave/`, "PATCH");
+            toast.success("Task left successfully");
             navigate("/");
         } catch (err) {
             console.error("Failed to leave task:", err);
+            toast.error("Failed to leave task. Please try again.");
         }
     };
 

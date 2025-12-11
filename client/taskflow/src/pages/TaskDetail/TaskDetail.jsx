@@ -10,6 +10,7 @@ import TaskCreator from "./TaskCreator";
 import DueDate from "./DueDate";
 import TaskInfo from "./TaskInfo";
 import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
+import { toast } from "react-toastify";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
@@ -68,8 +69,10 @@ const TaskDetail = () => {
         try {
             await deleteTask(`/api/tasks/${id}/`, "DELETE");
             navigate("/");
+            toast.success("Task deleted successfully");
         } catch (err) {
             console.error("Failed to delete task:", err);
+            toast.error("Failed to delete task");
         }
     };
 

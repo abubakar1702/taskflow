@@ -11,7 +11,7 @@ import { FiCheckCircle } from "react-icons/fi";
 import { FaPlus } from "react-icons/fa6";
 import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
 import { ClipLoader } from "react-spinners";
-import Toast from "../../components/common/Toast";
+import {toast} from "react-toastify";
 
 const Subtasks = ({ task, refetch }) => {
     const [showAddModal, setShowAddModal] = useState(false);
@@ -58,9 +58,10 @@ const Subtasks = ({ task, refetch }) => {
                 is_completed: !currentStatus,
             });
             fetchSubtasks();
+            toast.success("Subtask updated successfully");
         } catch (error) {
             console.error("Failed to update subtask:", error);
-            alert("Failed to update subtask. Please try again.");
+            toast.error("Failed to update subtask. Please try again.");
         }
     };
 
@@ -81,10 +82,11 @@ const Subtasks = ({ task, refetch }) => {
         try {
             await makeRequest(`/api/tasks/${taskId}/subtasks/${deletingSubtask.id}/`, "DELETE");
             fetchSubtasks();
+            toast.success("Subtask deleted successfully");
             setDeletingSubtask(null);
         } catch (error) {
             console.error("Failed to delete subtask:", error);
-            alert("Failed to delete subtask. Please try again.");
+            toast.error("Failed to delete subtask. Please try again.");
         } finally {
             setIsDeleting(false);
         }
@@ -126,13 +128,13 @@ const Subtasks = ({ task, refetch }) => {
                 is_completed: false,
             });
             fetchSubtasks();
-            alert("Subtask assigned successfully");
+            toast.success("Subtask assigned successfully");
         } catch (error) {
             console.error("Failed to assign subtask:", error);
             if (error.data) {
                 console.error("Error details:", JSON.stringify(error.data, null, 2));
             }
-            alert("Failed to assign subtask. Please try again.");
+            toast.error("Failed to assign subtask. Please try again.");
         }
     };
 
@@ -152,14 +154,14 @@ const Subtasks = ({ task, refetch }) => {
                 assignee_id: null,
                 is_completed: false,
             });
-            alert("Subtask unassigned successfully");
+            toast.success("Subtask unassigned successfully");
             fetchSubtasks();
         } catch (error) {
             console.error("Failed to unassign subtask:", error);
             if (error.data) {
                 console.error("Error details:", JSON.stringify(error.data, null, 2));
             }
-            alert("Failed to unassign subtask. Please try again.");
+            toast.error("Failed to unassign subtask. Please try again.");
         }
     };
 

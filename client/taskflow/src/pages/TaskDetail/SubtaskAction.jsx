@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useApi } from "../../components/hooks/useApi";
 import { LuUserPlus, LuUserMinus, LuTrash } from "react-icons/lu";
 import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
-import Toast from "../../components/common/Toast";
+import {toast} from "react-toastify";
 
 const SubtaskAction = ({ task, subtask, onClose, onUpdated, onEdit, onDelete }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,18 +50,13 @@ const SubtaskAction = ({ task, subtask, onClose, onUpdated, onEdit, onDelete }) 
                 assignee_id: currentUser.id,
                 is_completed: false,
             });
+            toast.success("Subtask assigned successfully");
             onUpdated();
             onClose();
-            Toast({
-                message: "Subtask assigned successfully.",
-                type: "success",
-                isVisible: true,
-                onClose: () => {},
-                duration: 3000,
-            });
+
         } catch (error) {
             console.error("Failed to assign subtask:", error);
-            alert("Failed to assign subtask. Please try again.");
+            toast.error("Failed to assign subtask. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
@@ -70,7 +65,7 @@ const SubtaskAction = ({ task, subtask, onClose, onUpdated, onEdit, onDelete }) 
     const handleUnassign = async (e) => {
         e?.preventDefault();
         if (!subtask.assignee) {
-            alert("This subtask is already unassigned.");
+            toast.error("This subtask is already unassigned.");
             return;
         }
 
@@ -80,11 +75,12 @@ const SubtaskAction = ({ task, subtask, onClose, onUpdated, onEdit, onDelete }) 
                 assignee_id: null,
                 is_completed: false,
             });
+            toast.success("Subtask unassigned successfully");
             onUpdated();
             onClose();
         } catch (error) {
             console.error("Failed to unassign subtask:", error);
-            alert("Failed to unassign subtask. Please try again.");
+            toast.error("Failed to unassign subtask. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
