@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FiPlus, FiTrash2, FiUser } from "react-icons/fi";
+import { IoClose } from "react-icons/io5";
 
 const NewSubtasks = ({ subtasks, setSubtasks, assignees }) => {
   const handleSubtaskChange = (index, key, value) => {
@@ -32,14 +33,14 @@ const NewSubtasks = ({ subtasks, setSubtasks, assignees }) => {
 
       <div className="space-y-4">
         {subtasks.map((subtask, index) => (
-          <div key={index} className="flex flex-col md:flex-row gap-3 p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200">
+          <div key={index} className="flex flex-col md:flex-row gap-3 p-2 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200">
             <div className="flex-1">
               <input
                 type="text"
                 value={subtask.text}
                 onChange={(e) => handleSubtaskChange(index, "text", e.target.value)}
                 placeholder="Enter subtask description..."
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
               />
             </div>
             <div className="flex gap-3">
@@ -48,7 +49,7 @@ const NewSubtasks = ({ subtasks, setSubtasks, assignees }) => {
                 <select
                   value={subtask.assignee_id || ""}
                   onChange={(e) => handleSubtaskChange(index, "assignee_id", e.target.value || null)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none cursor-pointer"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none cursor-pointer"
                 >
                   <option value="">No Assignee</option>
                   {assignees.map((user) => (
@@ -65,10 +66,9 @@ const NewSubtasks = ({ subtasks, setSubtasks, assignees }) => {
                 <button
                   type="button"
                   onClick={() => handleRemoveSubtask(index)}
-                  className="px-4 py-2.5 bg-gradient-to-r from-red-50 to-red-100 border border-red-200 text-red-600 hover:text-red-700 hover:from-red-100 hover:to-red-200 rounded-lg transition-all duration-200 flex items-center gap-2"
+                  className="text-red-600 hover:text-red-700"
                 >
-                  <FiTrash2 size={16} />
-                  <span className="hidden sm:inline">Remove</span>
+                  <IoClose title="Remove Subtask" size={26} />
                 </button>
               )}
             </div>
@@ -79,7 +79,7 @@ const NewSubtasks = ({ subtasks, setSubtasks, assignees }) => {
       <button
         type="button"
         onClick={handleAddSubtask}
-        className="mt-6 w-full py-3.5 px-4 bg-gradient-to-r from-indigo-50 to-indigo-100 border-2 border-dashed border-indigo-200 text-indigo-700 hover:text-indigo-800 hover:border-indigo-300 hover:from-indigo-100 hover:to-indigo-200 rounded-xl transition-all duration-200 font-medium flex items-center justify-center gap-3"
+        className="mt-6 w-full py-3.5 px-4 bg-gradient-to-r from-indigo-50 to-indigo-100 border-2 border-dashed border-indigo-200 text-indigo-700 hover:text-indigo-800 hover:border-indigo-300 hover:from-indigo-100 hover:to-indigo-200 rounded-md transition-all duration-200 font-medium flex items-center justify-center gap-3"
       >
         <FiPlus size={18} />
         Add Another Subtask
