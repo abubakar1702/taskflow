@@ -128,7 +128,7 @@ const TaskDetail = () => {
                         </div>
 
                         {/* Asset Section */}
-                        <AssetSection total_assets ={task.total_assets} taskId={task.id} projectId={task.project?.id || null} />
+                        <AssetSection total_assets ={task.total_assets} task={task} taskId={task.id} projectId={task.project?.id || null} />
 
                     </div>
                 </div>

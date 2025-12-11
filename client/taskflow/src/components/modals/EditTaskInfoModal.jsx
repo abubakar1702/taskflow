@@ -3,6 +3,7 @@ import { useApi } from "../../components/hooks/useApi";
 import ClipLoader from "react-spinners/ClipLoader";
 import { BsSave2 } from "react-icons/bs";
 import { FaClock, FaCalendarDays, FaBarsProgress, FaArrowRightArrowLeft, FaFilePen, FaXmark } from "react-icons/fa6";
+import { toast } from "react-toastify";
 
 const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
     const [title, setTitle] = useState("");
@@ -48,9 +49,11 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
         try {
             await makeRequest(`/api/tasks/${task.id}/`, "PATCH", payload);
             onUpdate();
+            toast.success("Task updated successfully");
             onClose();
         } catch (err) {
             console.error("Failed to update task:", err);
+            toast.error("Failed to update task. Please try again.");
         }
     };
 
