@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import TaskAPIView, TaskDetailAPIView, SubtasksApiView, SubtaskActionAPIView, AddAssigneeAPIView, RemoveAssigneeAPIView, SearchForAssigneeAPIView, AssetCreateAPIView, AssetListAPIView, AssetDetailAPIView, TaskAssetsAPIView, ProjectAssetsAPIView, AssetActionAPIView, LeaveTaskAPIView
+from .views import TaskAPIView, TaskDetailAPIView, SubtasksApiView, SubtaskActionAPIView, AddAssigneeAPIView, RemoveAssigneeAPIView, SearchForAssigneeAPIView, AssetCreateAPIView, AssetListAPIView, AssetDetailAPIView, TaskAssetsAPIView, ProjectAssetsAPIView, AssetActionAPIView, LeaveTaskAPIView, ProjectsAPIView
 
 urlpatterns = [
     path('tasks/', TaskAPIView.as_view(), name='task-list-create'),
@@ -17,4 +17,6 @@ urlpatterns = [
     path('tasks/<uuid:task>/assets/', TaskAssetsAPIView.as_view(), name='task-assets'),
     path('projects/<uuid:project>/assets/', ProjectAssetsAPIView.as_view(), name='project-assets'),
     path('assets/<uuid:id>/', AssetActionAPIView.as_view(), name='asset-detail'),
+    
+    path('projects/', ProjectsAPIView.as_view(), name='project-assets'),
 ]

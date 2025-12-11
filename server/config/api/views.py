@@ -290,3 +290,20 @@ class AssetActionAPIView(generics.RetrieveDestroyAPIView):
     serializer_class = AssetSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = 'id'
+    
+
+class ProjectsAPIView(generics.ListAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return (
+            Project.objects.filter(
+                Q(creator=self.request.user) |
+                Q(members__in=[self.request.user])
+            )
+            .distinct()
+            .select_related('creator')
+            .prefetch_related('members')
+        )
