@@ -7,6 +7,7 @@ import PrivateLayout from './components/layouts/PrivateLayout';
 import PublicLayout from './components/layouts/PublicLayout';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import NewTask from './pages/new task/NewTask';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route element={<PrivateLayout />}>
           <Route path="/" element={<Tasks />} />
           <Route path="/tasks/:id" element={<TaskDetail />} />
+          <Route path="/new-task" element={<NewTask />} />
         </Route>
       </Routes>
 

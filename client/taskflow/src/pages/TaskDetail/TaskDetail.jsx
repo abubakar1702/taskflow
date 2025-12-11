@@ -99,7 +99,7 @@ const TaskDetail = () => {
                         <TaskInfo task={task} onUpdate={refetch} />
 
                         {/* Subtasks section */}
-                        <div className="mb-6 border border-gray-200 rounded-lg p-6 bg-white">
+                        <div className="mb-6 shadow-sm border border-gray-200 rounded-lg p-6 bg-white">
                             <Subtasks task={task} taskId={task.id} creator={task.creator} assignees={task.assignees} refetch={refetch} />
                         </div>
                     </div>
