@@ -2,17 +2,22 @@ import { useState, useRef, useEffect } from "react";
 import { useApi } from "../../components/hooks/useApi";
 import { LuUserPlus, LuUserMinus, LuTrash } from "react-icons/lu";
 import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
+import Toast from "../../components/common/Toast";
 
-const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUpdated, onEdit, onDelete }) => {
+const SubtaskAction = ({ task, subtask, onClose, onUpdated, onEdit, onDelete }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { makeRequest } = useApi();
     const dropdownRef = useRef(null);
-    const { isCreator, currentUser } = useTaskPermissions(taskId);
+    const { isCreator, currentUser } = useTaskPermissions(task);
+
+    const taskId = task.id;
+    const creator = task.creator;
+    const assignees = task.assignees || [];
 
     const isAssignedToMe = subtask.assignee?.id === currentUser.id;
     const canModify = isCreator || isAssignedToMe;
-    const canEdit = isCreator
-    const canDelete = isCreator
+    const canEdit = isCreator;
+    const canDelete = isCreator;
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -47,6 +52,13 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
             });
             onUpdated();
             onClose();
+            Toast({
+                message: "Subtask assigned successfully.",
+                type: "success",
+                isVisible: true,
+                onClose: () => {},
+                duration: 3000,
+            });
         } catch (error) {
             console.error("Failed to assign subtask:", error);
             alert("Failed to assign subtask. Please try again.");
@@ -108,8 +120,7 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
                 </button>
             )}
 
-            {/* Assign to me */}
-
+            {/* Assign to me - only creator can assign to themselves if unassigned */}
             {isCreator && !subtask.assignee && (
                 <button
                     type="button"
@@ -121,8 +132,6 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
                     <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">Assign to me</span>
                 </button>
             )}
-
-
 
             {/* Unassign Option - only if assigned and user can modify */}
             {subtask.assignee && canModify && (
@@ -137,10 +146,12 @@ const SubtaskAction = ({ taskId, subtask, creator, assignees = [], onClose, onUp
                 </button>
             )}
 
-            {/* Divider */}
-            <div className="my-1 border-t border-gray-200"></div>
+            {/* Divider - only show if delete option will appear */}
+            {canDelete && (
+                <div className="my-1 border-t border-gray-200"></div>
+            )}
 
-            {/* Delete Option - only if user can modify */}
+            {/* Delete Option - only if user can delete */}
             {canDelete && (
                 <button
                     type="button"

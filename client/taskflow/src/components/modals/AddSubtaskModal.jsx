@@ -34,6 +34,7 @@ const AddSubtaskModal = ({ taskId, creator, assignees = [], onClose, onUpdated }
                 assignee_id: assigneeId || null,
                 is_completed: false,
             });
+            alert("Subtask added successfully");
             setText("");
             setAssigneeId(null);
             onUpdated?.();

@@ -186,7 +186,7 @@ const TaskCard = ({
                             </div>
                         </div>
                         <div>
-                            {total_assets > 0 && (<span className="flex items-center gap-2 text-gray-400"><FaPaperclip size={20} />({total_assets})</span>)}
+                            {total_assets > 0 && (<span className="flex items-center gap-2 text-gray-400"><FaPaperclip size={16} />{total_assets}</span>)}
                         </div>
                     </div>
                 )}

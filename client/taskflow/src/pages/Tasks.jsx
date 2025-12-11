@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { FaPlus, FaExclamationCircle, FaClipboardList } from "react-icons/fa";
 import { ClipLoader } from "react-spinners";
 import TaskCard from "../components/task/TaskCard";
-import { ToastContainer, toast } from "react-toastify";
 import FilterBar from "../components/task/filter/FilterBar";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
@@ -121,18 +120,6 @@ const Tasks = () => {
                     </div>
                 )}
             </div>
-
-            <ToastContainer
-                position="top-right"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-            />
         </div>
     );
 };

@@ -97,7 +97,7 @@ const TaskDetail = () => {
 
                         {/* Subtasks section */}
                         <div className="mb-6 border border-gray-200 rounded-lg p-6 bg-white">
-                            <Subtasks taskId={task.id} creator={task.creator} assignees={task.assignees} refetch={refetch} />
+                            <Subtasks task={task} taskId={task.id} creator={task.creator} assignees={task.assignees} refetch={refetch} />
                         </div>
                     </div>
 
