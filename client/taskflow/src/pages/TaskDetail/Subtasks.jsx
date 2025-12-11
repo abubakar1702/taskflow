@@ -11,10 +11,9 @@ import { FiCheckCircle } from "react-icons/fi";
 import { FaPlus } from "react-icons/fa6";
 import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
 import { ClipLoader } from "react-spinners";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 
 const Subtasks = ({ task, refetch }) => {
-    const [showAddModal, setShowAddModal] = useState(false);
     const [showAddSubtaskModal, setShowAddSubtaskModal] = useState(false);
     const [showSubtaskAction, setShowSubtaskAction] = useState(null);
     const [editingSubtask, setEditingSubtask] = useState(null);
@@ -103,14 +102,6 @@ const Subtasks = ({ task, refetch }) => {
         );
     }
 
-    if (!subtasks.length && !showAddModal) {
-        return (
-            <div className="text-center py-4">
-                <p className="text-xl font-semibold text-gray-500 mb-4">No subtasks yet</p>
-            </div>
-        );
-    }
-
     const handleAssignToMe = async (subtaskId) => {
         if (!taskId) {
             console.error("Missing taskId");
@@ -174,11 +165,10 @@ const Subtasks = ({ task, refetch }) => {
         return (
             <div
                 key={subtask.id}
-                className={`flex items-center p-3 rounded-lg transition-colors ${
-                    subtask.is_completed
+                className={`flex items-center p-3 rounded-lg transition-colors ${subtask.is_completed
                         ? "border border-green-400 bg-gray-50 hover:bg-gray-100"
                         : "border border-gray-200 bg-gray-50 hover:bg-gray-100"
-                }`}
+                    }`}
             >
                 {canToggle && (
                     <button
@@ -187,20 +177,18 @@ const Subtasks = ({ task, refetch }) => {
                             e.preventDefault();
                             handleToggleSubtask(subtask.id, subtask.is_completed);
                         }}
-                        className={`w-6 h-6 flex-shrink-0 flex items-center justify-center border-2 rounded-full mr-3 ${
-                            subtask.is_completed
+                        className={`w-6 h-6 flex-shrink-0 flex items-center justify-center border-2 rounded-full mr-3 ${subtask.is_completed
                                 ? "bg-green-500 border-green-500"
                                 : "border-gray-300 hover:border-gray-400"
-                        }`}
+                            }`}
                     >
                         {subtask.is_completed && <FiCheckCircle color="white" />}
                     </button>
                 )}
                 <div className="flex-grow">
                     <p
-                        className={`font-medium ${
-                            subtask.is_completed ? "text-gray-500" : "text-gray-900"
-                        }`}
+                        className={`font-medium ${subtask.is_completed ? "text-gray-500" : "text-gray-900"
+                            }`}
                     >
                         {subtask.text}
                     </p>
@@ -331,62 +319,70 @@ const Subtasks = ({ task, refetch }) => {
                         <div
                             className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                             style={{
-                                width: `${
-                                    totalSubtasks > 0
+                                width: `${totalSubtasks > 0
                                         ? (completedSubtasks / totalSubtasks) * 100
                                         : 0
-                                }%`,
+                                    }%`,
                             }}
                         ></div>
                     </div>
                 </div>
             )}
 
+            {/* Empty state message */}
+            {totalSubtasks === 0 && (
+                <div className="text-center py-8">
+                    <p className="text-gray-500 text-sm">No subtasks yet. Click "Add Subtask" to create one.</p>
+                </div>
+            )}
+
             {/* Subtask sections */}
-            <div className="space-y-6">
-                {/* My Subtasks */}
-                {mySubtasks.length > 0 && (
-                    <div>
-                        <div className="flex items-center mb-3">
-                            <h3 className="text-sm font-semibold text-blue-900">
-                                Assigned to You
-                            </h3>
-                            <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
-                                {mySubtasks.length}
-                            </span>
+            {totalSubtasks > 0 && (
+                <div className="space-y-6">
+                    {/* My Subtasks */}
+                    {mySubtasks.length > 0 && (
+                        <div>
+                            <div className="flex items-center mb-3">
+                                <h3 className="text-sm font-semibold text-blue-900">
+                                    Assigned to You
+                                </h3>
+                                <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
+                                    {mySubtasks.length}
+                                </span>
+                            </div>
+                            <div className="space-y-2">{mySubtasks.map(renderSubtask)}</div>
                         </div>
-                        <div className="space-y-2">{mySubtasks.map(renderSubtask)}</div>
-                    </div>
-                )}
+                    )}
 
-                {/* Team Subtasks */}
-                {teamSubtasks.length > 0 && (
-                    <div>
-                        <div className="flex items-center mb-3">
-                            <h3 className="text-sm font-semibold text-purple-900">Team</h3>
-                            <span className="ml-2 px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
-                                {teamSubtasks.length}
-                            </span>
+                    {/* Team Subtasks */}
+                    {teamSubtasks.length > 0 && (
+                        <div>
+                            <div className="flex items-center mb-3">
+                                <h3 className="text-sm font-semibold text-purple-900">Team</h3>
+                                <span className="ml-2 px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
+                                    {teamSubtasks.length}
+                                </span>
+                            </div>
+                            <div className="space-y-2">{teamSubtasks.map(renderSubtask)}</div>
                         </div>
-                        <div className="space-y-2">{teamSubtasks.map(renderSubtask)}</div>
-                    </div>
-                )}
+                    )}
 
-                {/* Unassigned Subtasks */}
-                {unassignedSubtasks.length > 0 && (
-                    <div>
-                        <div className="flex items-center mb-3">
-                            <h3 className="text-sm font-semibold text-gray-700">Unassigned</h3>
-                            <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full">
-                                {unassignedSubtasks.length}
-                            </span>
+                    {/* Unassigned Subtasks */}
+                    {unassignedSubtasks.length > 0 && (
+                        <div>
+                            <div className="flex items-center mb-3">
+                                <h3 className="text-sm font-semibold text-gray-700">Unassigned</h3>
+                                <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full">
+                                    {unassignedSubtasks.length}
+                                </span>
+                            </div>
+                            <div className="space-y-2">
+                                {unassignedSubtasks.map(renderSubtask)}
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            {unassignedSubtasks.map(renderSubtask)}
-                        </div>
-                    </div>
-                )}
-            </div>
+                    )}
+                </div>
+            )}
 
             {/* Edit Subtask Modal */}
             {editingSubtask && (
