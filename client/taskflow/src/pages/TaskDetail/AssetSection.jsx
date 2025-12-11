@@ -5,8 +5,9 @@ import UploadModal from "../../components/modals/UploadModal";
 import DeleteModal from "../../components/modals/DeleteModal";
 import { ClipLoader } from "react-spinners";
 import { toast } from "react-toastify";
+import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
 
-const AssetSection = ({ taskId, projectId, total_assets }) => {
+const AssetSection = ({task, taskId, projectId, total_assets }) => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -15,6 +16,11 @@ const AssetSection = ({ taskId, projectId, total_assets }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingAsset, setDeletingAsset] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const { canUpload, currentUser } = useTaskPermissions(task);
+
+  // task creator and the uploader can delete the asset
+  const canDelete = task?.creator?.id === currentUser.id || task?.uploaded_by?.id === currentUser.id;
 
   const endpoint = taskId
     ? `/api/tasks/${taskId}/assets/`
@@ -96,9 +102,11 @@ const AssetSection = ({ taskId, projectId, total_assets }) => {
       <div className="bg-white rounded-lg p-6 shadow">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Assets ({total_assets})</h2>
-          <button onClick={handleUploadClick} className="flex items-center gap-2 px-2 py-1 border border-blue-600 text-blue-600 hover:bg-blue-50 rounded">
-            <IoCloudUploadOutline className="w-5 h-5" /> Upload
-          </button>
+          {canUpload && (
+            <button onClick={handleUploadClick} className="flex items-center gap-2 px-2 py-1 border border-blue-600 text-blue-600 hover:bg-blue-50 rounded">
+              <IoCloudUploadOutline className="w-5 h-5" /> Upload
+            </button>
+          )}
         </div>
 
         {assets.length === 0 ? (
@@ -123,13 +131,13 @@ const AssetSection = ({ taskId, projectId, total_assets }) => {
                   <p className="text-xs text-gray-500">{new Date(asset.uploaded_at).toLocaleString()}</p>
                 </div>
 
-                <button
+                {canDelete && (<button
                   onClick={() => openDeleteModal(asset)}
                   className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-red-600 hover:bg-red-50 rounded"
                   title="Delete asset"
                 >
                   <IoTrashOutline className="w-5 h-5" />
-                </button>
+                </button>)}
               </li>
             ))}
           </ul>
