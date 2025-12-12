@@ -56,7 +56,7 @@ const NewSubtasks = ({ subtasks, setSubtasks, assignees, currentUser }) => {
                   {/* Current user as first option if exists */}
                   {currentUser && (
                     <option value={currentUser.id} className="font-semibold">
-                      {currentUser.name} (You)
+                      {currentUser.display_name}
                     </option>
                   )}
                   
