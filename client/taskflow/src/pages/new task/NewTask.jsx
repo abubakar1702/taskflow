@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useApi } from "../../components/hooks/useApi";
 import NewSubtasks from "./NewSubtasks";
-import Avatar from "../../components/common/Avatar";
-import { FiSearch, FiX, FiUsers, FiCalendar, FiClock, FiFlag, FiList, FiUserPlus } from "react-icons/fi";
+import { FiCalendar, FiClock, FiFlag, FiList } from "react-icons/fi";
 import { MdTaskAlt } from "react-icons/md";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -13,7 +12,7 @@ const getPlainUser = (result) => (result ? result.user || result : {});
 
 const NewTask = () => {
   const { currentUser } = useTaskPermissions();
-  
+
   const [taskFormData, setTaskFormData] = useState({
     title: "",
     description: "",
@@ -54,25 +53,22 @@ const NewTask = () => {
     if (taskFormData.project_id) {
       const project = projects.find((p) => p.id === taskFormData.project_id);
       if (project && project.members) {
-        // Filter out current user from project members
         const members = project.members
           .map((member) => getPlainUser(member))
           .filter((member) => member.id !== currentUser?.id);
-        
+
         setSelectedProjectMembers(members);
         setAssigneeSearchResults(members);
       }
     } else {
       setSelectedProjectMembers([]);
       setAssigneeSearchResults([]);
-      setTaskFormData((prev) => ({ ...prev, assignees_ids: [] }));
       setSelectedAssigneeObjects([]);
       setSubtasks([{ text: "", assignee_id: null }]);
       setShowAssigneeDropdown(false);
     }
   }, [taskFormData.project_id, projects, currentUser]);
 
-  // Handle input change
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let finalValue = value;
@@ -80,7 +76,6 @@ const NewTask = () => {
     setTaskFormData((prev) => ({ ...prev, [name]: finalValue }));
   };
 
-  // Handle project select
   const handleProjectChange = (e) => {
     const projectId = e.target.value;
     setTaskFormData((prev) => ({
@@ -93,8 +88,7 @@ const NewTask = () => {
     setSubtasks([{ text: "", assignee_id: null }]);
   };
 
-  // Task Assignee Search
-  const handleTaskAssigneeSearch = async (query) => {
+  const handleTaskAssigneeSearch = useCallback(async (query) => {
     const isProjectSelected = !!taskFormData.project_id;
     const projectMembers = selectedProjectMembers;
 
@@ -114,8 +108,7 @@ const NewTask = () => {
         );
       } else if (query.trim()) {
         const searchData = await makeRequest(`/user/search/?q=${encodeURIComponent(query)}`, "GET");
-        // Filter out current user from search results
-        results = Array.isArray(searchData) 
+        results = Array.isArray(searchData)
           ? searchData.map(getPlainUser).filter((user) => user.id !== currentUser?.id)
           : [];
       }
@@ -124,15 +117,14 @@ const NewTask = () => {
     } catch {
       setAssigneeSearchResults([]);
     }
-  };
+  }, [taskFormData.project_id, selectedProjectMembers, makeRequest, currentUser]);
 
-  // Debounce search
   useEffect(() => {
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     const timeout = setTimeout(() => handleTaskAssigneeSearch(assigneeSearchQuery), 300);
     searchTimeoutRef.current = timeout;
     return () => clearTimeout(searchTimeoutRef.current);
-  }, [assigneeSearchQuery]);
+  }, [assigneeSearchQuery, handleTaskAssigneeSearch]);
 
   const handleSelectAssignee = (user) => {
     const isAlreadySelected = taskFormData.assignees_ids.includes(user.id);
@@ -377,9 +369,9 @@ const NewTask = () => {
           />
 
           {/* Subtasks */}
-          <NewSubtasks 
-            subtasks={subtasks} 
-            setSubtasks={setSubtasks} 
+          <NewSubtasks
+            subtasks={subtasks}
+            setSubtasks={setSubtasks}
             assignees={selectedAssigneeObjects}
             currentUser={currentUser}
           />
