@@ -1,8 +1,9 @@
 from .models import User
 from .serializers import UserSerializer, LoginSerializer
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+
 
 
 class RegisterAPIView(generics.CreateAPIView):
@@ -37,3 +38,10 @@ class SearchUsersAPIView(generics.ListAPIView):
         
         queryset = queryset.filter(email__icontains=search_query)
         return queryset
+
+class CurrentUserAPIView(generics.RetrieveAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
