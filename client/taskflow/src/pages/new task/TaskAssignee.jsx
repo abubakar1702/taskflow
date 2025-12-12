@@ -14,7 +14,7 @@ const TaskAssignee = ({
   taskAssigneeRef
 }) => {
   return (
-    <section className="bg-gradient-to-r from-gray-50 to-white p-6 rounded-xl border border-gray-100">
+    <section className="bg-white shadow p-6 rounded-xl border border-gray-200">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <FiUserPlus className="text-blue-600" size={20} />

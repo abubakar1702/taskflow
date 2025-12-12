@@ -236,8 +236,8 @@ const NewTask = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 md:p-6">
-      <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+    <div className="max-w-6xl mx-auto">
+      <div className="rounded-xl">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
             <MdTaskAlt className="text-white" size={28} />
@@ -250,7 +250,7 @@ const NewTask = () => {
 
         <div className="space-y-8">
           {/* Task Details */}
-          <section className="bg-gradient-to-r from-gray-50 to-white p-6 rounded-xl border border-gray-100">
+          <section className="bg-white shadow p-6 rounded-xl border border-gray-200">
             <div className="flex items-center gap-2 mb-6">
               <FiList className="text-blue-600" size={20} />
               <h2 className="text-xl font-semibold text-gray-800">Task Details</h2>

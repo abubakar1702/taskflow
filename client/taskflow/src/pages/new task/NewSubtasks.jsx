@@ -20,7 +20,7 @@ const NewSubtasks = ({ subtasks, setSubtasks, assignees }) => {
   };
 
   return (
-    <section className="bg-gradient-to-r from-gray-50 to-white p-6 rounded-xl border border-gray-100">
+    <section className="bg-white shadow p-6 rounded-xl border border-gray-200">
       <div className="flex items-center gap-2 mb-6">
         <div className="p-2 bg-indigo-100 rounded-lg">
           <FiPlus className="text-indigo-600" size={18} />
@@ -33,7 +33,7 @@ const NewSubtasks = ({ subtasks, setSubtasks, assignees }) => {
 
       <div className="space-y-4">
         {subtasks.map((subtask, index) => (
-          <div key={index} className="flex flex-col md:flex-row gap-3 p-2 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-all duration-200">
+          <div key={index} className="flex flex-col md:flex-row gap-3 bg-white rounded-lg hover:border-gray-300 transition-all duration-200">
             <div className="flex-1">
               <input
                 type="text"
