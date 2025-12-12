@@ -7,7 +7,7 @@ import { ClipLoader } from "react-spinners";
 import { toast } from "react-toastify";
 import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
 
-const AssetSection = ({task, taskId, projectId, total_assets }) => {
+const AssetSection = ({ task, taskId, projectId, total_assets }) => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -81,7 +81,7 @@ const AssetSection = ({task, taskId, projectId, total_assets }) => {
       await makeRequest(`/api/assets/${deletingAsset.id}/`, "DELETE");
       setShowDeleteModal(false);
       setDeletingAsset(null);
-      refetch();  
+      refetch();
       toast.success("Asset deleted successfully");
     } catch (err) {
       toast.error("Failed to delete asset: " + (err.message || "Unknown error"));
@@ -93,7 +93,20 @@ const AssetSection = ({task, taskId, projectId, total_assets }) => {
   const getFileExtension = (filename) => filename.split('.').pop().toLowerCase();
   const isImage = (filename) => ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(getFileExtension(filename));
 
-  if (loading) return <p>Loading assets...</p>;
+  if (loading) {
+    return (
+      <div className="bg-white rounded-lg p-6 shadow border border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Assets ({total_assets || 0})</h2>
+        </div>
+        <div className="flex flex-col items-center justify-center py-12">
+          <ClipLoader color="#3B82F6" size={40} />
+          <p className="mt-4 text-gray-500">Loading assets...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (error) return <p className="text-red-600">Error: {error.message || "Failed to load assets"}</p>;
 
   return (

@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { IoCloudUploadOutline, IoCloseOutline } from "react-icons/io5";
+import { ClipLoader } from "react-spinners";
 
 const UploadModal = ({ 
   showUploadModal, 
@@ -78,7 +79,7 @@ const UploadModal = ({
               disabled={!selectedFile || uploading}
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
-              {uploading ? "Uploading..." : "Upload"}
+              {uploading ? <span className="flex items-center justify-center gap-2"><ClipLoader color="#fff" size={20} /> Uploading...</span> : "Upload"}
             </button>
           </div>
         </div>
