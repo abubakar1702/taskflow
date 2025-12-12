@@ -11,7 +11,8 @@ const TaskAssignee = ({
   setAssigneeSearchQuery,
   handleSelectAssignee,
   handleRemoveAssignee,
-  taskAssigneeRef
+  taskAssigneeRef,
+  setShowAssigneeDropdown
 }) => {
   return (
     <section className="bg-white shadow p-6 rounded-xl border border-gray-200">
@@ -40,6 +41,7 @@ const TaskAssignee = ({
             onChange={(e) => setAssigneeSearchQuery(e.target.value)}
             onFocus={() => {
               handleTaskAssigneeSearch(assigneeSearchQuery);
+              setShowAssigneeDropdown(true);
             }}
             className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
             placeholder={

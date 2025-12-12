@@ -86,6 +86,7 @@ const NewTask = () => {
     setSelectedAssigneeObjects([]);
     setAssigneeSearchQuery("");
     setSubtasks([{ text: "", assignee_id: null }]);
+    setShowAssigneeDropdown(false);
   };
 
   const handleTaskAssigneeSearch = useCallback(async (query) => {
@@ -94,7 +95,6 @@ const NewTask = () => {
 
     if (!query.trim() && isProjectSelected) {
       setAssigneeSearchResults(projectMembers);
-      setShowAssigneeDropdown(true);
       return;
     }
 
@@ -113,7 +113,6 @@ const NewTask = () => {
           : [];
       }
       setAssigneeSearchResults(results);
-      setShowAssigneeDropdown(true);
     } catch {
       setAssigneeSearchResults([]);
     }
@@ -366,6 +365,7 @@ const NewTask = () => {
             handleSelectAssignee={handleSelectAssignee}
             handleRemoveAssignee={handleRemoveAssignee}
             taskAssigneeRef={taskAssigneeRef}
+            setShowAssigneeDropdown={setShowAssigneeDropdown}
           />
 
           {/* Subtasks */}
