@@ -34,10 +34,18 @@ const EditSubtaskModal = ({ taskId, subtask, creator, assignees = [], onClose, o
 
         setIsSubmitting(true);
         try {
-            await makeRequest(`/api/tasks/${taskId}/subtasks/${subtask.id}/`, "PATCH", {
+            const assigneeChanged = String(assigneeId ?? "") !== String(subtask.assignee?.id ?? "");
+
+            const payload = {
                 text: text.trim(),
                 assignee_id: assigneeId || null,
-            });
+            };
+
+            if (assigneeChanged) {
+                payload.is_completed = false;
+            }
+
+            await makeRequest(`/api/tasks/${taskId}/subtasks/${subtask.id}/`, "PATCH", payload);
             toast.success("Subtask updated successfully");
             onUpdated?.();
             handleClose();
