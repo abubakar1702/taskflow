@@ -11,9 +11,9 @@ import TaskAssignee from "./TaskAssignee";
 
 const getPlainUser = (result) => (result ? result.user || result : {});
 
-const { currentUser } = useTaskPermissions();
-
 const NewTask = () => {
+  const { currentUser } = useTaskPermissions();
+  
   const [taskFormData, setTaskFormData] = useState({
     title: "",
     description: "",
@@ -54,7 +54,11 @@ const NewTask = () => {
     if (taskFormData.project_id) {
       const project = projects.find((p) => p.id === taskFormData.project_id);
       if (project && project.members) {
-        const members = project.members.map((member) => getPlainUser(member));
+        // Filter out current user from project members
+        const members = project.members
+          .map((member) => getPlainUser(member))
+          .filter((member) => member.id !== currentUser?.id);
+        
         setSelectedProjectMembers(members);
         setAssigneeSearchResults(members);
       }
@@ -66,7 +70,7 @@ const NewTask = () => {
       setSubtasks([{ text: "", assignee_id: null }]);
       setShowAssigneeDropdown(false);
     }
-  }, [taskFormData.project_id, projects]);
+  }, [taskFormData.project_id, projects, currentUser]);
 
   // Handle input change
   const handleInputChange = (e) => {
@@ -110,7 +114,10 @@ const NewTask = () => {
         );
       } else if (query.trim()) {
         const searchData = await makeRequest(`/user/search/?q=${encodeURIComponent(query)}`, "GET");
-        results = Array.isArray(searchData) ? searchData.map(getPlainUser) : [];
+        // Filter out current user from search results
+        results = Array.isArray(searchData) 
+          ? searchData.map(getPlainUser).filter((user) => user.id !== currentUser?.id)
+          : [];
       }
       setAssigneeSearchResults(results);
       setShowAssigneeDropdown(true);
@@ -370,7 +377,12 @@ const NewTask = () => {
           />
 
           {/* Subtasks */}
-          <NewSubtasks subtasks={subtasks} setSubtasks={setSubtasks} assignees={selectedAssigneeObjects} />
+          <NewSubtasks 
+            subtasks={subtasks} 
+            setSubtasks={setSubtasks} 
+            assignees={selectedAssigneeObjects}
+            currentUser={currentUser}
+          />
 
           {/* Submit Button */}
           <div className="pt-4">
