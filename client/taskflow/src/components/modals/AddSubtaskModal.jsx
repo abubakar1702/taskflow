@@ -65,9 +65,14 @@ const AddSubtaskModal = ({ taskId, creator, assignees = [], onClose, onUpdated }
             >
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     <div className="space-y-2">
-                        <label className="flex items-center text-sm font-semibold text-gray-700">
-                            <MdOutlineTask className="w-4 h-4 mr-2 text-blue-600" />
-                            Subtask Description
+                        <label className="flex items-center justify-between text-sm font-semibold text-gray-700">
+                            <span className="flex items-center">
+                                <MdOutlineTask className="w-4 h-4 mr-2 text-blue-600" />
+                                Subtask Description
+                            </span>
+                            <span className={`text-xs font-medium ${text.length > 200 ? 'text-red-600' : 'text-gray-500'}`}>
+                                {text.length}/200
+                            </span>
                         </label>
                         <textarea
                             value={text}
@@ -155,7 +160,7 @@ const AddSubtaskModal = ({ taskId, creator, assignees = [], onClose, onUpdated }
                         </button>
                         <button
                             type="submit"
-                            disabled={isSubmitting || !text.trim()}
+                            disabled={isSubmitting || !text.trim() || text.length > 200}
                             className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transform hover:scale-105 flex items-center space-x-2"
                         >
                             {isSubmitting ? (
