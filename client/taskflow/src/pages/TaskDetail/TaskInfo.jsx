@@ -19,6 +19,7 @@ const TaskInfo = ({ task, onUpdate }) => {
     const navigate = useNavigate();
 
     const { makeRequest: leaveTask } = useApi();
+    const { makeRequest: deleteTask, loading: deleteLoading } = useApi();
 
     const handleLeaveTask = async () => {
         try {
@@ -28,6 +29,18 @@ const TaskInfo = ({ task, onUpdate }) => {
         } catch (err) {
             console.error("Failed to leave task:", err);
             toast.error("Failed to leave task. Please try again.");
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            await deleteTask(`/api/tasks/${task.id}/`, "DELETE");
+            toast.success("Task deleted successfully");
+            setShowDeleteModal(false);
+            navigate("/");
+        } catch (err) {
+            console.error("Failed to delete task:", err);
+            toast.error("Failed to delete task. Please try again.");
         }
     };
 
@@ -51,11 +64,6 @@ const TaskInfo = ({ task, onUpdate }) => {
         } catch {
             return "N/A";
         }
-    };
-
-    const handleDelete = () => {
-        setShowDeleteModal(false);
-        onUpdate && onUpdate();
     };
 
     return (
@@ -132,7 +140,7 @@ const TaskInfo = ({ task, onUpdate }) => {
                     onConfirm={handleDelete}
                     title="Delete Task"
                     message="Are you sure you want to delete this task? This action cannot be undone."
-                    isLoading={false}
+                    isLoading={deleteLoading}
                 />
             )}
         </div>
