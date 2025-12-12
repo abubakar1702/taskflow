@@ -1,26 +1,14 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { FiLogOut, FiSettings } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import Avatar, { useAvatar } from "../common/Avatar";
+import { useUser } from "../../contexts/UserContext";
 
 const UserMenu = () => {
-    const [user, setUser] = useState(null);
+    const { currentUser, clearUser } = useUser();
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef(null);
     const navigate = useNavigate();
-
-    useEffect(() => {
-        const fromLocal = localStorage.getItem("user");
-        const fromSession = sessionStorage.getItem("user");
-
-        const parsed = fromLocal
-            ? JSON.parse(fromLocal)
-            : fromSession
-                ? JSON.parse(fromSession)
-                : null;
-
-        setUser(parsed);
-    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -34,19 +22,19 @@ const UserMenu = () => {
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem("user");
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-        sessionStorage.removeItem("user");
         sessionStorage.removeItem("accessToken");
         sessionStorage.removeItem("refreshToken");
+
+        clearUser();
 
         navigate("/login");
     };
 
     const { avatarUrl, initials } = useAvatar(
-        user?.name || user?.email || "User",
-        user?.avatar
+        currentUser?.display_name || currentUser?.email || "User",
+        currentUser?.avatar
     );
 
     return (
@@ -57,8 +45,8 @@ const UserMenu = () => {
                 aria-label="User menu"
             >
                 <Avatar
-                    name={user?.name || user?.email || "User"}
-                    url={user?.avatar}
+                    name={currentUser?.display_name || currentUser?.email || "User"}
+                    url={currentUser?.avatar}
                     size={8}
                     className="shadow-md"
                 />
@@ -71,17 +59,17 @@ const UserMenu = () => {
                     <div className="px-4 py-3 border-b border-gray-100">
                         <div className="flex items-center gap-3">
                             <Avatar
-                                name={user?.name || user?.email || "User"}
-                                url={user?.avatar}
+                                name={currentUser?.display_name || currentUser?.email || "User"}
+                                url={currentUser?.avatar}
                                 size={10}
                                 className="shadow-md"
                             />
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-semibold text-gray-900 truncate">
-                                    {user?.name || "User"}
+                                    {currentUser?.display_name || "User"}
                                 </p>
                                 <p className="text-xs text-gray-500 truncate">
-                                    {user?.email || ""}
+                                    {currentUser?.email || ""}
                                 </p>
                             </div>
                         </div>
