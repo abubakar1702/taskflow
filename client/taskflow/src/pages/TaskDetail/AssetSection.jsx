@@ -19,7 +19,6 @@ const AssetSection = ({task, taskId, projectId, total_assets }) => {
 
   const { canUpload, currentUser } = useTaskPermissions(task);
 
-  // task creator and the uploader can delete the asset
   const canDelete = task?.creator?.id === currentUser.id || task?.uploaded_by?.id === currentUser.id;
 
   const endpoint = taskId
@@ -99,7 +98,7 @@ const AssetSection = ({task, taskId, projectId, total_assets }) => {
 
   return (
     <>
-      <div className="bg-white rounded-lg p-6 shadow">
+      <div className="bg-white rounded-lg p-6 shadow border border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Assets ({total_assets})</h2>
           {canUpload && (
