@@ -30,9 +30,11 @@ const ProjectDetail = () => {
     const [activeTab, setActiveTab] = useState("overview");
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    const isProjectAdmin = project?.members?.some(
+    const isProjectAdmin = currentUser && project?.members?.some(
         (member) => member.user.id === currentUser.id && member.role === "Admin"
     );
+
+    const isProjectCreator = currentUser && project?.creator?.id === currentUser.id;
 
     const handleProjectUpdated = () => {
         refetch();
@@ -77,6 +79,7 @@ const ProjectDetail = () => {
                 assets={assets}
                 onEditClick={() => setIsEditModalOpen(true)}
                 isProjectAdmin={isProjectAdmin}
+                isProjectCreator={isProjectCreator}
             />
 
             <EditProjectModal
@@ -94,6 +97,7 @@ const ProjectDetail = () => {
                         project={project}
                         onProjectUpdated={handleProjectUpdated}
                         isProjectAdmin={isProjectAdmin}
+                        isProjectCreator={isProjectCreator}
                     />
                 )}
                 {activeTab === "tasks" && (

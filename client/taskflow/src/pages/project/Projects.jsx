@@ -1,10 +1,17 @@
+import { useState } from "react";
 import { useApi } from "../../components/hooks/useApi";
 import ProjectCard from "../../components/project/ProjectCard";
 import { FaPlus, FaExclamationTriangle } from "react-icons/fa";
 import LoadingScreen from "../../components/common/LoadingScreen";
+import NewProjectModal from "../../components/modals/NewProjectModal";
 
 const Projects = () => {
     const { data: projects, loading, error, refetch } = useApi("/api/projects/");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleProjectCreated = () => {
+        refetch();
+    };
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -21,7 +28,10 @@ const Projects = () => {
                         </p>
                     </div>
 
-                    <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                    >
                         <FaPlus />
                         <span>New Project</span>
                     </button>
@@ -64,7 +74,10 @@ const Projects = () => {
                                 <p className="text-gray-600 mb-6">
                                     Get started by creating your first project
                                 </p>
-                                <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm mx-auto">
+                                <button
+                                    onClick={() => setIsModalOpen(true)}
+                                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm mx-auto"
+                                >
                                     <FaPlus />
                                     <span>Create Project</span>
                                 </button>
@@ -73,6 +86,12 @@ const Projects = () => {
                     )}
                 </div>
             </div>
+
+            <NewProjectModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onProjectCreated={handleProjectCreated}
+            />
         </div>
     );
 };

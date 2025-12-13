@@ -98,6 +98,20 @@ const NewTask = () => {
     const isProjectSelected = !!taskFormData.project_id;
     const projectMembers = selectedProjectMembers;
 
+    let searchTerm = query;
+    if (searchTerm.startsWith("@")) {
+      searchTerm = searchTerm.slice(1);
+      if (!searchTerm.trim()) {
+        setAssigneeSearchResults([]);
+        return;
+      }
+    }
+
+    if (!searchTerm.trim() && isProjectSelected && !query.startsWith("@")) {
+      setAssigneeSearchResults(projectMembers);
+      return;
+    }
+
     if (!query.trim() && isProjectSelected) {
       setAssigneeSearchResults(projectMembers);
       return;
@@ -108,11 +122,11 @@ const NewTask = () => {
       if (isProjectSelected) {
         results = projectMembers.filter(
           (member) =>
-            member.display_name?.toLowerCase().includes(query.toLowerCase()) ||
-            member.email?.toLowerCase().includes(query.toLowerCase())
+            member.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            member.email?.toLowerCase().includes(searchTerm.toLowerCase())
         );
-      } else if (query.trim()) {
-        const searchData = await makeRequest(`/user/search/?q=${encodeURIComponent(query)}`, "GET");
+      } else if (searchTerm.trim()) {
+        const searchData = await makeRequest(`/user/search/?q=${encodeURIComponent(searchTerm)}`, "GET");
         results = Array.isArray(searchData)
           ? searchData.map(getPlainUser).filter((user) => user.id !== currentUser?.id)
           : [];
@@ -267,10 +281,10 @@ const NewTask = () => {
                   </label>
                   <span
                     className={`text-xs font-medium ${taskFormData.title.length >= 200
-                        ? 'text-red-600'
-                        : taskFormData.title.length >= 150
-                          ? 'text-yellow-600'
-                          : 'text-gray-500'
+                      ? 'text-red-600'
+                      : taskFormData.title.length >= 150
+                        ? 'text-yellow-600'
+                        : 'text-gray-500'
                       }`}
                   >
                     {taskFormData.title.length}/200
