@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .serializers import ProjectSerializer, ProjectMemberSerializer, TaskSerializer, SubtaskSerializer, SearchForAssigneeSerializer, AssetSerializer
+from .serializers import ProjectSerializer, ProjectMemberSerializer, TaskSerializer, SubtaskSerializer, SearchForAssigneeSerializer, AssetSerializer, ProjectMemberBulkSerializer
 from django.shortcuts import get_object_or_404  
 from .models import Project, ProjectMember, Task, Subtask, Asset
 from rest_framework import generics, serializers
@@ -13,6 +13,7 @@ from rest_framework import status
 from user.models import User
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import MultiPartParser, FormParser
+from django.db import transaction
 
 class TaskAPIView(generics.ListCreateAPIView):
     queryset = Task.objects.all()
@@ -20,7 +21,7 @@ class TaskAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     filterset_class = TaskFilter
     
-    filter_backends = [DjangoFilterBackend, OrderingFilter] 
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
 
     ordering_fields = ['created_at', 'due_date']
 
@@ -306,4 +307,77 @@ class ProjectsAPIView(generics.ListAPIView):
             .distinct()
             .select_related('creator')
             .prefetch_related('members')
+        )
+        
+class ProjectDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
+
+class ProjectMembersAPIView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProjectMemberBulkSerializer
+
+    def get_queryset(self):
+        project_id = self.kwargs['project_id']
+        return ProjectMember.objects.filter(
+            project_id=project_id
+        ).select_related('user', 'project')
+
+    def get_serializer(self, *args, **kwargs):
+        kwargs['many'] = True
+        kwargs['context'] = self.get_serializer_context()
+        return super().get_serializer(*args, **kwargs)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        project = get_object_or_404(Project, id=self.kwargs['project_id'])
+        context['project'] = project
+        return context
+
+#if a member is removed from a project, all tasks assigned to him in that project will have him removed from assignees list, all his subtasks will be unassigned and all assets he uploaded to that project will be deleted. If he checked a subtask as completed, it will be set to false.
+class ProjectMemberActionAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ProjectMember.objects.select_related('user', 'project')
+    serializer_class = ProjectMemberSerializer
+    permission_classes = [IsAuthenticated]
+
+    lookup_field = "id"
+    lookup_url_kwarg = "member_id"
+
+    @transaction.atomic
+    def destroy(self, request, *args, **kwargs):
+        project_member = self.get_object()
+        user = project_member.user
+        project = project_member.project
+
+        # Remove user from all task assignees in this project
+        Task.objects.filter(
+            project=project,
+            assignees=user
+        ).update()  # forces queryset eval before m2m ops
+
+        for task in Task.objects.filter(project=project, assignees=user):
+            task.assignees.remove(user)
+
+        # Unassign ALL subtasks in this project assigned to the user
+        Subtask.objects.filter(
+            task__project=project,
+            assignee=user
+        ).update(
+            assignee=None,
+            is_completed=False
+        )
+
+        # Delete ALL assets uploaded by the user in this project
+        Asset.objects.filter(
+            project=project,
+            uploaded_by=user
+        ).delete()
+
+        # Finally remove project membership
+        project_member.delete()
+
+        return Response(
+            {"detail": "Project member removed successfully."},
+            status=status.HTTP_204_NO_CONTENT
         )

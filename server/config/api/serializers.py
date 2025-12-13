@@ -10,6 +10,27 @@ class ProjectMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectMember
         fields = ['id', 'project', 'user', 'role', 'created_at', 'updated_at']
+        
+class ProjectMemberBulkSerializer(serializers.ModelSerializer):
+    member_id = serializers.UUIDField(write_only=True)
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = ProjectMember
+        fields = ['id', 'member_id', 'user', 'role', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        project = self.context['project']
+        member_id = validated_data.pop('member_id')
+
+        user = User.objects.get(id=member_id)
+
+        return ProjectMember.objects.create(
+            project=project,
+            user=user,
+            **validated_data
+        )
+
     
 class SearchForAssigneeSerializer(serializers.Serializer):
     id = serializers.UUIDField(read_only=True)
