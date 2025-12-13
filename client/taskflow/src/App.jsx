@@ -8,6 +8,8 @@ import PublicLayout from './components/layouts/PublicLayout';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import NewTask from './pages/new task/NewTask';
+import Projects from './pages/project/Projects';
+import ProjectDetail from './pages/project/ProjectDetail';
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
           <Route path="/" element={<Tasks />} />
           <Route path="/tasks/:id" element={<TaskDetail />} />
           <Route path="/new-task" element={<NewTask />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/projects/:id" element={<ProjectDetail />} />
         </Route>
       </Routes>
 
