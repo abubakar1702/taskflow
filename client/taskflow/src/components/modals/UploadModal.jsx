@@ -1,17 +1,18 @@
 import { useRef } from "react";
 import { IoCloudUploadOutline, IoCloseOutline } from "react-icons/io5";
 import { ClipLoader } from "react-spinners";
+import { createPortal } from "react-dom";
 
-const UploadModal = ({ 
-  showUploadModal, 
-  setShowUploadModal, 
-  handleUpload, 
-  handleFileSelect, 
-  selectedFile, 
-  setSelectedFile, 
-  uploadError, 
+const UploadModal = ({
+  showUploadModal,
+  setShowUploadModal,
+  handleUpload,
+  handleFileSelect,
+  selectedFile,
+  setSelectedFile,
+  uploadError,
   setUploadError,
-  uploading 
+  uploading
 }) => {
   const fileInputRef = useRef(null);
 
@@ -23,7 +24,7 @@ const UploadModal = ({
 
   if (!showUploadModal) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black/50 transition-opacity duration-200 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
         <div className="flex items-center justify-between mb-4">
@@ -47,7 +48,7 @@ const UploadModal = ({
               {selectedFile ? selectedFile.name : "Click to select a file"}
             </p>
             <p className="text-xs text-gray-400 mt-1">
-              {selectedFile 
+              {selectedFile
                 ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB`
                 : "All file types supported"
               }
@@ -84,7 +85,8 @@ const UploadModal = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

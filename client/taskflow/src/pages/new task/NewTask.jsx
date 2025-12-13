@@ -73,7 +73,12 @@ const NewTask = () => {
     const { name, value } = e.target;
     let finalValue = value;
     if ((name === "due_date" || name === "due_time") && value === "") finalValue = null;
-    setTaskFormData((prev) => ({ ...prev, [name]: finalValue }));
+
+    if (name === "due_date" && value && !taskFormData.due_time) {
+      setTaskFormData((prev) => ({ ...prev, [name]: finalValue, due_time: "12:00" }));
+    } else {
+      setTaskFormData((prev) => ({ ...prev, [name]: finalValue }));
+    }
   };
 
   const handleProjectChange = (e) => {
@@ -234,7 +239,7 @@ const NewTask = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto py-8">
       <div className="rounded-xl">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
@@ -256,14 +261,27 @@ const NewTask = () => {
 
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Title <span className="text-red-500">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Title <span className="text-red-500">*</span>
+                  </label>
+                  <span
+                    className={`text-xs font-medium ${taskFormData.title.length >= 200
+                        ? 'text-red-600'
+                        : taskFormData.title.length >= 150
+                          ? 'text-yellow-600'
+                          : 'text-gray-500'
+                      }`}
+                  >
+                    {taskFormData.title.length}/200
+                  </span>
+                </div>
                 <input
                   type="text"
                   name="title"
                   value={taskFormData.title}
                   onChange={handleInputChange}
+                  maxLength={200}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                   placeholder="Enter task title"
                   required
@@ -381,7 +399,7 @@ const NewTask = () => {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={isSubmitting || !taskFormData.title.trim()}
+              disabled={isSubmitting || !taskFormData.title.trim() || taskFormData.title.length > 200}
               className="w-full py-4 px-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all duration-200 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl"
             >
               {isSubmitting ? (

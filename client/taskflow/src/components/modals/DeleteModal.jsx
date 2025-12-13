@@ -1,5 +1,6 @@
 import { ClipLoader } from "react-spinners";
 import { LuTrash } from "react-icons/lu";
+import { createPortal } from "react-dom";
 
 const DeleteModal = ({
     isOpen,
@@ -11,10 +12,10 @@ const DeleteModal = ({
 }) => {
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
             <div className="bg-white w-full max-w-md rounded-lg p-6 shadow-lg">
-                
+
                 {/* Title */}
                 <h2 className="text-lg font-semibold mb-2">{title}</h2>
 
@@ -39,8 +40,9 @@ const DeleteModal = ({
                         {isLoading ? <span className="flex items-center"><ClipLoader size={20} color="#ffffff" className="mr-2" />Deleting...</span> : <span className="flex items-center"><LuTrash className="mr-2" /> Delete</span>}
                     </button>
                 </div>
-            </div>  
-        </div>
+            </div>
+        </div>,
+        document.body
     );
 };
 
