@@ -293,7 +293,7 @@ class AssetActionAPIView(generics.RetrieveDestroyAPIView):
     lookup_field = 'id'
     
 
-class ProjectsAPIView(generics.ListAPIView):
+class ProjectsAPIView(generics.ListCreateAPIView):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
@@ -309,10 +309,24 @@ class ProjectsAPIView(generics.ListAPIView):
             .prefetch_related('members')
         )
         
+    # the creator is automatically added as a member with Admin role
+    @transaction.atomic
+    def perform_create(self, serializer):
+        project = serializer.save(creator=self.request.user)
+        ProjectMember.objects.create(
+            project=project,
+            user=self.request.user,
+            role=ProjectMember.Role.ADMIN
+        )
+        
 class ProjectDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
 
 class ProjectMembersAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -335,7 +349,7 @@ class ProjectMembersAPIView(generics.ListCreateAPIView):
         context['project'] = project
         return context
 
-#if a member is removed from a project, all tasks assigned to him in that project will have him removed from assignees list, all his subtasks will be unassigned and all assets he uploaded to that project will be deleted. If he checked a subtask as completed, it will be set to false.
+#if a member is removed from a project,all task will be deleted if the task belong to that project, all tasks assigned to him in that project will have him removed from assignees list, all his subtasks will be unassigned and all assets he uploaded to that project will be deleted. If he checked a subtask as completed, it will be set to false.
 class ProjectMemberActionAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProjectMember.objects.select_related('user', 'project')
     serializer_class = ProjectMemberSerializer
@@ -350,16 +364,18 @@ class ProjectMemberActionAPIView(generics.RetrieveUpdateDestroyAPIView):
         user = project_member.user
         project = project_member.project
 
-        # Remove user from all task assignees in this project
+        # 1. Delete tasks CREATED by this member in this project
         Task.objects.filter(
             project=project,
-            assignees=user
-        ).update()  # forces queryset eval before m2m ops
+            creator=user
+        ).delete()
 
+
+        # 2. Remove user from assignees of remaining tasks
         for task in Task.objects.filter(project=project, assignees=user):
             task.assignees.remove(user)
 
-        # Unassign ALL subtasks in this project assigned to the user
+        # 3. Unassign ALL subtasks in this project
         Subtask.objects.filter(
             task__project=project,
             assignee=user
@@ -368,16 +384,18 @@ class ProjectMemberActionAPIView(generics.RetrieveUpdateDestroyAPIView):
             is_completed=False
         )
 
-        # Delete ALL assets uploaded by the user in this project
+        # 4. Delete assets uploaded by the user (project + task assets)
         Asset.objects.filter(
-            project=project,
             uploaded_by=user
+        ).filter(
+            Q(project=project) | Q(task__project=project)
         ).delete()
 
-        # Finally remove project membership
+        # 5. Remove membership
         project_member.delete()
 
         return Response(
             {"detail": "Project member removed successfully."},
             status=status.HTTP_204_NO_CONTENT
         )
+
