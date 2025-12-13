@@ -80,11 +80,24 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
                     )}
                     <form id="edit-task-form" onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                            <div className="flex items-center justify-between mb-1">
+                                <label className="block text-sm font-medium text-gray-700">Title</label>
+                                <span
+                                    className={`text-xs font-medium ${title.length >= 200
+                                        ? 'text-red-600'
+                                        : title.length >= 150
+                                            ? 'text-yellow-600'
+                                            : 'text-gray-500'
+                                        }`}
+                                >
+                                    {title.length}/200
+                                </span>
+                            </div>
                             <input
                                 type="text"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
+                                maxLength={200}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                                 placeholder="Task title"
                                 required
@@ -163,11 +176,12 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
                         Cancel
                     </button>
 
+
                     <button
                         type="submit"
                         form="edit-task-form"
-                        disabled={loading || !hasChanges}
-                        className={`px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm flex items-center justify-center min-w-[100px] ${!hasChanges ? "opacity-50 cursor-not-allowed" : ""}`}
+                        disabled={loading || !hasChanges || title.length > 200}
+                        className={`px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm flex items-center justify-center min-w-[100px] ${!hasChanges || title.length > 200 ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                         {loading ? <ClipLoader color="#fff" size={20} /> : <span className="flex items-center gap-2"><BsSave2 className="w-5 h-5 mr-2" /> Save Changes</span>}
                     </button>

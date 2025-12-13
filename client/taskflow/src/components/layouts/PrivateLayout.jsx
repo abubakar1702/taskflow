@@ -49,8 +49,7 @@ const PrivateLayout = () => {
                 )}
                 <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} isMobile={isMobile} />
                 <div
-                    className={`flex-1 transition-all duration-300 ${isMobile ? "ml-20" : (collapsed ? "ml-20" : "ml-64")
-                        } p-8`}
+                    className={`flex-1 transition-all duration-300 ${isMobile ? "ml-20" : (collapsed ? "ml-20" : "ml-64")}`}
                 >
                     <Outlet />
                 </div>
