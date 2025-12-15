@@ -14,6 +14,7 @@ from user.models import User
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.db import transaction
+from user.serializers import UserSerializer
 
 class TaskAPIView(generics.ListCreateAPIView):
     queryset = Task.objects.all()
@@ -399,3 +400,27 @@ class ProjectMemberActionAPIView(generics.RetrieveUpdateDestroyAPIView):
             status=status.HTTP_204_NO_CONTENT
         )
 
+
+#all the roject team members and all the the task assignees that the user is part of
+class TeamAPIView(generics.ListAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        project_members = ProjectMember.objects.filter(
+            Q(project__members=user) |
+            Q(project__creator=user)
+        ).exclude(user=user)
+
+        task_assignees = User.objects.filter(
+            assigned_tasks__in=user.assigned_tasks.all()
+        ).exclude(id=user.id)
+
+        return User.objects.filter(
+            Q(id__in=project_members.values_list('user_id', flat=True)) |
+            Q(id__in=task_assignees.values_list('id', flat=True))
+        ).distinct()
+
+    
