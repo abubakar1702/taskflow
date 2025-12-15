@@ -10,7 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import NewTask from './pages/new task/NewTask';
 import Projects from './pages/project/Projects';
 import ProjectDetail from './pages/project/ProjectDetail';
-
+import Team from './pages/Team';
 function App() {
   return (
     <>
@@ -22,6 +22,7 @@ function App() {
 
         <Route element={<PrivateLayout />}>
           <Route path="/" element={<Tasks />} />
+          <Route path="/team" element={<Team />} />
           <Route path="/tasks/:id" element={<TaskDetail />} />
           <Route path="/new-task" element={<NewTask />} />
           <Route path="/projects" element={<Projects />} />
