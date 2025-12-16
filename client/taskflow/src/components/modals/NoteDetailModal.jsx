@@ -88,7 +88,7 @@ const NoteDetailModal = ({ isOpen, onClose, noteId, onUpdate }) => {
 
     const overlay = (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[90vh] overflow-hidden flex flex-col relative animate-slideUp">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[70vh] overflow-hidden flex flex-col relative animate-slideUp">
                 {/* header */}
                 <div className="flex justify-between items-center p-4 border-b border-gray-100 shrink-0">
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
