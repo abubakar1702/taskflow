@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../hooks/useApi';
-import { BsPin, BsPinFill, BsTrash, BsSave, BsX, BsPencil } from 'react-icons/bs';
+import { BsPin, BsPinFill, BsTrash, BsSave, BsX, BsPencil, BsArrowLeftCircle } from 'react-icons/bs';
 import { toast } from 'react-toastify';
 import DeleteModal from './DeleteModal';
 import { createPortal } from 'react-dom';
@@ -25,6 +25,15 @@ const NoteDetailModal = ({ isOpen, onClose, noteId, onUpdate }) => {
     }, [note]);
 
     if (!isOpen) return null;
+
+    const handleCancelEdit = () => {
+        if (note) {
+            setTitle(note.title || '');
+            setContent(note.content || '');
+            setIsDirty(false);
+        }
+        setIsEditing(false);
+    };
 
     const handleSave = async () => {
         try {
@@ -68,21 +77,17 @@ const NoteDetailModal = ({ isOpen, onClose, noteId, onUpdate }) => {
     const handleContentChange = (e) => {
         const newContent = e.target.value;
         setContent(newContent);
-        if (newContent !== note.content || title !== note.title) {
-            setIsDirty(true);
-        } else {
-            setIsDirty(false);
-        }
+        const isContentChanged = newContent !== (note?.content || '');
+        const isTitleChanged = title !== (note?.title || '');
+        setIsDirty(isContentChanged || isTitleChanged);
     };
 
     const handleTitleChange = (e) => {
         const newTitle = e.target.value;
         setTitle(newTitle);
-        if (newTitle !== note.title || content !== note.content) {
-            setIsDirty(true);
-        } else {
-            setIsDirty(false);
-        }
+        const isTitleChanged = newTitle !== (note?.title || '');
+        const isContentChanged = content !== (note?.content || '');
+        setIsDirty(isTitleChanged || isContentChanged);
     };
 
 
@@ -96,17 +101,15 @@ const NoteDetailModal = ({ isOpen, onClose, noteId, onUpdate }) => {
                     </button>
 
                     <div className="flex items-center gap-2">
-                        {note && (
+                        {note && !isEditing && ( 
                             <>
-                                {!isEditing && (
-                                    <button
-                                        onClick={() => setIsEditing(true)}
-                                        className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-colors"
-                                        title="Edit note"
-                                    >
-                                        <BsPencil size={20} />
-                                    </button>
-                                )}
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-colors"
+                                    title="Edit note"
+                                >
+                                    <BsPencil size={20} />
+                                </button>
                                 
                                 <button
                                     onClick={handlePinToggle}
@@ -125,17 +128,25 @@ const NoteDetailModal = ({ isOpen, onClose, noteId, onUpdate }) => {
                             </>
                         )}
 
-                        {isEditing && (
-                            <button
-                                onClick={handleSave}
-                                disabled={!isDirty || actionLoading}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ml-2 ${isDirty
-                                        ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
-                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    }`}
-                            >
-                                {actionLoading ? 'Saving...' : <><BsSave /> Save</>}
-                            </button>
+                        {isEditing && ( 
+                            <>
+                                <button
+                                    onClick={handleCancelEdit}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-gray-700 hover:bg-gray-100"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSave}
+                                    disabled={!isDirty || actionLoading}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ml-2 ${isDirty
+                                            ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
+                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                        }`}
+                                >
+                                    {actionLoading ? 'Saving...' : <><BsSave /> Save</>}
+                                </button>
+                            </>
                         )}
                     </div>
                 </div>
