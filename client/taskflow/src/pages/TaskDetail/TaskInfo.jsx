@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TaskInfoAction from "./TaskInfoAction";
 import { BsThreeDotsVertical } from "react-icons/bs";
@@ -16,16 +16,47 @@ const TaskInfo = ({ task, onUpdate }) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const { isCreator, isAssignee } = useTaskPermissions(task);
 
+    const [isImportant, setIsImportant] = useState(false);
+
+    const { data: importantTasks, refetch: refetchImportant } = useApi('/api/important-tasks/');
+    const { makeRequest: toggleImportant } = useApi();
+
     const navigate = useNavigate();
 
     const { makeRequest: leaveTask } = useApi();
     const { makeRequest: deleteTask, loading: deleteLoading } = useApi();
 
+    useEffect(() => {
+        if (importantTasks && task) {
+            const important = importantTasks.some(t =>
+                (t.id === task.id) || (t.task?.id === task.id) || (t.task_id === task.id)
+            );
+            setIsImportant(important);
+        }
+    }, [importantTasks, task]);
+
+    const handleToggleImportant = async () => {
+        try {
+            if (isImportant) {
+                await toggleImportant(`/api/important-tasks/${task.id}/`, "DELETE");
+                toast.success("Removed from important tasks");
+            } else {
+                await toggleImportant("/api/important-tasks/", "POST", { task_id: task.id });
+                toast.success("Marked as important");
+            }
+            refetchImportant();
+            setIsImportant(!isImportant);
+        } catch (err) {
+            console.error("Failed to toggle importance:", err);
+            toast.error("Failed to update importance");
+        }
+    };
+
     const handleLeaveTask = async () => {
         try {
             await leaveTask(`/api/tasks/${task.id}/leave/`, "PATCH");
             toast.success("Task left successfully");
-            navigate("/");
+            navigate("/tasks");
         } catch (err) {
             console.error("Failed to leave task:", err);
             toast.error("Failed to leave task. Please try again.");
@@ -37,7 +68,7 @@ const TaskInfo = ({ task, onUpdate }) => {
             await deleteTask(`/api/tasks/${task.id}/`, "DELETE");
             toast.success("Task deleted successfully");
             setShowDeleteModal(false);
-            navigate("/");
+            navigate("/tasks");
         } catch (err) {
             console.error("Failed to delete task:", err);
             toast.error("Failed to delete task. Please try again.");
@@ -89,6 +120,8 @@ const TaskInfo = ({ task, onUpdate }) => {
                         onDelete={() => setShowDeleteModal(true)}
                         onLeave={handleLeaveTask}
                         task={task}
+                        isImportant={isImportant}
+                        onToggleImportant={handleToggleImportant}
                     />
                 </div>)}
             </div>

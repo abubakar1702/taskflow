@@ -68,7 +68,7 @@ const TaskDetail = () => {
     const handleDeleteTask = async () => {
         try {
             await deleteTask(`/api/tasks/${id}/`, "DELETE");
-            navigate("/");
+            navigate("/tasks");
             toast.success("Task deleted successfully");
         } catch (err) {
             console.error("Failed to delete task:", err);

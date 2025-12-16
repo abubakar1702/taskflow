@@ -7,6 +7,7 @@ import {
     FiSettings,
     FiMessageSquare,
     FiList,
+    FiHome,
 } from "react-icons/fi";
 import { FaRegStar, FaPlus, FaRegCalendar, FaRegFolder, FaRegMessage } from "react-icons/fa6";
 import { TbActivityHeartbeat } from "react-icons/tb";
@@ -45,16 +46,9 @@ const Sidebar = ({ collapsed, setCollapsed, isMobile }) => {
 
             <nav className="space-y-1">
                 <SidebarItem
-                    icon={<TbActivityHeartbeat />}
-                    label="Activity"
-                    to="/activity"
-                    collapsed={collapsed}
-                />
-                <SidebarItem
-                    icon={<FiMessageSquare />}
-                    label="Inbox"
-                    to="/inbox"
-                    count={5}
+                    icon={<FiHome />}
+                    label="Home"
+                    to="/"
                     collapsed={collapsed}
                 />
                 <SidebarItem
@@ -77,7 +71,7 @@ const Sidebar = ({ collapsed, setCollapsed, isMobile }) => {
                 <SidebarItem
                     icon={<FiList />}
                     label="Tasks"
-                    to="/"
+                    to="/tasks"
                     collapsed={collapsed}
                 />
                 <SidebarItem

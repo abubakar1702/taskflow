@@ -1,6 +1,7 @@
 export const isAuthenticated = () => {
     const user = localStorage.getItem('user') || sessionStorage.getItem('user');
-    return !!user;
+    const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+    return !!user && !!token;
 };
 
 export const getCurrentUser = () => {
