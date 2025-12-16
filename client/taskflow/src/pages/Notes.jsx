@@ -5,6 +5,7 @@ import { FaStickyNote } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import DeleteModal from '../components/modals/DeleteModal';
 import NoteDetailModal from '../components/modals/NoteDetailModal';
+import CreateNoteModal from '../components/modals/NewNoteModal';
 
 const NoteCard = ({ note, onPin, onDelete, onClick }) => {
     return (
@@ -36,75 +37,6 @@ const NoteCard = ({ note, onPin, onDelete, onClick }) => {
             </p>
             <div className="mt-4 text-xs text-gray-400">
                 {new Date(note.updated_at).toLocaleDateString()}
-            </div>
-        </div>
-    );
-};
-
-const CreateNoteModal = ({ isOpen, onClose, onCreated }) => {
-    const [title, setTitle] = useState('');
-    const [content, setContent] = useState('');
-    const { makeRequest, loading } = useApi();
-
-    if (!isOpen) return null;
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            await makeRequest('/api/notes/', 'POST', { title, content });
-            toast.success('Note created successfully');
-            setTitle('');
-            setContent('');
-            onCreated();
-            onClose();
-        } catch (err) {
-            console.error(err);
-            toast.error('Failed to create note');
-        }
-    };
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-fadeIn">
-                <div className="flex justify-between items-center p-4 border-b">
-                    <h2 className="text-lg font-semibold text-gray-800">Create New Note</h2>
-                    <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full transition-colors">
-                        <BsX size={24} className="text-gray-500" />
-                    </button>
-                </div>
-                <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-4">
-                    <input
-                        type="text"
-                        placeholder="Title"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="w-full text-lg font-semibold placeholder-gray-400 border-none focus:ring-0 px-0"
-                        autoFocus
-                    />
-                    <textarea
-                        placeholder="Take a note..."
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        rows={8}
-                        className="w-full resize-none border-none focus:ring-0 px-0 text-gray-600"
-                    />
-                    <div className="flex justify-end gap-3 pt-2">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={loading || (!title.trim() && !content.trim())}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                        >
-                            {loading ? 'Creating...' : 'Create Note'}
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
     );
