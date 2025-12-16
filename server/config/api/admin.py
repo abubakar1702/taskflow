@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Project, ProjectMember, Task, Subtask, Asset
+from .models import Project, ProjectMember, Task, Subtask, Asset, ImportantTask
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
@@ -34,5 +34,12 @@ class AssetAdmin(admin.ModelAdmin):
     list_display = ("file", "uploaded_by", "uploaded_at", "task", "project")
     search_fields = ("uploaded_by__username", "task__title", "project__title")
     list_filter = ("uploaded_at",)
+    
+@admin.register(ImportantTask)
+class ImportantTaskAdmin(admin.ModelAdmin):
+    list_display = ('user', 'task', 'marked_at')
+    list_filter = ('user', 'marked_at')
+    search_fields = ('user__username', 'task__title')
+    ordering = ('-marked_at',)
 
 

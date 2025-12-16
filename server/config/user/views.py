@@ -39,7 +39,7 @@ class SearchUsersAPIView(generics.ListAPIView):
         queryset = queryset.filter(email__icontains=search_query)
         return queryset
 
-class CurrentUserAPIView(generics.RetrieveAPIView):
+class CurrentUserAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 

@@ -1,7 +1,7 @@
 from django.shortcuts import render
-from .serializers import ProjectSerializer, ProjectMemberSerializer, TaskSerializer, SubtaskSerializer, SearchForAssigneeSerializer, AssetSerializer, ProjectMemberBulkSerializer
+from .serializers import ProjectSerializer, ProjectMemberSerializer, TaskSerializer, SubtaskSerializer, SearchForAssigneeSerializer, AssetSerializer, ProjectMemberBulkSerializer, ImportantTaskSerializer
 from django.shortcuts import get_object_or_404  
-from .models import Project, ProjectMember, Task, Subtask, Asset
+from .models import Project, ProjectMember, Task, Subtask, Asset, ImportantTask
 from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
@@ -195,7 +195,6 @@ class SearchForAssigneeAPIView(generics.ListAPIView):
             email__icontains=search
         )
 
-#if an assignee leaves a task, he will be removed from the assignees list and all his subtasks will be unassigned and all the assets he uploaded to that task will be deleted. I he checked a subtask as completed, it will be set to false.
 class LeaveTaskAPIView(generics.UpdateAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
@@ -310,7 +309,6 @@ class ProjectsAPIView(generics.ListCreateAPIView):
             .prefetch_related('members')
         )
         
-    # the creator is automatically added as a member with Admin role
     @transaction.atomic
     def perform_create(self, serializer):
         project = serializer.save(creator=self.request.user)
@@ -350,7 +348,6 @@ class ProjectMembersAPIView(generics.ListCreateAPIView):
         context['project'] = project
         return context
 
-#if a member is removed from a project,all task will be deleted if the task belong to that project, all tasks assigned to him in that project will have him removed from assignees list, all his subtasks will be unassigned and all assets he uploaded to that project will be deleted. If he checked a subtask as completed, it will be set to false.
 class ProjectMemberActionAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProjectMember.objects.select_related('user', 'project')
     serializer_class = ProjectMemberSerializer
@@ -365,18 +362,14 @@ class ProjectMemberActionAPIView(generics.RetrieveUpdateDestroyAPIView):
         user = project_member.user
         project = project_member.project
 
-        # 1. Delete tasks CREATED by this member in this project
         Task.objects.filter(
             project=project,
             creator=user
         ).delete()
 
-
-        # 2. Remove user from assignees of remaining tasks
         for task in Task.objects.filter(project=project, assignees=user):
             task.assignees.remove(user)
 
-        # 3. Unassign ALL subtasks in this project
         Subtask.objects.filter(
             task__project=project,
             assignee=user
@@ -385,14 +378,12 @@ class ProjectMemberActionAPIView(generics.RetrieveUpdateDestroyAPIView):
             is_completed=False
         )
 
-        # 4. Delete assets uploaded by the user (project + task assets)
         Asset.objects.filter(
             uploaded_by=user
         ).filter(
             Q(project=project) | Q(task__project=project)
         ).delete()
 
-        # 5. Remove membership
         project_member.delete()
 
         return Response(
@@ -400,8 +391,6 @@ class ProjectMemberActionAPIView(generics.RetrieveUpdateDestroyAPIView):
             status=status.HTTP_204_NO_CONTENT
         )
 
-
-#all the roject team members and all the the task assignees that the user is part of
 class TeamAPIView(generics.ListAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
@@ -423,4 +412,31 @@ class TeamAPIView(generics.ListAPIView):
             Q(id__in=task_assignees.values_list('id', flat=True))
         ).distinct()
 
+class UserTasksAPIView(generics.ListAPIView):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Task.objects.filter(
+            Q(creator=user) |
+            Q(assignees=user)
+        ).distinct()
     
+class ImportantTaskAPIView(generics.ListCreateAPIView):
+    serializer_class = ImportantTaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return ImportantTask.objects.filter(user=self.request.user)
+
+class UnmarkImportantAPIView(generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get_object(self):
+        task_id = self.kwargs['pk']
+        return get_object_or_404(
+            ImportantTask,
+            task_id=task_id,
+            user=self.request.user
+        )

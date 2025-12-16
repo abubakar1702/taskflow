@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import TaskAPIView, TaskDetailAPIView, SubtasksApiView, SubtaskActionAPIView, AddAssigneeAPIView, RemoveAssigneeAPIView, SearchForAssigneeAPIView, AssetCreateAPIView, AssetListAPIView, AssetDetailAPIView, TaskAssetsAPIView, ProjectAssetsAPIView, AssetActionAPIView, LeaveTaskAPIView, ProjectsAPIView, ProjectDetailAPIView, ProjectMembersAPIView, ProjectMemberActionAPIView, TeamAPIView
+from .views import TaskAPIView, TaskDetailAPIView, SubtasksApiView, SubtaskActionAPIView, AddAssigneeAPIView, RemoveAssigneeAPIView, SearchForAssigneeAPIView, AssetCreateAPIView, AssetListAPIView, AssetDetailAPIView, TaskAssetsAPIView, ProjectAssetsAPIView, AssetActionAPIView, LeaveTaskAPIView, ProjectsAPIView, ProjectDetailAPIView, ProjectMembersAPIView, ProjectMemberActionAPIView, TeamAPIView, UserTasksAPIView, ImportantTaskAPIView, UnmarkImportantAPIView
 
 urlpatterns = [
     path('tasks/', TaskAPIView.as_view(), name='task-list-create'),
@@ -24,4 +24,8 @@ urlpatterns = [
     path('projects/<uuid:project_id>/members/<uuid:member_id>/', ProjectMemberActionAPIView.as_view(), name='project-member-action'),
     
     path('team/', TeamAPIView.as_view(), name='team-list'),
+    path('user-tasks/', UserTasksAPIView.as_view(), name='user-tasks'),
+    
+    path('important-tasks/', ImportantTaskAPIView.as_view(), name='important-task-list-create'),
+    path('important-tasks/<uuid:pk>/', UnmarkImportantAPIView.as_view(), name='important-task-detail'),
 ]

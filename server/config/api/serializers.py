@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Project, ProjectMember, Task, Subtask, Asset
+from .models import Project, ProjectMember, Task, Subtask, Asset, ImportantTask
 from user.serializers import UserSerializer
 from user.models import User
 from django.db.models import Count
@@ -173,3 +173,22 @@ class AssetSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Asset cannot belong to both a task and a project.")
         return data
+    
+class ImportantTaskSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    task = TaskSerializer(read_only=True)
+    task_id = serializers.UUIDField(write_only=True)
+
+    class Meta:
+        model = ImportantTask
+        fields = ['id', 'user', 'task', 'task_id', 'marked_at']
+
+    def create(self, validated_data):
+        task_id = validated_data.pop('task_id')
+        task = Task.objects.get(id=task_id)
+
+        return ImportantTask.objects.create(
+            user=self.context['request'].user,
+            task=task
+        )
+

@@ -81,3 +81,12 @@ class Asset(models.Model):
         if self.file:
             self.file.delete(save=False)
         super().delete(*args, **kwargs)
+        
+class ImportantTask(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='important_tasks')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='marked_important')
+    marked_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'task')

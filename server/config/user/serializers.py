@@ -6,7 +6,6 @@ from django.contrib.auth import authenticate
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    username = serializers.CharField(read_only=True)
     display_name = serializers.SerializerMethodField()
 
     class Meta:
@@ -26,6 +25,12 @@ class UserSerializer(serializers.ModelSerializer):
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("A user with this email already exists.")
+        return value
+    
+    def validate_username(self, value):
+        user = self.instance
+        if User.objects.exclude(pk=user.pk if user else None).filter(username=value).exists():
+            raise serializers.ValidationError("Username already taken.")
         return value
 
     def create(self, validated_data):
