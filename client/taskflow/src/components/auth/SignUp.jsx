@@ -4,6 +4,7 @@ import loginImg from "../../assets/taskflow-login.png";
 import axios from "axios";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { ClipLoader } from "react-spinners";
+import GoogleAuth from "./GoogleAuth";
 
 const SignUp = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -113,6 +114,67 @@ const SignUp = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleGoogleSuccess = async (credentialResponse) => {
+        if (!credentialResponse?.credential) {
+            setError("Google sign up failed. No token received.");
+            return;
+        }
+
+        setLoading(true);
+        setError("");
+
+        try {
+            const response = await axios.post(
+                `${API_BASE_URL}/user/auth/google/`,
+                {
+                    token: credentialResponse.credential,
+                },
+                {
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                }
+            );
+
+            if (!response.data?.access) {
+                throw new Error("Invalid response from server");
+            }
+
+            // Store tokens and user data
+            const storage = sessionStorage;
+            storage.setItem("accessToken", response.data.access);
+
+            if (response.data.refresh) {
+                storage.setItem("refreshToken", response.data.refresh);
+            }
+
+            storage.setItem(
+                "user",
+                JSON.stringify({
+                    id: response.data.user.id,
+                    email: response.data.user.email,
+                    name: `${response.data.user.first_name} ${response.data.user.last_name}`,
+                    firstName: response.data.user.first_name,
+                    lastName: response.data.user.last_name,
+                    avatar: response.data.user.avatar,
+                })
+            );
+
+            navigate("/", { replace: true });
+        } catch (err) {
+            console.error("Google sign up error:", err);
+            setError("Google sign up failed. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleError = () => {
+        setError("Google sign up failed. Please try again.");
     };
 
     return (
@@ -304,6 +366,13 @@ const SignUp = () => {
                                 )}
                             </button>
                         </form>
+
+                        {/* Google Authentication */}
+                        <GoogleAuth 
+                            onSuccess={handleGoogleSuccess}
+                            onError={handleGoogleError}
+                            disabled={loading}
+                        />
 
                         {/* Sign In Link */}
                         <div className="mt-6 text-center">

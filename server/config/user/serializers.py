@@ -2,6 +2,9 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
 from django.contrib.auth import authenticate
+from google.oauth2 import id_token
+from google.auth.transport import requests
+from django.conf import settings
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -78,3 +81,29 @@ class LoginSerializer(serializers.Serializer):
             'access': str(refresh.access_token),
             'refresh': str(refresh),
         }
+
+
+class GoogleAuthSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    print(f"GOOGLE_CLIENT_ID: {settings.GOOGLE_CLIENT_ID}")
+
+    def validate(self, attrs):
+        try:
+            idinfo = id_token.verify_oauth2_token(
+                attrs['token'],
+                requests.Request(),
+                settings.GOOGLE_CLIENT_ID
+            )
+        except Exception:
+            raise serializers.ValidationError("Invalid Google token")
+
+        email = idinfo['email']
+        name = idinfo.get('name', '')
+
+        user, _ = User.objects.get_or_create(
+            email=email,
+            defaults={"username": email.split('@')[0], "first_name": name}
+        )
+
+        attrs['user'] = user
+        return attrs

@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 from datetime import timedelta
+from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,10 +22,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-5b4hsg&*rsfa7b_$gnrhnkqa@$0860(kx01k7hau45+e)1w&h^'
+load_dotenv()
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+
+
+print(f"DEBUG: SECRET_KEY loaded: {SECRET_KEY is not None}")
+print(f"DEBUG: GOOGLE_CLIENT_ID loaded: {GOOGLE_CLIENT_ID}")
+print(f"DEBUG: BASE_DIR is: {BASE_DIR}")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = []
 
@@ -152,6 +162,18 @@ CORS_ALLOW_METHODS = (
     "POST",
     "PUT",
 )
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 #jwt 
 

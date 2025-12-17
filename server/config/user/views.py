@@ -1,10 +1,9 @@
 from .models import User
-from .serializers import UserSerializer, LoginSerializer
+from .serializers import UserSerializer, LoginSerializer, GoogleAuthSerializer
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-
-
+from rest_framework_simplejwt.tokens import RefreshToken
 
 class RegisterAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -21,8 +20,6 @@ class LoginAPIView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-#http://127.0.0.1:8000/user/search/?email="akash@gmail.com"
 
 class SearchUsersAPIView(generics.ListAPIView):
     queryset = User.objects.all()
@@ -45,3 +42,19 @@ class CurrentUserAPIView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class GoogleAuthAPIView(generics.GenericAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = GoogleAuthSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': UserSerializer(user).data
+        }, status=status.HTTP_200_OK)

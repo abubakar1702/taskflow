@@ -4,6 +4,7 @@ import loginImg from "../../assets/taskflow-login.png";
 import axios from "axios";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { ClipLoader } from "react-spinners";
+import GoogleAuth from "./GoogleAuth";
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -123,6 +124,49 @@ const Login = () => {
         }
     };
 
+    const handleGoogleSuccess = async (credentialResponse) => {
+        if (!credentialResponse?.credential) {
+            setError("Google login failed. No token received.");
+            return;
+        }
+
+        setLoading(true);
+        setError("");
+
+        try {
+            const response = await axios.post(
+                `${API_BASE_URL}/user/auth/google/`,
+                {
+                    token: credentialResponse.credential,
+                },
+                {
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                }
+            );
+
+            if (!response.data?.access) {
+                throw new Error("Invalid response from server");
+            }
+
+            if (handleStorage(response.data)) {
+                navigate("/", { replace: true });
+            }
+        } catch (err) {
+            console.error("Google login error:", err);
+            setError("Google login failed. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleError = () => {
+        setError("Google login failed. Please try again.");
+    };
+
     return (
         <div className="flex items-center justify-center h-screen p-4">
             <div className="max-w-4xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
@@ -137,8 +181,6 @@ const Login = () => {
                             />
                         </div>
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-
-                        {/* Floating Card with Brand */}
                         <div className="relative z-10 text-white text-center space-y-6">
                             <div className="backdrop-blur-md bg-white/10 rounded-2xl p-8 border border-white/20 shadow-xl">
                                 <div className="flex items-center justify-center mb-4">
@@ -162,20 +204,13 @@ const Login = () => {
                             <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
                                 Welcome Back
                             </h2>
-                            <p className="text-gray-500">
-                                Sign in to continue to TaskFlow
-                            </p>
+                            <p className="text-gray-500">Sign in to continue to TaskFlow</p>
                         </div>
 
                         <form className="space-y-5" onSubmit={handleSubmit}>
                             {/* Email Field */}
                             <div className="group">
-                                <label
-                                    htmlFor="email"
-                                    className="block text-sm font-semibold text-gray-700 mb-2"
-                                >
-                                    Email Address
-                                </label>
+                                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
                                 <input
                                     id="email"
                                     name="email"
@@ -184,22 +219,14 @@ const Login = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     disabled={loading}
-                                    className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("email") || error.includes("Email")
-                                        ? "border-red-400 bg-red-50"
-                                        : "border-gray-200 bg-gray-50 focus:bg-white"
-                                        } focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
+                                    className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("email") || error.includes("Email") ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 focus:bg-white"} focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
                                     placeholder="you@example.com"
                                 />
                             </div>
 
                             {/* Password Field */}
                             <div className="group">
-                                <label
-                                    htmlFor="password"
-                                    className="block text-sm font-semibold text-gray-700 mb-2"
-                                >
-                                    Password
-                                </label>
+                                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
                                 <div className="relative">
                                     <input
                                         id="password"
@@ -209,10 +236,7 @@ const Login = () => {
                                         value={formData.password}
                                         onChange={handleChange}
                                         disabled={loading}
-                                        className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("password") || error.includes("Password")
-                                            ? "border-red-400 bg-red-50"
-                                            : "border-gray-200 bg-gray-50 focus:bg-white"
-                                            } focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed pr-12`}
+                                        className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("password") || error.includes("Password") ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 focus:bg-white"} focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed pr-12`}
                                         placeholder="••••••••"
                                     />
                                     <button
@@ -220,25 +244,17 @@ const Login = () => {
                                         onClick={() => setShowPassword(!showPassword)}
                                         disabled={loading}
                                         className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 focus:outline-none disabled:text-gray-300 transition-colors duration-200"
-                                        aria-label={
-                                            showPassword ? "Hide password" : "Show password"
-                                        }
+                                        aria-label={showPassword ? "Hide password" : "Show password"}
                                     >
-                                        {showPassword ? (
-                                            <IoEyeOff size={20} />
-                                        ) : (
-                                            <IoEye size={20} />
-                                        )}
+                                        {showPassword ? <IoEyeOff size={20} /> : <IoEye size={20} />}
                                     </button>
                                 </div>
                             </div>
 
-                            {/* Error Message with Animation */}
+                            {/* Error Message */}
                             {error && (
                                 <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 rounded-lg animate-in slide-in-from-top-2">
-                                    <p className="text-red-700 text-sm font-medium">
-                                        {error}
-                                    </p>
+                                    <p className="text-red-700 text-sm font-medium">{error}</p>
                                 </div>
                             )}
 
@@ -254,22 +270,14 @@ const Login = () => {
                                         disabled={loading}
                                         className="h-4 w-4 text-blue-600 focus:ring-2 focus:ring-blue-500 border-gray-300 rounded cursor-pointer transition-all"
                                     />
-                                    <label
-                                        htmlFor="keepLoggedIn"
-                                        className="ml-2 block text-sm text-gray-600 cursor-pointer group-hover:text-gray-800 transition-colors"
-                                    >
+                                    <label htmlFor="keepLoggedIn" className="ml-2 block text-sm text-gray-600 cursor-pointer group-hover:text-gray-800 transition-colors">
                                         Keep me logged in
                                     </label>
                                 </div>
-                                <button
-                                    type="button"
-                                    className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
-                                >
-                                    Forgot password?
-                                </button>
+                                <button type="button" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">Forgot password?</button>
                             </div>
 
-                            {/* Submit Button with Gradient */}
+                            {/* Submit Button */}
                             <button
                                 type="submit"
                                 disabled={loading}
@@ -280,20 +288,22 @@ const Login = () => {
                                         <ClipLoader size={20} color="#fff" />
                                         Signing in...
                                     </span>
-                                ) : (
-                                    "Sign In"
-                                )}
+                                ) : "Sign In"}
                             </button>
                         </form>
+
+                        {/* Google Authentication */}
+                        <GoogleAuth 
+                            onSuccess={handleGoogleSuccess}
+                            onError={handleGoogleError}
+                            disabled={loading}
+                        />
 
                         {/* Sign Up Link */}
                         <div className="mt-8 text-center">
                             <p className="text-sm text-gray-600">
                                 Don't have an account?{" "}
-                                <Link
-                                    to="/signup"
-                                    className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-                                >
+                                <Link to="/signup" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
                                     Sign up
                                 </Link>
                             </p>
