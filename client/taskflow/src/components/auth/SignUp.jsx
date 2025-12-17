@@ -67,7 +67,7 @@ const SignUp = () => {
         setLoading(true);
 
         try {
-            const response = await axios.post(
+            const registerResponse = await axios.post(
                 `${API_BASE_URL}/user/register/`,
                 {
                     first_name: formData.firstName,
@@ -84,11 +84,50 @@ const SignUp = () => {
                 }
             );
 
-            if (response.status === 201 || response.status === 200) {
-                // Registration successful, redirect to login
-                navigate("/login", {
-                    state: { message: "Account created successfully! Please log in." }
-                });
+            if (registerResponse.status === 201 || registerResponse.status === 200) {
+                try {
+                    const loginResponse = await axios.post(
+                        `${API_BASE_URL}/user/login/`,
+                        {
+                            email: formData.email,
+                            password: formData.password,
+                        },
+                        {
+                            withCredentials: true,
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-Requested-With": "XMLHttpRequest",
+                            },
+                        }
+                    );
+
+                    if (loginResponse.data?.access) {
+                        const storage = sessionStorage;
+                        storage.setItem("accessToken", loginResponse.data.access);
+
+                        if (loginResponse.data.refresh) {
+                            storage.setItem("refreshToken", loginResponse.data.refresh);
+                        }
+
+                        storage.setItem(
+                            "user",
+                            JSON.stringify({
+                                id: loginResponse.data.user.id,
+                                email: loginResponse.data.user.email,
+                                name: `${loginResponse.data.user.first_name} ${loginResponse.data.user.last_name}`,
+                                firstName: loginResponse.data.user.first_name,
+                                lastName: loginResponse.data.user.last_name,
+                                avatar: loginResponse.data.user.avatar,
+                            })
+                        );
+                        navigate("/", { replace: true });
+                    }
+                } catch (loginErr) {
+                    console.error("Auto-login error:", loginErr);
+                    navigate("/login", {
+                        state: { message: "Account created successfully! Please log in." }
+                    });
+                }
             }
         } catch (err) {
             console.error("Registration error:", err);
@@ -144,7 +183,6 @@ const SignUp = () => {
                 throw new Error("Invalid response from server");
             }
 
-            // Store tokens and user data
             const storage = sessionStorage;
             storage.setItem("accessToken", response.data.access);
 
