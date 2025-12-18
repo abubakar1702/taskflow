@@ -1,54 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useApi } from '../components/hooks/useApi';
-import { BsPin, BsPinFill, BsTrash, BsPlus, BsSearch, BsX } from 'react-icons/bs';
+import { BsPlus } from 'react-icons/bs';
 import { FaStickyNote } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import DeleteModal from '../components/modals/DeleteModal';
 import NoteDetailModal from '../components/modals/NoteDetailModal';
 import CreateNoteModal from '../components/modals/NewNoteModal';
-
-const NoteCard = ({ note, onPin, onDelete, onClick }) => {
-    return (
-        <div
-            onClick={() => onClick(note.id)}
-            className="group bg-white p-5 rounded-xl shadow-sm hover:shadow-md border border-gray-200 transition-all cursor-pointer relative flex flex-col h-60"
-        >
-            <div className="flex justify-between items-start mb-3">
-                <h3 className="font-semibold text-lg text-gray-800 line-clamp-1 pr-8">{note.title || 'Untitled'}</h3>
-            </div>
-            
-            <p className="text-gray-600 text-sm line-clamp-6 whitespace-pre-wrap flex-grow">
-                {note.content || 'No content'}
-            </p>
-            
-            <div className="flex justify-between items-center pt-2 mt-auto">
-                
-                <div className="text-xs text-gray-400">
-                    {new Date(note.updated_at).toLocaleDateString()}
-                </div>
-                
-                <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onPin(note); }}
-                        className="p-1.5 text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 rounded-full transition-colors"
-                        title={note.is_pinned ? "Unpin note" : "Pin note"}
-                    >
-                        {note.is_pinned ? <BsPinFill className="text-yellow-500" size={18} /> : <BsPin size={18} />}
-                    </button>
-                    
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onDelete(note); }}
-                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                        title="Delete note"
-                    >
-                        <BsTrash size={18} />
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
+import NoteCard from '../components/note/NoteCard';
+import NoteSearch from '../components/note/NoteSearch';
 
 const Notes = () => {
     const { data: notes, loading, refetch } = useApi('/api/notes/');
@@ -102,16 +61,12 @@ const Notes = () => {
                 </div>
 
                 <div className="flex items-center gap-4 w-full md:w-auto">
-                    <div className="relative flex-grow md:w-64">
-                        <BsSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Search notes..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                        />
-                    </div>
+                    <NoteSearch 
+                        searchTerm={searchTerm} 
+                        onSearchChange={setSearchTerm}
+                        notes={notes}
+                        onNoteClick={setSelectedNoteId}
+                    />
                     <button
                         onClick={() => setShowCreateModal(true)}
                         className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-sm active:scale-95"
@@ -147,7 +102,9 @@ const Notes = () => {
 
                     {otherNotes.length > 0 && (
                         <section>
-                            {pinnedNotes.length > 0 && <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 pl-1">Others</h2>}
+                            {pinnedNotes.length > 0 && (
+                                <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 pl-1">Others</h2>
+                            )}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {otherNotes.map(note => (
                                     <NoteCard
