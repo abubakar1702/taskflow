@@ -453,13 +453,13 @@ class SearchAPIView(generics.GenericAPIView):
 
         # Search Projects
         projects = Project.objects.filter(
-            Q(name__icontains=query) | Q(description__icontains=query),
+            Q(name__icontains=query),
             Q(creator=request.user) | Q(members=request.user)
-        ).distinct()[:10]  # Limit results for speed
+        ).distinct()[:10]
 
         # Search Tasks
         tasks = Task.objects.filter(
-            Q(title__icontains=query) | Q(description__icontains=query),
+            Q(title__icontains=query),
             Q(creator=request.user) | 
             Q(assignees=request.user) | 
             Q(project__members=request.user)
