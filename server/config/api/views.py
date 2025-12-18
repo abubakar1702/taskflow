@@ -440,3 +440,32 @@ class UnmarkImportantAPIView(generics.DestroyAPIView):
             task_id=task_id,
             user=self.request.user
         )
+
+#global search for tasks and projects
+class SearchAPIView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        query = request.query_params.get('q', '').strip()
+
+        if len(query) < 2:
+            return Response({"projects": [], "tasks": []})
+
+        # Search Projects
+        projects = Project.objects.filter(
+            Q(name__icontains=query) | Q(description__icontains=query),
+            Q(creator=request.user) | Q(members=request.user)
+        ).distinct()[:10]  # Limit results for speed
+
+        # Search Tasks
+        tasks = Task.objects.filter(
+            Q(title__icontains=query) | Q(description__icontains=query),
+            Q(creator=request.user) | 
+            Q(assignees=request.user) | 
+            Q(project__members=request.user)
+        ).select_related('project').distinct()[:20]
+
+        return Response({
+            "projects": ProjectSerializer(projects, many=True).data,
+            "tasks": TaskSerializer(tasks, many=True).data
+        }, status=status.HTTP_200_OK)

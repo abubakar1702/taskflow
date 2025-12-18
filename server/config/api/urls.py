@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import TaskAPIView, TaskDetailAPIView, SubtasksApiView, SubtaskActionAPIView, AddAssigneeAPIView, RemoveAssigneeAPIView, SearchForAssigneeAPIView, AssetCreateAPIView, AssetListAPIView, AssetDetailAPIView, TaskAssetsAPIView, ProjectAssetsAPIView, AssetActionAPIView, LeaveTaskAPIView, ProjectsAPIView, ProjectDetailAPIView, ProjectMembersAPIView, ProjectMemberActionAPIView, TeamAPIView, UserTasksAPIView, ImportantTaskAPIView, UnmarkImportantAPIView
+from .views import TaskAPIView, TaskDetailAPIView, SubtasksApiView, SubtaskActionAPIView, AddAssigneeAPIView, RemoveAssigneeAPIView, SearchForAssigneeAPIView, AssetCreateAPIView, AssetListAPIView, AssetDetailAPIView, TaskAssetsAPIView, ProjectAssetsAPIView, AssetActionAPIView, LeaveTaskAPIView, ProjectsAPIView, ProjectDetailAPIView, ProjectMembersAPIView, ProjectMemberActionAPIView, TeamAPIView, UserTasksAPIView, ImportantTaskAPIView, UnmarkImportantAPIView, SearchAPIView
 
 urlpatterns = [
     path('tasks/', TaskAPIView.as_view(), name='task-list-create'),
@@ -28,4 +28,6 @@ urlpatterns = [
     
     path('important-tasks/', ImportantTaskAPIView.as_view(), name='important-task-list-create'),
     path('important-tasks/<uuid:pk>/', UnmarkImportantAPIView.as_view(), name='important-task-detail'),
+    
+    path('search/', SearchAPIView.as_view(), name='search-tasks-projects'),
 ]
