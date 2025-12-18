@@ -9,27 +9,26 @@ import DeleteModal from "../../components/modals/DeleteModal";
 import { useApi } from "../../components/hooks/useApi";
 import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
 import { toast } from "react-toastify";
+import { PRIORITY_COLORS, STATUS_COLORS } from "../../components/constants/uiColors";
 
 const TaskInfo = ({ task, onUpdate }) => {
     const [showActionMenu, setShowActionMenu] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const { isCreator, isAssignee } = useTaskPermissions(task);
-
     const [isImportant, setIsImportant] = useState(false);
 
-    const { data: importantTasks, refetch: refetchImportant } = useApi('/api/important-tasks/');
+    const { isCreator, isAssignee } = useTaskPermissions(task);
+    const { data: importantTasks, refetch: refetchImportant } = useApi("/api/important-tasks/");
     const { makeRequest: toggleImportant } = useApi();
-
-    const navigate = useNavigate();
-
     const { makeRequest: leaveTask } = useApi();
     const { makeRequest: deleteTask, loading: deleteLoading } = useApi();
 
+    const navigate = useNavigate();
+
     useEffect(() => {
         if (importantTasks && task) {
-            const important = importantTasks.some(t =>
-                (t.id === task.id) || (t.task?.id === task.id) || (t.task_id === task.id)
+            const important = importantTasks.some(
+                t => t.id === task.id || t.task?.id === task.id || t.task_id === task.id
             );
             setIsImportant(important);
         }
@@ -46,8 +45,7 @@ const TaskInfo = ({ task, onUpdate }) => {
             }
             refetchImportant();
             setIsImportant(!isImportant);
-        } catch (err) {
-            console.error("Failed to toggle importance:", err);
+        } catch {
             toast.error("Failed to update importance");
         }
     };
@@ -57,9 +55,8 @@ const TaskInfo = ({ task, onUpdate }) => {
             await leaveTask(`/api/tasks/${task.id}/leave/`, "PATCH");
             toast.success("Task left successfully");
             navigate("/tasks");
-        } catch (err) {
-            console.error("Failed to leave task:", err);
-            toast.error("Failed to leave task. Please try again.");
+        } catch {
+            toast.error("Failed to leave task");
         }
     };
 
@@ -69,23 +66,9 @@ const TaskInfo = ({ task, onUpdate }) => {
             toast.success("Task deleted successfully");
             setShowDeleteModal(false);
             navigate("/tasks");
-        } catch (err) {
-            console.error("Failed to delete task:", err);
-            toast.error("Failed to delete task. Please try again.");
+        } catch {
+            toast.error("Failed to delete task");
         }
-    };
-
-    const priorityColors = {
-        Urgent: "bg-red-100 text-red-800 border-red-300",
-        High: "bg-orange-100 text-orange-800 border-orange-300",
-        Medium: "bg-yellow-100 text-yellow-800 border-yellow-300",
-        Low: "bg-green-100 text-green-800 border-green-300",
-    };
-
-    const statusColors = {
-        "To Do": "bg-gray-100 text-gray-800 border-gray-300",
-        "In Progress": "bg-blue-100 text-blue-800 border-blue-300",
-        Done: "bg-green-100 text-green-800 border-green-300",
     };
 
     const safeFormatDate = (value, fmt = "MMM dd, yyyy HH:mm") => {
@@ -102,37 +85,43 @@ const TaskInfo = ({ task, onUpdate }) => {
             <div className="flex justify-between items-start mb-4">
                 <h1 className="text-3xl font-bold text-gray-900">{task.title}</h1>
 
-                {(isCreator || isAssignee) && (<div className="relative">
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setShowActionMenu(!showActionMenu);
-                        }}
-                        className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
-                    >
-                        <BsThreeDotsVertical className="w-5 h-5" />
-                    </button>
+                {(isCreator || isAssignee) && (
+                    <div className="relative">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowActionMenu(!showActionMenu);
+                            }}
+                            className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100"
+                        >
+                            <BsThreeDotsVertical className="w-5 h-5" />
+                        </button>
 
-                    <TaskInfoAction
-                        showActionMenu={showActionMenu}
-                        setShowActionMenu={setShowActionMenu}
-                        onEdit={() => setShowEditModal(true)}
-                        onDelete={() => setShowDeleteModal(true)}
-                        onLeave={handleLeaveTask}
-                        task={task}
-                        isImportant={isImportant}
-                        onToggleImportant={handleToggleImportant}
-                    />
-                </div>)}
+                        <TaskInfoAction
+                            showActionMenu={showActionMenu}
+                            setShowActionMenu={setShowActionMenu}
+                            onEdit={() => setShowEditModal(true)}
+                            onDelete={() => setShowDeleteModal(true)}
+                            onLeave={handleLeaveTask}
+                            task={task}
+                            isImportant={isImportant}
+                            onToggleImportant={handleToggleImportant}
+                        />
+                    </div>
+                )}
             </div>
 
             <div className="flex flex-wrap gap-3 mb-6">
-                <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${statusColors[task.status]}`}>
-                    {task.status}
+                <span
+                    className={`px-3 py-1 rounded-full text-sm font-semibold border ${PRIORITY_COLORS[task.priority]}`}
+                >
+                    {task.priority}
                 </span>
 
-                <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${priorityColors[task.priority]}`}>
-                    {task.priority}
+                <span
+                    className={`px-3 py-1 rounded-full text-sm font-semibold border ${STATUS_COLORS[task.status]}`}
+                >
+                    {task.status}
                 </span>
 
                 {task.project && (
@@ -142,6 +131,7 @@ const TaskInfo = ({ task, onUpdate }) => {
                     </span>
                 )}
             </div>
+
 
             <div className="mb-8">
                 <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>
@@ -172,7 +162,7 @@ const TaskInfo = ({ task, onUpdate }) => {
                     onClose={() => setShowDeleteModal(false)}
                     onConfirm={handleDelete}
                     title="Delete Task"
-                    message="Are you sure you want to delete this task? This action cannot be undone."
+                    message="Are you sure you want to delete this task?"
                     isLoading={deleteLoading}
                 />
             )}

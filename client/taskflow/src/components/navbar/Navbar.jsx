@@ -3,8 +3,7 @@ import { FiSearch, FiX } from "react-icons/fi";
 import Logo from "./Logo";
 import UserMenu from "./UserMenu";
 import NotificationBell from "./NotificationBell";
-
-import Search from "../sidebar/Search";
+import Search from "../common/Search";
 
 const Navbar = () => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -17,7 +16,7 @@ const Navbar = () => {
 
             {/* Mobile Search Bar Overlay */}
             {isSearchOpen && (
-                <div className="absolute top-full left-0 right-0 bg-white p-4 shadow-md border-b border-gray-200 md:hidden animate-in slide-in-from-top-2">
+                <div className="absolute top-full left-0 right-0 bg-white p-4 shadow-md border-b border-gray-200 md:hidden z-50">
                     <Search className="w-full !px-0" />
                 </div>
             )}
