@@ -1,8 +1,4 @@
 from django.core.exceptions import ValidationError
-from django.utils import timezone
-from rest_framework.permissions import BasePermission
-
-
 
 def validate_file_size(file):
     max_size = 50 * 1024 * 1024  # 50MB in bytes

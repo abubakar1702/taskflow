@@ -12,8 +12,12 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('admin/', admin.site.urls),
     path('user/', include('user.urls')),
-    path('api/', include('api.urls')),
     path('api/', include('note.urls')),
+    path('api/', include('notification.urls')),
+    path('api/', include('project.urls')),
+    path('api/', include('asset.urls')),
+    path('api/', include('task.urls')),
+    path('api/', include('common.urls')),
 ]
 
 if settings.DEBUG:
