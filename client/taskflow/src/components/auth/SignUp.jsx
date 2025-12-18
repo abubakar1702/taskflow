@@ -279,8 +279,8 @@ const SignUp = () => {
                                         onChange={handleChange}
                                         disabled={loading}
                                         className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("First name")
-                                                ? "border-red-400 bg-red-50"
-                                                : "border-gray-200 bg-gray-50 focus:bg-white"
+                                            ? "border-red-400 bg-red-50"
+                                            : "border-gray-200 bg-gray-50 focus:bg-white"
                                             } focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
                                         placeholder="John"
                                     />
@@ -303,8 +303,8 @@ const SignUp = () => {
                                         onChange={handleChange}
                                         disabled={loading}
                                         className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("Last name")
-                                                ? "border-red-400 bg-red-50"
-                                                : "border-gray-200 bg-gray-50 focus:bg-white"
+                                            ? "border-red-400 bg-red-50"
+                                            : "border-gray-200 bg-gray-50 focus:bg-white"
                                             } focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
                                         placeholder="Doe"
                                     />
@@ -328,8 +328,8 @@ const SignUp = () => {
                                     onChange={handleChange}
                                     disabled={loading}
                                     className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("email") || error.includes("Email")
-                                            ? "border-red-400 bg-red-50"
-                                            : "border-gray-200 bg-gray-50 focus:bg-white"
+                                        ? "border-red-400 bg-red-50"
+                                        : "border-gray-200 bg-gray-50 focus:bg-white"
                                         } focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
                                     placeholder="you@example.com"
                                 />
@@ -353,8 +353,8 @@ const SignUp = () => {
                                         onChange={handleChange}
                                         disabled={loading}
                                         className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("password") || error.includes("Password")
-                                                ? "border-red-400 bg-red-50"
-                                                : "border-gray-200 bg-gray-50 focus:bg-white"
+                                            ? "border-red-400 bg-red-50"
+                                            : "border-gray-200 bg-gray-50 focus:bg-white"
                                             } focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed pr-12`}
                                         placeholder="••••••••"
                                     />
@@ -406,7 +406,7 @@ const SignUp = () => {
                         </form>
 
                         {/* Google Authentication */}
-                        <GoogleAuth 
+                        <GoogleAuth
                             onSuccess={handleGoogleSuccess}
                             onError={handleGoogleError}
                             disabled={loading}

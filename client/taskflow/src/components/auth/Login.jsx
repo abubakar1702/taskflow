@@ -293,7 +293,7 @@ const Login = () => {
                         </form>
 
                         {/* Google Authentication */}
-                        <GoogleAuth 
+                        <GoogleAuth
                             onSuccess={handleGoogleSuccess}
                             onError={handleGoogleError}
                             disabled={loading}
