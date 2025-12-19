@@ -64,7 +64,6 @@ const Notes = () => {
                     <NoteSearch 
                         searchTerm={searchTerm} 
                         onSearchChange={setSearchTerm}
-                        notes={notes}
                         onNoteClick={setSelectedNoteId}
                     />
                     <button
