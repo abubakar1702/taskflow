@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FiSearch, FiX } from "react-icons/fi";
 import { Link } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';

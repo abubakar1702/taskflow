@@ -16,6 +16,7 @@ import Calendar from './pages/Calendar';
 import Home from './pages/Home';
 import Important from './pages/Important';
 import Notes from './pages/Notes';
+import AllNotifications from './components/notification/AllNotifications';
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/important" element={<Important />} />
           <Route path="/notes" element={<Notes />} />
+          <Route path="/notifications" element={<AllNotifications />} />
         </Route>
       </Routes>
 

@@ -1,10 +1,42 @@
-import { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { BsSearch, BsX } from 'react-icons/bs';
 import { BsPin, BsPinFill } from 'react-icons/bs';
+import { useApi } from '../hooks/useApi';
+import { ClipLoader } from 'react-spinners';
 
-const NoteSearch = ({ searchTerm, onSearchChange, notes, onNoteClick }) => {
+const NoteSearch = ({ searchTerm, onSearchChange, onNoteClick }) => {
     const dropdownRef = useRef(null);
     const [isFocused, setIsFocused] = useState(false);
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const { makeRequest } = useApi();
+
+    useEffect(() => {
+        const delayDebounce = setTimeout(() => {
+            if (searchTerm.trim()) {
+                handleSearch(searchTerm);
+            } else {
+                setSearchResults([]);
+            }
+        }, 300);
+
+        return () => clearTimeout(delayDebounce);
+    }, [searchTerm]);
+
+    const handleSearch = async (query) => {
+        if (!query.trim()) return;
+
+        setIsSearching(true);
+        try {
+            const results = await makeRequest(`/api/notes/search/?q=${encodeURIComponent(query)}`, 'GET');
+            setSearchResults(results || []);
+        } catch (error) {
+            console.error('Search error:', error);
+            setSearchResults([]);
+        } finally {
+            setIsSearching(false);
+        }
+    };
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -16,13 +48,6 @@ const NoteSearch = ({ searchTerm, onSearchChange, notes, onNoteClick }) => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-
-    const filteredNotes = searchTerm.trim()
-        ? notes?.filter(note =>
-            note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            note.content.toLowerCase().includes(searchTerm.toLowerCase())
-        ) || []
-        : [];
 
     const highlightText = (text, query) => {
         if (!query.trim() || !text) return text;
@@ -52,6 +77,13 @@ const NoteSearch = ({ searchTerm, onSearchChange, notes, onNoteClick }) => {
         onNoteClick(noteId);
         onSearchChange('');
         setIsFocused(false);
+        setSearchResults([]);
+    };
+
+    const handleClear = () => {
+        onSearchChange('');
+        setIsFocused(false);
+        setSearchResults([]);
     };
 
     return (
@@ -60,7 +92,14 @@ const NoteSearch = ({ searchTerm, onSearchChange, notes, onNoteClick }) => {
                 }`}
             ref={dropdownRef}
         >
-            <BsSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10" />
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
+                {isSearching ? (
+                    <ClipLoader color="#3b82f6" size={16} loading={isSearching} />
+                ) : (
+                    <BsSearch className="text-gray-400" />
+                )}
+            </div>
+
             <input
                 type="text"
                 placeholder="Search notes..."
@@ -69,12 +108,10 @@ const NoteSearch = ({ searchTerm, onSearchChange, notes, onNoteClick }) => {
                 onFocus={() => setIsFocused(true)}
                 className="w-full pl-10 pr-10 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             />
-            {searchTerm && (
+
+            {searchTerm && !isSearching && (
                 <button
-                    onClick={() => {
-                        onSearchChange('');
-                        setIsFocused(false);
-                    }}
+                    onClick={handleClear}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
                     title="Clear search"
                 >
@@ -82,12 +119,11 @@ const NoteSearch = ({ searchTerm, onSearchChange, notes, onNoteClick }) => {
                 </button>
             )}
 
-            {/* Dropdown Results */}
-            {searchTerm.trim() && isFocused && (
+            {searchTerm.trim() && isFocused && !isSearching && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50">
-                    {filteredNotes.length > 0 ? (
+                    {searchResults.length > 0 ? (
                         <div className="py-2">
-                            {filteredNotes.map((note) => (
+                            {searchResults.map((note) => (
                                 <div
                                     key={note.id}
                                     onClick={() => handleNoteClick(note.id)}
