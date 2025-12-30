@@ -274,7 +274,7 @@ const Login = () => {
                                         Keep me logged in
                                     </label>
                                 </div>
-                                <button type="button" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">Forgot password?</button>
+                                <Link to="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">Forgot password?</Link>
                             </div>
 
                             {/* Submit Button */}

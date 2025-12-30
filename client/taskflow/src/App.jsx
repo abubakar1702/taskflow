@@ -3,6 +3,7 @@ import Tasks from './pages/Tasks';
 import TaskDetail from "./pages/TaskDetail/TaskDetail";
 import Login from './components/auth/Login';
 import SignUp from './components/auth/SignUp';
+import ForgotPassword from './components/auth/ForgotPassword';
 import PrivateLayout from './components/layouts/PrivateLayout';
 import PublicLayout from './components/layouts/PublicLayout';
 import { ToastContainer } from 'react-toastify';
@@ -25,6 +26,7 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
         </Route>
 
         <Route element={<PrivateLayout />}>

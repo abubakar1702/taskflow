@@ -413,7 +413,7 @@ const SignUp = () => {
                         />
 
                         {/* Sign In Link */}
-                        <div className="mt-6 text-center">
+                        <div className="mt-6 text-center space-y-2">
                             <p className="text-sm text-gray-600">
                                 Already have an account?{" "}
                                 <Link
@@ -423,6 +423,12 @@ const SignUp = () => {
                                     Sign in
                                 </Link>
                             </p>
+                            <Link
+                                to="/forgot-password"
+                                className="text-sm font-semibold text-purple-600 hover:text-purple-700 transition-colors inline-block"
+                            >
+                                Forgot Password?
+                            </Link>
                         </div>
                     </div>
                 </div>
