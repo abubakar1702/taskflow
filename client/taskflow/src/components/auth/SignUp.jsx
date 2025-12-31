@@ -5,6 +5,7 @@ import axios from "axios";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { ClipLoader } from "react-spinners";
 import GoogleAuth from "./GoogleAuth";
+import OTPVerification from "./OTPVerification";
 
 const SignUp = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -19,6 +20,9 @@ const SignUp = () => {
     const navigate = useNavigate();
 
     const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
+    const [step, setStep] = useState(0);
+    const [otp, setOtp] = useState("");
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -85,49 +89,8 @@ const SignUp = () => {
             );
 
             if (registerResponse.status === 201 || registerResponse.status === 200) {
-                try {
-                    const loginResponse = await axios.post(
-                        `${API_BASE_URL}/user/login/`,
-                        {
-                            email: formData.email,
-                            password: formData.password,
-                        },
-                        {
-                            withCredentials: true,
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-Requested-With": "XMLHttpRequest",
-                            },
-                        }
-                    );
-
-                    if (loginResponse.data?.access) {
-                        const storage = sessionStorage;
-                        storage.setItem("accessToken", loginResponse.data.access);
-
-                        if (loginResponse.data.refresh) {
-                            storage.setItem("refreshToken", loginResponse.data.refresh);
-                        }
-
-                        storage.setItem(
-                            "user",
-                            JSON.stringify({
-                                id: loginResponse.data.user.id,
-                                email: loginResponse.data.user.email,
-                                name: `${loginResponse.data.user.first_name} ${loginResponse.data.user.last_name}`,
-                                firstName: loginResponse.data.user.first_name,
-                                lastName: loginResponse.data.user.last_name,
-                                avatar: loginResponse.data.user.avatar,
-                            })
-                        );
-                        navigate("/", { replace: true });
-                    }
-                } catch (loginErr) {
-                    console.error("Auto-login error:", loginErr);
-                    navigate("/login", {
-                        state: { message: "Account created successfully! Please log in." }
-                    });
-                }
+                setStep(1);
+                setError("");
             }
         } catch (err) {
             console.error("Registration error:", err);
@@ -179,6 +142,12 @@ const SignUp = () => {
                 }
             );
 
+            if (response.data?.action === 'OTP_REQUIRED') {
+                setFormData(prev => ({ ...prev, email: response.data.email }));
+                setStep(1);
+                return;
+            }
+
             if (!response.data?.access) {
                 throw new Error("Invalid response from server");
             }
@@ -214,6 +183,57 @@ const SignUp = () => {
     const handleGoogleError = () => {
         setError("Google sign up failed. Please try again.");
     };
+
+    const handleVerify = async (e) => {
+        e.preventDefault();
+        setError("");
+        setLoading(true);
+
+        try {
+            const response = await axios.post(
+                `${API_BASE_URL}/user/verify-email/`,
+                {
+                    email: formData.email,
+                    otp: otp
+                },
+                {
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                }
+            );
+
+            if (response.status === 200) {
+                const storage = sessionStorage;
+                storage.setItem("accessToken", response.data.access);
+
+                if (response.data.refresh) {
+                    storage.setItem("refreshToken", response.data.refresh);
+                }
+
+                storage.setItem(
+                    "user",
+                    JSON.stringify({
+                        id: response.data.user.id,
+                        email: response.data.user.email,
+                        name: `${response.data.user.first_name} ${response.data.user.last_name}`,
+                        firstName: response.data.user.first_name,
+                        lastName: response.data.user.last_name,
+                        avatar: response.data.user.avatar,
+                    })
+                );
+                navigate("/", { replace: true });
+            }
+
+        } catch (err) {
+            console.error("Verification error:", err);
+            setError(err.response?.data?.detail || "Verification failed. Invalid OTP.");
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <div className="flex items-center justify-center h-screen p-4">
@@ -252,184 +272,200 @@ const SignUp = () => {
                     <div className="w-full md:w-1/2 p-8 md:p-12">
                         <div className="mb-8">
                             <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-                                Create Account
+                                {step === 0 ? "Create Account" : "Verify Email"}
                             </h2>
                             <p className="text-gray-500">
-                                Sign up to get started with TaskFlow
+                                {step === 0 ? "Sign up to get started with TaskFlow" : `Enter the OTP sent to ${formData.email}`}
                             </p>
                         </div>
 
-                        <form className="space-y-4" onSubmit={handleSubmit}>
-                            {/* Name Fields Row */}
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* First Name Field */}
+                        {step === 0 ? (
+                            <form className="space-y-4" onSubmit={handleSubmit}>
+                                {/* Name Fields Row */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* First Name Field */}
+                                    <div className="group">
+                                        <label
+                                            htmlFor="firstName"
+                                            className="block text-sm font-semibold text-gray-700 mb-2"
+                                        >
+                                            First Name
+                                        </label>
+                                        <input
+                                            id="firstName"
+                                            name="firstName"
+                                            type="text"
+                                            autoComplete="given-name"
+                                            value={formData.firstName}
+                                            onChange={handleChange}
+                                            disabled={loading}
+                                            className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("First name")
+                                                ? "border-red-400 bg-red-50"
+                                                : "border-gray-200 bg-gray-50 focus:bg-white"
+                                                } focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
+                                            placeholder="John"
+                                        />
+                                    </div>
+
+                                    {/* Last Name Field */}
+                                    <div className="group">
+                                        <label
+                                            htmlFor="lastName"
+                                            className="block text-sm font-semibold text-gray-700 mb-2"
+                                        >
+                                            Last Name
+                                        </label>
+                                        <input
+                                            id="lastName"
+                                            name="lastName"
+                                            type="text"
+                                            autoComplete="family-name"
+                                            value={formData.lastName}
+                                            onChange={handleChange}
+                                            disabled={loading}
+                                            className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("Last name")
+                                                ? "border-red-400 bg-red-50"
+                                                : "border-gray-200 bg-gray-50 focus:bg-white"
+                                                } focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
+                                            placeholder="Doe"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Email Field */}
                                 <div className="group">
                                     <label
-                                        htmlFor="firstName"
+                                        htmlFor="email"
                                         className="block text-sm font-semibold text-gray-700 mb-2"
                                     >
-                                        First Name
+                                        Email Address
                                     </label>
                                     <input
-                                        id="firstName"
-                                        name="firstName"
-                                        type="text"
-                                        autoComplete="given-name"
-                                        value={formData.firstName}
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        autoComplete="email"
+                                        value={formData.email}
                                         onChange={handleChange}
                                         disabled={loading}
-                                        className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("First name")
+                                        className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("email") || error.includes("Email")
                                             ? "border-red-400 bg-red-50"
                                             : "border-gray-200 bg-gray-50 focus:bg-white"
                                             } focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
-                                        placeholder="John"
+                                        placeholder="you@example.com"
                                     />
                                 </div>
 
-                                {/* Last Name Field */}
+                                {/* Password Field */}
                                 <div className="group">
                                     <label
-                                        htmlFor="lastName"
+                                        htmlFor="password"
                                         className="block text-sm font-semibold text-gray-700 mb-2"
                                     >
-                                        Last Name
+                                        Password
                                     </label>
-                                    <input
-                                        id="lastName"
-                                        name="lastName"
-                                        type="text"
-                                        autoComplete="family-name"
-                                        value={formData.lastName}
-                                        onChange={handleChange}
-                                        disabled={loading}
-                                        className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("Last name")
-                                            ? "border-red-400 bg-red-50"
-                                            : "border-gray-200 bg-gray-50 focus:bg-white"
-                                            } focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
-                                        placeholder="Doe"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Email Field */}
-                            <div className="group">
-                                <label
-                                    htmlFor="email"
-                                    className="block text-sm font-semibold text-gray-700 mb-2"
-                                >
-                                    Email Address
-                                </label>
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    disabled={loading}
-                                    className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("email") || error.includes("Email")
-                                        ? "border-red-400 bg-red-50"
-                                        : "border-gray-200 bg-gray-50 focus:bg-white"
-                                        } focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
-                                    placeholder="you@example.com"
-                                />
-                            </div>
-
-                            {/* Password Field */}
-                            <div className="group">
-                                <label
-                                    htmlFor="password"
-                                    className="block text-sm font-semibold text-gray-700 mb-2"
-                                >
-                                    Password
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        id="password"
-                                        name="password"
-                                        type={showPassword ? "text" : "password"}
-                                        autoComplete="new-password"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        disabled={loading}
-                                        className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("password") || error.includes("Password")
-                                            ? "border-red-400 bg-red-50"
-                                            : "border-gray-200 bg-gray-50 focus:bg-white"
-                                            } focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed pr-12`}
-                                        placeholder="••••••••"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        disabled={loading}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 focus:outline-none disabled:text-gray-300 transition-colors duration-200"
-                                        aria-label={
-                                            showPassword ? "Hide password" : "Show password"
-                                        }
-                                    >
-                                        {showPassword ? (
-                                            <IoEyeOff size={20} />
-                                        ) : (
-                                            <IoEye size={20} />
-                                        )}
-                                    </button>
-                                </div>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Must be at least 8 characters long
-                                </p>
-                            </div>
-
-                            {/* Error Message with Animation */}
-                            {error && (
-                                <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 rounded-lg animate-in slide-in-from-top-2">
-                                    <p className="text-red-700 text-sm font-medium">
-                                        {error}
+                                    <div className="relative">
+                                        <input
+                                            id="password"
+                                            name="password"
+                                            type={showPassword ? "text" : "password"}
+                                            autoComplete="new-password"
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            disabled={loading}
+                                            className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("password") || error.includes("Password")
+                                                ? "border-red-400 bg-red-50"
+                                                : "border-gray-200 bg-gray-50 focus:bg-white"
+                                                } focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed pr-12`}
+                                            placeholder="••••••••"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            disabled={loading}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 focus:outline-none disabled:text-gray-300 transition-colors duration-200"
+                                            aria-label={
+                                                showPassword ? "Hide password" : "Show password"
+                                            }
+                                        >
+                                            {showPassword ? (
+                                                <IoEyeOff size={20} />
+                                            ) : (
+                                                <IoEye size={20} />
+                                            )}
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Must be at least 8 characters long
                                     </p>
                                 </div>
-                            )}
 
-                            {/* Submit Button with Gradient */}
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 hover:-translate-y-0.5 active:translate-y-0"
-                            >
-                                {loading ? (
-                                    <span className="flex items-center justify-center gap-2">
-                                        <ClipLoader size={20} color="#fff" />
-                                        Creating account...
-                                    </span>
-                                ) : (
-                                    "Create Account"
+                                {/* Error Message with Animation */}
+                                {error && (
+                                    <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 rounded-lg animate-in slide-in-from-top-2">
+                                        <p className="text-red-700 text-sm font-medium">
+                                            {error}
+                                        </p>
+                                    </div>
                                 )}
-                            </button>
-                        </form>
 
-                        {/* Google Authentication */}
-                        <GoogleAuth
-                            onSuccess={handleGoogleSuccess}
-                            onError={handleGoogleError}
-                            disabled={loading}
-                        />
-
-                        {/* Sign In Link */}
-                        <div className="mt-6 text-center space-y-2">
-                            <p className="text-sm text-gray-600">
-                                Already have an account?{" "}
-                                <Link
-                                    to="/login"
-                                    className="font-semibold text-purple-600 hover:text-purple-700 transition-colors"
+                                {/* Submit Button with Gradient */}
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 hover:-translate-y-0.5 active:translate-y-0"
                                 >
-                                    Sign in
-                                </Link>
-                            </p>
-                            <Link
-                                to="/forgot-password"
-                                className="text-sm font-semibold text-purple-600 hover:text-purple-700 transition-colors inline-block"
-                            >
-                                Forgot Password?
-                            </Link>
-                        </div>
+                                    {loading ? (
+                                        <span className="flex items-center justify-center gap-2">
+                                            <ClipLoader size={20} color="#fff" />
+                                            Creating account...
+                                        </span>
+                                    ) : (
+                                        "Create Account"
+                                    )}
+                                </button>
+                            </form>
+                        ) : (
+                            // OTP Verification Form
+                            <OTPVerification
+                                otp={otp}
+                                setOtp={setOtp}
+                                handleVerify={handleVerify}
+                                loading={loading}
+                                error={error}
+                                onBack={() => setStep(0)}
+                                backLabel="Back to Sign Up"
+                                theme="purple"
+                            />
+                        )}
+
+                        {step === 0 && (
+                            <>
+                                <GoogleAuth
+                                    onSuccess={handleGoogleSuccess}
+                                    onError={handleGoogleError}
+                                    disabled={loading}
+                                />
+
+                                <div className="mt-6 text-center space-y-2">
+                                    <p className="text-sm text-gray-600">
+                                        Already have an account?{" "}
+                                        <Link
+                                            to="/login"
+                                            className="font-semibold text-purple-600 hover:text-purple-700 transition-colors"
+                                        >
+                                            Sign in
+                                        </Link>
+                                    </p>
+                                    <Link
+                                        to="/forgot-password"
+                                        className="text-sm font-semibold text-purple-600 hover:text-purple-700 transition-colors inline-block"
+                                    >
+                                        Forgot Password?
+                                    </Link>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

@@ -5,6 +5,7 @@ import axios from "axios";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { ClipLoader } from "react-spinners";
 import GoogleAuth from "./GoogleAuth";
+import OTPVerification from "./OTPVerification";
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +17,9 @@ const Login = () => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    const [step, setStep] = useState(0);
+    const [otp, setOtp] = useState("");
 
     const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
@@ -97,6 +101,11 @@ const Login = () => {
                 }
             );
 
+            if (response.data?.action === 'OTP_REQUIRED') {
+                setStep(1);
+                return;
+            }
+
             if (!response.data?.access) {
                 throw new Error("Invalid response from server");
             }
@@ -148,6 +157,12 @@ const Login = () => {
                 }
             );
 
+            if (response.data?.action === 'OTP_REQUIRED') {
+                setFormData(prev => ({ ...prev, email: response.data.email }));
+                setStep(1);
+                return;
+            }
+
             if (!response.data?.access) {
                 throw new Error("Invalid response from server");
             }
@@ -166,6 +181,41 @@ const Login = () => {
     const handleGoogleError = () => {
         setError("Google login failed. Please try again.");
     };
+
+    const handleVerify = async (e) => {
+        e.preventDefault();
+        setError("");
+        setLoading(true);
+
+        try {
+            const response = await axios.post(
+                `${API_BASE_URL}/user/verify-email/`,
+                {
+                    email: formData.email,
+                    otp: otp
+                },
+                {
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                }
+            );
+
+            if (response.status === 200) {
+                if (handleStorage(response.data)) {
+                    navigate("/", { replace: true });
+                }
+            }
+
+        } catch (err) {
+            console.error("Verification error:", err);
+            setError(err.response?.data?.detail || "Verification failed. Invalid OTP.");
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <div className="flex items-center justify-center h-screen p-4">
@@ -202,112 +252,132 @@ const Login = () => {
                     <div className="w-full md:w-1/2 p-8 md:p-12">
                         <div className="mb-10">
                             <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
-                                Welcome Back
+                                {step === 0 ? "Welcome Back" : "Verify Email"}
                             </h2>
-                            <p className="text-gray-500">Sign in to continue to TaskFlow</p>
-                        </div>
-
-                        <form className="space-y-5" onSubmit={handleSubmit}>
-                            {/* Email Field */}
-                            <div className="group">
-                                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    disabled={loading}
-                                    className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("email") || error.includes("Email") ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 focus:bg-white"} focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
-                                    placeholder="you@example.com"
-                                />
-                            </div>
-
-                            {/* Password Field */}
-                            <div className="group">
-                                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-                                <div className="relative">
-                                    <input
-                                        id="password"
-                                        name="password"
-                                        type={showPassword ? "text" : "password"}
-                                        autoComplete="current-password"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        disabled={loading}
-                                        className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("password") || error.includes("Password") ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 focus:bg-white"} focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed pr-12`}
-                                        placeholder="••••••••"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        disabled={loading}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 focus:outline-none disabled:text-gray-300 transition-colors duration-200"
-                                        aria-label={showPassword ? "Hide password" : "Show password"}
-                                    >
-                                        {showPassword ? <IoEyeOff size={20} /> : <IoEye size={20} />}
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Error Message */}
-                            {error && (
-                                <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 rounded-lg animate-in slide-in-from-top-2">
-                                    <p className="text-red-700 text-sm font-medium">{error}</p>
-                                </div>
-                            )}
-
-                            {/* Keep Logged In & Forgot Password */}
-                            <div className="flex items-center justify-between pt-1">
-                                <div className="flex items-center group">
-                                    <input
-                                        id="keepLoggedIn"
-                                        name="keepLoggedIn"
-                                        type="checkbox"
-                                        checked={formData.keepLoggedIn}
-                                        onChange={handleChange}
-                                        disabled={loading}
-                                        className="h-4 w-4 text-blue-600 focus:ring-2 focus:ring-blue-500 border-gray-300 rounded cursor-pointer transition-all"
-                                    />
-                                    <label htmlFor="keepLoggedIn" className="ml-2 block text-sm text-gray-600 cursor-pointer group-hover:text-gray-800 transition-colors">
-                                        Keep me logged in
-                                    </label>
-                                </div>
-                                <Link to="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">Forgot password?</Link>
-                            </div>
-
-                            {/* Submit Button */}
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0"
-                            >
-                                {loading ? (
-                                    <span className="flex items-center justify-center gap-2">
-                                        <ClipLoader size={20} color="#fff" />
-                                        Signing in...
-                                    </span>
-                                ) : "Sign In"}
-                            </button>
-                        </form>
-
-                        {/* Google Authentication */}
-                        <GoogleAuth
-                            onSuccess={handleGoogleSuccess}
-                            onError={handleGoogleError}
-                            disabled={loading}
-                        />
-
-                        {/* Sign Up Link */}
-                        <div className="mt-8 text-center">
-                            <p className="text-sm text-gray-600">
-                                Don't have an account?{" "}
-                                <Link to="/signup" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
-                                    Sign up
-                                </Link>
+                            <p className="text-gray-500">
+                                {step === 0 ? "Sign in to continue to TaskFlow" : `Enter the OTP sent to ${formData.email}`}
                             </p>
                         </div>
+
+                        {step === 0 ? (
+                            <form className="space-y-5" onSubmit={handleSubmit}>
+                                {/* Email Field */}
+                                <div className="group">
+                                    <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        autoComplete="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        disabled={loading}
+                                        className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("email") || error.includes("Email") ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 focus:bg-white"} focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
+                                        placeholder="you@example.com"
+                                    />
+                                </div>
+
+                                {/* Password Field */}
+                                <div className="group">
+                                    <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                                    <div className="relative">
+                                        <input
+                                            id="password"
+                                            name="password"
+                                            type={showPassword ? "text" : "password"}
+                                            autoComplete="current-password"
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            disabled={loading}
+                                            className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("password") || error.includes("Password") ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 focus:bg-white"} focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed pr-12`}
+                                            placeholder="••••••••"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            disabled={loading}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 focus:outline-none disabled:text-gray-300 transition-colors duration-200"
+                                            aria-label={showPassword ? "Hide password" : "Show password"}
+                                        >
+                                            {showPassword ? <IoEyeOff size={20} /> : <IoEye size={20} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Error Message */}
+                                {error && (
+                                    <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 rounded-lg animate-in slide-in-from-top-2">
+                                        <p className="text-red-700 text-sm font-medium">{error}</p>
+                                    </div>
+                                )}
+
+                                {/* Keep Logged In & Forgot Password */}
+                                <div className="flex items-center justify-between pt-1">
+                                    <div className="flex items-center group">
+                                        <input
+                                            id="keepLoggedIn"
+                                            name="keepLoggedIn"
+                                            type="checkbox"
+                                            checked={formData.keepLoggedIn}
+                                            onChange={handleChange}
+                                            disabled={loading}
+                                            className="h-4 w-4 text-blue-600 focus:ring-2 focus:ring-blue-500 border-gray-300 rounded cursor-pointer transition-all"
+                                        />
+                                        <label htmlFor="keepLoggedIn" className="ml-2 block text-sm text-gray-600 cursor-pointer group-hover:text-gray-800 transition-colors">
+                                            Keep me logged in
+                                        </label>
+                                    </div>
+                                    <Link to="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">Forgot password?</Link>
+                                </div>
+
+                                {/* Submit Button */}
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0"
+                                >
+                                    {loading ? (
+                                        <span className="flex items-center justify-center gap-2">
+                                            <ClipLoader size={20} color="#fff" />
+                                            Signing in...
+                                        </span>
+                                    ) : "Sign In"}
+                                </button>
+                            </form>
+                        ) : (
+                            // OTP Form
+                            <OTPVerification
+                                otp={otp}
+                                setOtp={setOtp}
+                                handleVerify={handleVerify}
+                                loading={loading}
+                                error={error}
+                                onBack={() => setStep(0)}
+                                backLabel="Back to Sign In"
+                                theme="blue"
+                            />
+                        )}
+
+                        {step === 0 && (
+                            <>
+                                {/* Google Authentication */}
+                                <GoogleAuth
+                                    onSuccess={handleGoogleSuccess}
+                                    onError={handleGoogleError}
+                                    disabled={loading}
+                                />
+
+                                {/* Sign Up Link */}
+                                <div className="mt-8 text-center">
+                                    <p className="text-sm text-gray-600">
+                                        Don't have an account?{" "}
+                                        <Link to="/signup" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                                            Sign up
+                                        </Link>
+                                    </p>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
