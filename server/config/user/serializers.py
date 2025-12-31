@@ -100,13 +100,14 @@ class GoogleAuthSerializer(serializers.Serializer):
         email = idinfo['email']
         name = idinfo.get('name', '')
 
-        user, _ = User.objects.get_or_create(
-            email=email,
-            defaults={"username": email.split('@')[0], "first_name": name}
-        )
-
-        attrs['user'] = user
+        attrs['email'] = email
+        attrs['name'] = name
         return attrs
+
+
+class VerifyEmailOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(min_length=6, max_length=6)
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):
