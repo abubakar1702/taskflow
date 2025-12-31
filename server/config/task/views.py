@@ -18,6 +18,8 @@ from project.models import Project, ProjectMember
 from project.serializers import ProjectSerializer
 from asset.models import Asset
 from notification.views import send_notification_to_user
+from django.core.mail import send_mail
+from django.conf import settings
 
 class TaskAPIView(generics.ListCreateAPIView):
     queryset = Task.objects.all()
@@ -77,6 +79,17 @@ class TaskAPIView(generics.ListCreateAPIView):
                 "task_title": task.title,
                 "user_email": self.request.user.email,
             })
+
+            # Send email
+            subject = f"New Task Assignment: {task.title}"
+            message = f"Hello {assignee.first_name},\n\nYou have been assigned to a new task: {task.title}.\n\nDescription: {task.description or 'No description provided'}\n\nPlease check the application for more details."
+            from_email = settings.DEFAULT_FROM_EMAIL
+            recipient_list = [assignee.email]
+            
+            try:
+                send_mail(subject, message, from_email, recipient_list, fail_silently=True)
+            except Exception as e:
+                print(f"Failed to send email to {assignee.email}: {e}")
         
 class TaskDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
@@ -156,17 +169,32 @@ class AddAssigneeAPIView(generics.UpdateAPIView):
             missing = set(assignee_ids) - set(users.values_list('id', flat=True))
             return Response({"detail": f"Invalid user IDs: {missing}"}, status=400)
 
-        task.assignees.add(*users)
-        
-        for user in users:
-            send_notification_to_user(user.id, {
-                "type": "task_assigned",
-                "message": f"You have been assigned to task: {task.title}",
-                "task_id": str(task.id),
-                "task_title": task.title,
-                "assigned_by": request.user.email,
-                "timestamp": task.created_at.isoformat() if hasattr(task, 'created_at') else None
-            })
+        existing_ids = set(task.assignees.values_list('id', flat=True))
+        new_users = [user for user in users if user.id not in existing_ids]
+
+        if new_users:
+            task.assignees.add(*new_users)
+            
+            for user in new_users:
+                send_notification_to_user(user.id, {
+                    "type": "task_assigned",
+                    "message": f"You have been assigned to task: {task.title}",
+                    "task_id": str(task.id),
+                    "task_title": task.title,
+                    "assigned_by": request.user.email,
+                    "timestamp": task.created_at.isoformat() if hasattr(task, 'created_at') else None
+                })
+
+                # Send email
+                subject = f"New Task Assignment: {task.title}"
+                message = f"Hello {user.first_name},\n\nYou have been assigned to a task: {task.title}.\n\nDescription: {task.description or 'No description provided'}\n\nPlease check the application for more details."
+                from_email = settings.DEFAULT_FROM_EMAIL
+                recipient_list = [user.email]
+                
+                try:
+                    send_mail(subject, message, from_email, recipient_list, fail_silently=True)
+                except Exception as e:
+                    print(f"Failed to send email to {user.email}: {e}")
         
         return Response({"detail": "Assignees added successfully."})
 
