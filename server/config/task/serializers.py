@@ -86,7 +86,7 @@ class TaskSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'creator','project_id', 'project','assignees_ids', 'assignees', 'status', 'priority','subtasks','subtasks_data','total_assets', 'due_date', 'due_time', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'description', 'creator','project_id', 'project','assignees_ids', 'assignees', 'status', 'priority','subtasks','subtasks_data','total_assets', 'due_date', 'due_time', 'time_taken', 'timer_start_time', 'created_at', 'updated_at']
         
     def create(self, validated_data):
         subtasks_data = validated_data.pop('subtasks_data', [])

@@ -10,8 +10,29 @@ from project.serializers import ProjectSerializer
 from task.models import Task
 from task.serializers import TaskSerializer
 
+from rest_framework import serializers
+
+class TeamTaskSerializer(serializers.ModelSerializer):
+    project_id = serializers.CharField(source='project.id', read_only=True)
+    class Meta:
+        model = Task
+        fields = ['id', 'title', 'timer_start_time', 'time_taken', 'project_id', 'status']
+
+class TeamUserSerializer(UserSerializer):
+    running_tasks = serializers.SerializerMethodField()
+
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + ['running_tasks']
+
+    def get_running_tasks(self, obj):
+        tasks = Task.objects.filter(
+            assignees=obj,
+            timer_start_time__isnull=False
+        )
+        return TeamTaskSerializer(tasks, many=True).data
+
 class TeamAPIView(generics.ListAPIView):
-    serializer_class = UserSerializer
+    serializer_class = TeamUserSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
