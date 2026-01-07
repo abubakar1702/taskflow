@@ -1,7 +1,8 @@
 import { format } from "date-fns";
 import { IoCalendarOutline } from "react-icons/io5";
+import TaskTimer from "./TaskTimer";
 
-const DueDate = ({ task }) => {
+const DueDate = ({ task, onUpdate, isCreator }) => {
     if (!task) return null;
 
     const now = new Date();
@@ -47,6 +48,8 @@ const DueDate = ({ task }) => {
                 <span className="font-medium text-base">{formatDateTime()}</span>
                 {label}
             </div>
+
+            <TaskTimer task={task} onUpdate={onUpdate} isCreator={isCreator} />
         </div>
     );
 };

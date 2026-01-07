@@ -33,7 +33,7 @@ const TaskDetail = () => {
         }
     }, [taskData]);
 
-    if (loading) {
+    if (loading && !task) {
         return (
             <div className="flex items-center justify-center h-full">
                 <ClipLoader color="#021af3ff" size={100} />
@@ -107,7 +107,7 @@ const TaskDetail = () => {
                     {/* Sidebar - Right side (1/3) */}
                     <div className="space-y-6">
                         {/* Due date card */}
-                        <DueDate task={task} />
+                        <DueDate task={task} onUpdate={refetch} isCreator={isCreator} />
 
                         {/* Creator and Assignees Card */}
                         <div className="bg-white rounded-xl shadow-sm p-6 space-y-6 border border-gray-100">
@@ -128,7 +128,7 @@ const TaskDetail = () => {
                         </div>
 
                         {/* Asset Section */}
-                        <AssetSection total_assets ={task.total_assets} task={task} taskId={task.id} projectId={task.project?.id || null} />
+                        <AssetSection total_assets={task.total_assets} task={task} taskId={task.id} projectId={task.project?.id || null} />
 
                     </div>
                 </div>
