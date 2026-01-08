@@ -42,20 +42,11 @@ class TaskAPIView(generics.ListCreateAPIView):
             .select_related('project', 'creator')
             .prefetch_related('assignees')
         )
-        
-    def filter_queryset(self, queryset):
-        for backend in list(self.filter_backends):
-            if backend == DjangoFilterBackend:
-                filterset = self.filterset_class(
-                    self.request.GET, 
-                    queryset=queryset,
-                    request=self.request
-                )
-                if filterset.is_valid():
-                    queryset = filterset.qs
-            else:
-                queryset = backend().filter_queryset(self.request, queryset, self)
-        return queryset
+    
+    def get_filterset_kwargs(self, *args, **kwargs):
+        kwargs = super().get_filterset_kwargs(*args, **kwargs)
+        kwargs['request'] = self.request
+        return kwargs
     
     def perform_create(self, serializer):
         project = serializer.validated_data.get('project')
@@ -299,3 +290,24 @@ class UnmarkImportantAPIView(generics.DestroyAPIView):
             user=self.request.user
         )
 
+class RunningTasksAPIView(generics.ListAPIView):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):        
+        from datetime import timedelta
+        
+        return (
+            Task.objects.filter(
+                Q(creator=self.request.user) |
+                Q(assignees__in=[self.request.user]) |
+                Q(project__members__in=[self.request.user])
+            ).filter(
+                Q(timer_start_time__isnull=False) | 
+                (Q(status='In Progress') & Q(time_taken__gt=timedelta(0)))
+            )
+            .distinct()
+            .select_related('project', 'creator')
+            .prefetch_related('assignees')
+            .order_by('-timer_start_time', '-updated_at')
+        )

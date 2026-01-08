@@ -12,24 +12,30 @@ from task.serializers import TaskSerializer
 
 from rest_framework import serializers
 
-class TeamTaskSerializer(serializers.ModelSerializer):
-    project_id = serializers.CharField(source='project.id', read_only=True)
+class TeamProjectSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Task
-        fields = ['id', 'title', 'timer_start_time', 'time_taken', 'project_id', 'status']
+        model = Project
+        fields = ['id', 'name']
 
 class TeamUserSerializer(UserSerializer):
-    running_tasks = serializers.SerializerMethodField()
+    projects = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + ['running_tasks']
+        fields = UserSerializer.Meta.fields + ['projects']
 
-    def get_running_tasks(self, obj):
-        tasks = Task.objects.filter(
-            assignees=obj,
-            timer_start_time__isnull=False
-        )
-        return TeamTaskSerializer(tasks, many=True).data
+    def get_projects(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return []
+            
+        request_user = request.user
+        
+        # Return only projects where BOTH the target member (obj) AND the requesting user are involved
+        projects = Project.objects.filter(
+            (Q(creator=obj) | Q(members=obj)) &
+            (Q(creator=request_user) | Q(members=request_user))
+        ).distinct()
+        return TeamProjectSerializer(projects, many=True).data
 
 class TeamAPIView(generics.ListAPIView):
     serializer_class = TeamUserSerializer
