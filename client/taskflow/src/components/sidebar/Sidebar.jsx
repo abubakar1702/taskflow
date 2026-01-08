@@ -8,6 +8,7 @@ import {
     FiMessageSquare,
     FiList,
     FiHome,
+    FiClock,
 } from "react-icons/fi";
 import { FaRegStar, FaPlus, FaRegCalendar, FaRegFolder, FaRegMessage } from "react-icons/fa6";
 import { GrNotes } from "react-icons/gr";
@@ -71,6 +72,12 @@ const Sidebar = ({ collapsed, setCollapsed, isMobile }) => {
                     icon={<FiList />}
                     label="Tasks"
                     to="/tasks"
+                    collapsed={collapsed}
+                />
+                <SidebarItem
+                    icon={<FiClock />}
+                    label="In Progress"
+                    to="/tasks/running"
                     collapsed={collapsed}
                 />
                 <SidebarItem

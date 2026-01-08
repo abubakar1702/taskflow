@@ -11,6 +11,8 @@ import DueDate from "./DueDate";
 import TaskInfo from "./TaskInfo";
 import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
 import { toast } from "react-toastify";
+import { FiActivity } from "react-icons/fi";
+import TaskActivity from "./TaskActivity";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
@@ -19,6 +21,7 @@ const TaskDetail = () => {
     const navigate = useNavigate();
     const [task, setTask] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showActivityModal, setShowActivityModal] = useState(false);
     const { isCreator, isAssignee } = useTaskPermissions(task);
 
     const { data: taskData, loading, error, refetch } = useApi(
@@ -78,17 +81,25 @@ const TaskDetail = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
-            <div className="max-w-6xl mx-auto">
-                {/* Back button or breadcrumb */}
-                <div className="mb-6">
+            <div className="max-w-6xl mx-auto px-4">
+                {/* Back button and Activity button */}
+                <div className="mb-6 flex items-center justify-between">
                     <button
                         onClick={() => window.history.back()}
-                        className="flex items-center text-blue-600 hover:text-blue-800"
+                        className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
                     >
                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                         Back
+                    </button>
+
+                    <button
+                        onClick={() => setShowActivityModal(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+                    >
+                        <FiActivity className="w-5 h-5 text-gray-600" />
+                        <span className="font-medium text-gray-700">Activity</span>
                     </button>
                 </div>
 
@@ -129,7 +140,6 @@ const TaskDetail = () => {
 
                         {/* Asset Section */}
                         <AssetSection total_assets={task.total_assets} task={task} taskId={task.id} projectId={task.project?.id || null} />
-
                     </div>
                 </div>
             </div>
@@ -141,6 +151,12 @@ const TaskDetail = () => {
                 title="Delete Task"
                 message="Are you sure you want to delete this task? This action cannot be undone."
                 isLoading={deleteLoading}
+            />
+
+            <TaskActivity 
+                isOpen={showActivityModal}
+                onClose={() => setShowActivityModal(false)}
+                taskTitle={task?.title}
             />
         </div>
     );

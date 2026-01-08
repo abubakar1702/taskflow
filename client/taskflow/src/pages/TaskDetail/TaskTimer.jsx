@@ -94,31 +94,68 @@ const TaskTimer = ({ task, onUpdate, isCreator }) => {
     };
 
     const handleStop = async () => {
-        handlePause();
+        try {
+            const durationStr = formatTime(seconds);
+            const payload = {
+                status: "To Do",
+                time_taken: durationStr,
+                timer_start_time: null
+            };
+
+            await makeRequest(`/api/tasks/${task.id}/`, "PATCH", payload);
+            onUpdate();
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to stop timer");
+        }
     };
 
     const isRunning = !!task?.timer_start_time;
+    const isPaused = !isRunning && task.status === 'In Progress' && parseDuration(task.time_taken) > 0;
+
+    const getTimeStyle = () => {
+        if (isRunning) return "text-green-600 animate-pulse";
+        if (isPaused) return "text-amber-500";
+        return "text-gray-700";
+    };
 
     return (
         <div className="mt-4 pt-4 border-t border-gray-100">
             <p className="text-lg py-2 font-semibold">Time Tracker</p>
-            <div className={`flex items-center ${isCreator ? 'justify-between' : 'justify-center'} bg-gray-50 p-3 rounded-lg`}>
-                <span className="text-2xl font-mono text-gray-700 font-bold">
-                    {formatDisplayTime(seconds)}
-                </span>
+            <div className={`flex items-center ${isCreator ? 'justify-between' : 'justify-center'} bg-gray-50 p-3 rounded-lg relative overflow-hidden`}>
+                <div className="flex flex-col items-center">
+                    <span className={`text-2xl font-mono font-bold transition-colors ${getTimeStyle()}`}>
+                        {formatDisplayTime(seconds)}
+                    </span>
+                    {isPaused && <span className="text-[10px] uppercase font-bold text-amber-500 tracking-widest mt-0.5">Paused</span>}
+                    {isRunning && <span className="text-[10px] uppercase font-bold text-green-500 tracking-widest mt-0.5">Running</span>}
+                </div>
 
                 {isCreator && (
                     <div className="flex items-center space-x-2">
                         {!isRunning ? (
-                            <button
-                                type="button"
-                                onClick={handleStart}
-                                disabled={loading}
-                                className="p-2 bg-green-500 rounded-full text-white hover:bg-green-600 transition shadow-sm"
-                                title="Start Timer"
-                            >
-                                <IoPlay className="w-5 h-5 pl-0.5" />
-                            </button>
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={handleStart}
+                                    disabled={loading}
+                                    className="p-2 bg-green-500 rounded-full text-white hover:bg-green-600 transition shadow-sm"
+                                    title={isPaused ? "Resume Timer" : "Start Timer"}
+                                >
+                                    <IoPlay className="w-5 h-5 pl-0.5" />
+                                </button>
+                                {isPaused && (
+                                    <button
+                                        type="button"
+                                        onClick={handleStop}
+                                        disabled={loading}
+                                        className="p-2 bg-red-500 rounded-full text-white hover:bg-red-600 transition shadow-sm"
+                                        title="Stop Timer (Reset)"
+                                    >
+                                        <IoStop className="w-5 h-5" />
+                                    </button>
+                                )}
+                            </>
                         ) : (
                             <>
                                 <button
@@ -135,7 +172,7 @@ const TaskTimer = ({ task, onUpdate, isCreator }) => {
                                     onClick={handleStop}
                                     disabled={loading}
                                     className="p-2 bg-red-500 rounded-full text-white hover:bg-red-600 transition shadow-sm"
-                                    title="Stop Timer"
+                                    title="Stop Timer (Reset)"
                                 >
                                     <IoStop className="w-5 h-5" />
                                 </button>

@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Tasks from './pages/Tasks';
 import TaskDetail from "./pages/TaskDetail/TaskDetail";
+import RunningTasks from "./pages/RunningTasks";
 import Login from './components/auth/Login';
 import SignUp from './components/auth/SignUp';
 import ForgotPassword from './components/auth/ForgotPassword';
@@ -31,6 +32,7 @@ function App() {
 
         <Route element={<PrivateLayout />}>
           <Route path="/tasks" element={<Tasks />} />
+          <Route path="/tasks/running" element={<RunningTasks />} />
           <Route path="/" element={<Home />} />
           <Route path="/team" element={<Team />} />
           <Route path="/tasks/:id" element={<TaskDetail />} />
