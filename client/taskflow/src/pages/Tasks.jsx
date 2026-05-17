@@ -75,13 +75,13 @@ const Tasks = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-200">
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <h1 className="text-3xl font-bold text-gray-900">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                         Tasks{" "}
                         {!loading && tasks && (
-                            <span className="text-gray-400 font-medium text-2xl ml-2">({tasks.length})</span>
+                            <span className="text-gray-400 dark:text-slate-500 font-medium text-2xl ml-2">({tasks.length})</span>
                         )}
                     </h1>
                     <div className="flex items-center gap-3 w-full md:w-auto">
@@ -108,12 +108,12 @@ const Tasks = () => {
                             </button>
                         </div>
                     ) : !tasks || tasks.length === 0 ? (
-                        <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
-                            <div className="bg-blue-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-xl border border-dashed border-gray-300 dark:border-slate-800">
+                            <div className="bg-blue-50 dark:bg-blue-950/50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <FaClipboardList className="h-10 w-10 text-blue-400" />
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">No tasks found</h3>
-                            <p className="text-gray-500 mb-8 max-w-sm mx-auto">
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No tasks found</h3>
+                            <p className="text-gray-500 dark:text-slate-400 mb-8 max-w-sm mx-auto">
                                 You don't have any tasks matching your filters. Create a new task to get started.
                             </p>
                             <Link to="/new-task/">
@@ -129,9 +129,9 @@ const Tasks = () => {
                                     {tasks.map((task) => <TaskCard key={task.id} {...task} />)}
                                 </div>
                             ) : (
-                                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                                    <div className="bg-gray-50 border-b border-gray-200 px-6 py-3">
-                                        <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
+                                    <div className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-200 dark:border-slate-800 px-6 py-3">
+                                        <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
                                             <div className="col-span-4">Title</div>
                                             <div className="col-span-1">Status</div>
                                             <div className="col-span-1">Priority</div>
@@ -141,12 +141,12 @@ const Tasks = () => {
                                             <div className="col-span-1">Assignees</div>
                                         </div>
                                     </div>
-                                    <div className="divide-y divide-gray-100">
+                                    <div className="divide-y divide-gray-100 dark:divide-slate-800">
                                         {tasks.map((task) => (
-                                            <div key={task.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+                                            <div key={task.id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
                                                 <div className="grid grid-cols-12 gap-4 items-center">
                                                     <div className="col-span-4">
-                                                        <Link to={`/tasks/${task.id}`} className="text-sm font-semibold text-gray-900 hover:text-blue-600 line-clamp-2 block">
+                                                        <Link to={`/tasks/${task.id}`} className="text-sm font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 line-clamp-2 block">
                                                             {task.title}
                                                         </Link>
                                                         <div className="flex items-center gap-2">
@@ -174,19 +174,19 @@ const Tasks = () => {
                                                         </span>
                                                     </div>
                                                     <div className="col-span-2">
-                                                        <span className="text-sm font-medium text-gray-800 truncate block">
+                                                        <span className="text-sm font-medium text-gray-800 dark:text-slate-200 truncate block">
                                                             {task.project?.name || "No Project"}
                                                         </span>
                                                     </div>
                                                     <div className="col-span-2">
                                                         <div className="flex items-center gap-2">
                                                             <Avatar name={task.creator?.display_name} url={task.creator?.avatar} size={6} />
-                                                            <span className="text-sm text-gray-700 truncate">{task.creator?.display_name}</span>
+                                                            <span className="text-sm text-gray-700 dark:text-slate-300 truncate">{task.creator?.display_name}</span>
                                                         </div>
                                                     </div>
                                                     <div className="col-span-1">
                                                         {task.due_date ? (
-                                                            <div className={`text-sm ${isOverdue(task) ? "text-red-600 font-medium" : "text-gray-600"}`}>
+                                                            <div className={`text-sm ${isOverdue(task) ? "text-red-600 dark:text-red-400 font-medium" : "text-gray-600 dark:text-slate-400"}`}>
                                                                 <div className="flex items-center gap-1">
                                                                     <FaCalendarAlt className="w-3 h-3" />
                                                                     <span className="text-xs">{formatDate(task.due_date)}</span>
@@ -199,25 +199,25 @@ const Tasks = () => {
                                                                 )}
                                                             </div>
                                                         ) : (
-                                                            <span className="text-xs text-gray-400">-</span>
+                                                            <span className="text-xs text-gray-400 dark:text-slate-600">-</span>
                                                         )}
                                                     </div>
                                                     <div className="col-span-1">
                                                         {task.assignees && task.assignees.length > 0 ? (
                                                             <div className="flex items-center -space-x-2">
                                                                 {task.assignees.slice(0, 3).map((assignee, index) => (
-                                                                    <div key={assignee.id} className="relative ring-2 ring-white rounded-full" style={{ zIndex: 3 - index }}>
+                                                                    <div key={assignee.id} className="relative ring-2 ring-white dark:ring-slate-900 rounded-full" style={{ zIndex: 3 - index }}>
                                                                         <Avatar name={assignee.display_name} url={assignee.avatar} size={6} />
                                                                     </div>
                                                                 ))}
                                                                 {task.assignees.length > 3 && (
-                                                                    <div className="w-6 h-6 rounded-full bg-gray-100 ring-2 ring-white flex items-center justify-center text-xs font-semibold text-gray-600" style={{ zIndex: 0 }}>
+                                                                    <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-slate-800 ring-2 ring-white dark:ring-slate-900 flex items-center justify-center text-xs font-semibold text-gray-600 dark:text-slate-300" style={{ zIndex: 0 }}>
                                                                         +{task.assignees.length - 3}
                                                                     </div>
                                                                 )}
                                                             </div>
                                                         ) : (
-                                                            <span className="text-xs text-gray-400 italic">None</span>
+                                                            <span className="text-xs text-gray-400 dark:text-slate-600 italic">None</span>
                                                         )}
                                                     </div>
                                                 </div>

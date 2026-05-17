@@ -58,12 +58,12 @@ const FilterBar = ({ onFilterUpdate, viewMode, setViewMode }) => {
 
             <div className="flex items-center gap-3">
                 {/* View Mode Switcher */}
-                <div className="bg-white p-0.5 rounded-md border border-gray-200 flex items-center shadow-sm">
+                <div className="bg-white dark:bg-slate-900 p-0.5 rounded-md border border-gray-200 dark:border-slate-800 flex items-center shadow-sm">
                     <button
                         onClick={() => setViewMode("list")}
                         className={`p-1.5 rounded transition ${viewMode === "list"
-                                ? "bg-blue-50 text-blue-600"
-                                : "text-gray-400 hover:text-gray-600"
+                                ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
+                                : "text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"
                             }`}
                         title="List View"
                     >
@@ -72,8 +72,8 @@ const FilterBar = ({ onFilterUpdate, viewMode, setViewMode }) => {
                     <button
                         onClick={() => setViewMode("grid")}
                         className={`p-1.5 rounded transition ${viewMode === "grid"
-                                ? "bg-blue-50 text-blue-600"
-                                : "text-gray-400 hover:text-gray-600"
+                                ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
+                                : "text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300"
                             }`}
                         title="Grid View"
                     >

@@ -92,15 +92,15 @@ const TaskTimer = ({ task, onUpdate, isCreator }) => {
     const isPaused = !isRunning && task.status === 'In Progress' && parseDuration(task.time_taken) > 0;
 
     const getTimeStyle = () => {
-        if (isRunning) return "text-green-600 animate-pulse";
-        if (isPaused) return "text-amber-500";
-        return "text-gray-700";
+        if (isRunning) return "text-green-600 dark:text-green-400 animate-pulse";
+        if (isPaused) return "text-amber-500 dark:text-amber-400";
+        return "text-gray-700 dark:text-slate-200";
     };
 
     return (
-        <div className="mt-4 pt-4 border-t border-gray-100">
-            <p className="text-lg py-2 font-semibold">Time Tracker</p>
-            <div className={`flex items-center ${isCreator ? 'justify-between' : 'justify-center'} bg-gray-50 p-3 rounded-lg relative overflow-hidden`}>
+        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-slate-800">
+            <p className="text-lg py-2 font-semibold text-gray-900 dark:text-white">Time Tracker</p>
+            <div className={`flex items-center ${isCreator ? 'justify-between' : 'justify-center'} bg-gray-50 dark:bg-slate-800/50 p-3 rounded-lg relative overflow-hidden`}>
                 <div className="flex flex-col items-center">
                     <span className={`text-2xl font-mono font-bold transition-colors ${getTimeStyle()}`}>
                         {formatDisplayTime(seconds)}

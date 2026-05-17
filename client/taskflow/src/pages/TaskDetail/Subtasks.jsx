@@ -107,8 +107,8 @@ const Subtasks = ({ task }) => {
                 key={subtask.id}
                 className={`flex items-center p-3 rounded-lg transition-colors ${
                     subtask.is_completed
-                        ? "border border-green-400 bg-gray-50 hover:bg-gray-100"
-                        : "border border-gray-200 bg-gray-50 hover:bg-gray-100"
+                        ? "border border-green-400 dark:border-green-600 bg-gray-50 dark:bg-slate-800/40 hover:bg-gray-100 dark:hover:bg-slate-800"
+                        : "border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/40 hover:bg-gray-100 dark:hover:bg-slate-800"
                 }`}
             >
                 {canToggle && (
@@ -118,7 +118,7 @@ const Subtasks = ({ task }) => {
                         className={`w-6 h-6 flex-shrink-0 flex items-center justify-center border-2 rounded-full mr-3 ${
                             subtask.is_completed
                                 ? "bg-green-500 border-green-500"
-                                : "border-gray-300 hover:border-gray-400"
+                                : "border-gray-300 dark:border-slate-700 hover:border-gray-400 dark:hover:border-slate-600"
                         }`}
                     >
                         {subtask.is_completed && <FiCheckCircle color="white" />}
@@ -126,7 +126,7 @@ const Subtasks = ({ task }) => {
                 )}
 
                 <div className="flex-grow">
-                    <p className={`font-medium ${subtask.is_completed ? "text-gray-500" : "text-gray-900"}`}>
+                    <p className={`font-medium ${subtask.is_completed ? "text-gray-500 dark:text-slate-500" : "text-gray-900 dark:text-white"}`}>
                         {subtask.text}
                     </p>
                     {subtask.assignee && (
@@ -136,7 +136,7 @@ const Subtasks = ({ task }) => {
                             ) : (
                                 <Avatar name={subtask.assignee.display_name} size={4} className="mr-1" />
                             )}
-                            <span className="text-xs text-gray-600">{subtask.assignee.display_name}</span>
+                            <span className="text-xs text-gray-600 dark:text-slate-400">{subtask.assignee.display_name}</span>
                         </div>
                     )}
                 </div>
@@ -147,7 +147,7 @@ const Subtasks = ({ task }) => {
                         <button
                             type="button"
                             onClick={() => setShowSubtaskAction(showSubtaskAction === subtask.id ? null : subtask.id)}
-                            className="text-gray-500 hover:text-gray-700 p-1 hover:bg-gray-200 rounded-full transition-colors"
+                            className="text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 p-1 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-full transition-colors"
                         >
                             <PiDotsThreeCircleVertical className="w-5 h-5" />
                         </button>
@@ -169,7 +169,7 @@ const Subtasks = ({ task }) => {
                     <button
                         type="button"
                         onClick={() => unassignFromMe(subtask.id)}
-                        className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-200 rounded-full transition-colors"
+                        className="text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 p-2 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-full transition-colors"
                         title="Unassign from me"
                     >
                         <PiUserCircleMinusThin className="w-5 h-5" />
@@ -181,7 +181,7 @@ const Subtasks = ({ task }) => {
                     <button
                         type="button"
                         onClick={() => assignToMe(subtask.id)}
-                        className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-200 rounded-full transition-colors"
+                        className="text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 p-2 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-full transition-colors"
                         title="Assign to me"
                     >
                         <PiUserCirclePlusLight className="w-5 h-5" />
@@ -195,11 +195,11 @@ const Subtasks = ({ task }) => {
     return (
         <div className="space-y-4">
             <div className="flex justify-between items-center mb-3">
-                <h2 className="text-lg font-semibold text-gray-900">Subtasks</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Subtasks</h2>
                 {isCreator && (
                     <button
                         onClick={() => setShowAddSubtaskModal(true)}
-                        className="flex items-center px-2 py-1 border border-blue-600 text-blue-600 rounded hover:bg-blue-50 transition-colors"
+                        className="flex items-center px-2 py-1 border border-blue-600 dark:border-blue-500 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors"
                     >
                         <FaPlus className="mr-2" /> Add Subtask
                     </button>
@@ -209,14 +209,14 @@ const Subtasks = ({ task }) => {
             {totalSubtasks > 0 && (
                 <div className="mb-6">
                     <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
                             {completedSubtasks} of {totalSubtasks} completed
                         </span>
-                        <span className="text-sm font-semibold text-blue-600">
+                        <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
                             {Math.round((completedSubtasks / totalSubtasks) * 100)}%
                         </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 dark:bg-slate-800 rounded-full h-2">
                         <div
                             className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${(completedSubtasks / totalSubtasks) * 100}%` }}
@@ -227,7 +227,7 @@ const Subtasks = ({ task }) => {
 
             {totalSubtasks === 0 && (
                 <div className="text-center py-8">
-                    <p className="text-gray-500 text-sm">No subtasks yet. Click "Add Subtask" to create one.</p>
+                    <p className="text-gray-500 dark:text-slate-400 text-sm">No subtasks yet. Click "Add Subtask" to create one.</p>
                 </div>
             )}
 
@@ -236,8 +236,8 @@ const Subtasks = ({ task }) => {
                     {mySubtasks.length > 0 && (
                         <div>
                             <div className="flex items-center mb-3">
-                                <h3 className="text-sm font-semibold text-blue-900">Assigned to You</h3>
-                                <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">{mySubtasks.length}</span>
+                                <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-400">Assigned to You</h3>
+                                <span className="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-xs font-semibold rounded-full">{mySubtasks.length}</span>
                             </div>
                             <div className="space-y-2">{mySubtasks.map(renderSubtask)}</div>
                         </div>
@@ -245,8 +245,8 @@ const Subtasks = ({ task }) => {
                     {teamSubtasks.length > 0 && (
                         <div>
                             <div className="flex items-center mb-3">
-                                <h3 className="text-sm font-semibold text-purple-900">Team</h3>
-                                <span className="ml-2 px-2 py-0.5 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">{teamSubtasks.length}</span>
+                                <h3 className="text-sm font-semibold text-purple-900 dark:text-purple-400">Team</h3>
+                                <span className="ml-2 px-2 py-0.5 bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 text-xs font-semibold rounded-full">{teamSubtasks.length}</span>
                             </div>
                             <div className="space-y-2">{teamSubtasks.map(renderSubtask)}</div>
                         </div>
@@ -254,8 +254,8 @@ const Subtasks = ({ task }) => {
                     {unassignedSubtasks.length > 0 && (
                         <div>
                             <div className="flex items-center mb-3">
-                                <h3 className="text-sm font-semibold text-gray-700">Unassigned</h3>
-                                <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full">{unassignedSubtasks.length}</span>
+                                <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300">Unassigned</h3>
+                                <span className="ml-2 px-2 py-0.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 text-xs font-semibold rounded-full">{unassignedSubtasks.length}</span>
                             </div>
                             <div className="space-y-2">{unassignedSubtasks.map(renderSubtask)}</div>
                         </div>

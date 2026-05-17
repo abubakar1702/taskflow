@@ -11,8 +11,8 @@ const FilterTabs = ({ activeTab, onTabChange }) => {
             px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
             ${
               activeTab === tab
-                ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md shadow-blue-200 scale-105"
-                : "bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 border border-gray-200"
+                ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md shadow-blue-200 dark:shadow-none scale-105"
+                : "bg-white dark:bg-slate-900 text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-slate-800"
             }
           `}
         >

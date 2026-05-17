@@ -31,7 +31,7 @@ const PrivateLayout = () => {
 
     return (
         <UserProvider>
-            <div className="flex bg-gray-50 min-h-screen pt-16">
+            <div className="flex bg-gray-50 dark:bg-slate-950 dark:text-slate-100 min-h-screen pt-16 transition-colors duration-200">
                 <Navbar />
                 {isMobile && !collapsed && (
                     <div

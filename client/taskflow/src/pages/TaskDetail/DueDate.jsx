@@ -19,18 +19,18 @@ const DueDate = ({ task, onUpdate, isCreator }) => {
     const isOverdue = dueDate && dueDate < now && !isCompleted;
     const isDueToday = dueDate && dueDate.toDateString() === now.toDateString() && !isOverdue && !isCompleted;
 
-    let textColor = "text-gray-700";
-    let iconColor = "text-gray-400";
+    let textColor = "text-gray-700 dark:text-slate-200";
+    let iconColor = "text-gray-400 dark:text-slate-400";
     let label = null;
 
     if (isOverdue) {
-        textColor = "text-red-600";
-        iconColor = "text-red-500";
-        label = <span className="ml-2 text-sm font-semibold text-red-600">(Overdue)</span>;
+        textColor = "text-red-600 dark:text-red-400";
+        iconColor = "text-red-500 dark:text-red-400";
+        label = <span className="ml-2 text-sm font-semibold text-red-600 dark:text-red-400">(Overdue)</span>;
     } else if (isDueToday) {
-        textColor = "text-purple-600";
-        iconColor = "text-purple-500";
-        label = <span className="ml-2 text-sm font-semibold text-purple-600">(Today)</span>;
+        textColor = "text-purple-600 dark:text-purple-400";
+        iconColor = "text-purple-500 dark:text-purple-400";
+        label = <span className="ml-2 text-sm font-semibold text-purple-600 dark:text-purple-400">(Today)</span>;
     }
 
     const formatDateTime = () => {
@@ -41,8 +41,8 @@ const DueDate = ({ task, onUpdate, isCreator }) => {
     };
 
     return (
-        <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-lg py-2 font-semibold">Due Date</p>
+        <div className="bg-white dark:bg-slate-900 rounded-lg shadow border border-transparent dark:border-slate-800 p-4">
+            <p className="text-lg py-2 font-semibold text-gray-900 dark:text-white">Due Date</p>
             <div className={`flex items-center ${textColor}`}>
                 <IoCalendarOutline className={`w-5 h-5 mr-3 ${iconColor}`} />
                 <span className="font-medium text-base">{formatDateTime()}</span>

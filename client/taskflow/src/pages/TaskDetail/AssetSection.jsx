@@ -96,13 +96,13 @@ const AssetSection = ({ task, taskId, projectId, total_assets }) => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg p-6 shadow border border-gray-200">
+      <div className="bg-white dark:bg-slate-900 rounded-lg p-6 shadow border border-transparent dark:border-slate-800">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Assets ({total_assets || 0})</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Assets ({total_assets || 0})</h2>
         </div>
         <div className="flex flex-col items-center justify-center py-12">
           <ClipLoader color="#3B82F6" size={40} />
-          <p className="mt-4 text-gray-500">Loading assets...</p>
+          <p className="mt-4 text-gray-500 dark:text-slate-400">Loading assets...</p>
         </div>
       </div>
     );
@@ -112,41 +112,41 @@ const AssetSection = ({ task, taskId, projectId, total_assets }) => {
 
   return (
     <>
-      <div className="bg-white rounded-lg p-6 shadow border border-gray-200">
+      <div className="bg-white dark:bg-slate-900 rounded-lg p-6 shadow border border-transparent dark:border-slate-800">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Assets ({total_assets})</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Assets ({total_assets})</h2>
           {canUpload && (
-            <button onClick={handleUploadClick} className="flex items-center gap-2 px-2 py-1 border border-blue-600 text-blue-600 hover:bg-blue-50 rounded">
+            <button onClick={handleUploadClick} className="flex items-center gap-2 px-2 py-1 border border-blue-600 dark:border-blue-500 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 rounded">
               <IoCloudUploadOutline className="w-5 h-5" /> Upload
             </button>
           )}
         </div>
 
         {assets.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No assets found</p>
+          <p className="text-gray-500 dark:text-slate-400 text-center py-8">No assets found</p>
         ) : (
           <ul className="space-y-3">
             {assets.map((asset) => (
-              <li key={asset.id} className="p-3 bg-gray-50 rounded flex items-center space-x-4 group">
+              <li key={asset.id} className="p-3 bg-gray-50 dark:bg-slate-800/50 rounded flex items-center space-x-4 group">
                 {isImage(asset.file) ? (
-                  <img src={asset.file} alt="Asset" className="w-16 h-16 object-cover rounded border border-gray-200" />
+                  <img src={asset.file} alt="Asset" className="w-16 h-16 object-cover rounded border border-gray-200 dark:border-slate-700" />
                 ) : (
-                  <div className="w-16 h-16 bg-blue-100 rounded flex items-center justify-center">
-                    <span className="text-blue-600 font-semibold text-xs uppercase">{getFileExtension(asset.file)}</span>
+                  <div className="w-16 h-16 bg-blue-100 dark:bg-blue-950/50 rounded flex items-center justify-center">
+                    <span className="text-blue-600 dark:text-blue-400 font-semibold text-xs uppercase">{getFileExtension(asset.file)}</span>
                   </div>
                 )}
 
                 <div className="flex-1 min-w-0">
-                  <a href={asset.file} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium truncate block">
+                  <a href={asset.file} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline font-medium truncate block">
                     {asset.file.split('/').pop()}
                   </a>
-                  <p className="text-sm text-gray-600">Uploaded by: {asset.uploaded_by?.display_name || "Unknown"}</p>
-                  <p className="text-xs text-gray-500">{new Date(asset.uploaded_at).toLocaleString()}</p>
+                  <p className="text-sm text-gray-600 dark:text-slate-300">Uploaded by: {asset.uploaded_by?.display_name || "Unknown"}</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400">{new Date(asset.uploaded_at).toLocaleString()}</p>
                 </div>
 
                 {canDelete && (<button
                   onClick={() => openDeleteModal(asset)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-red-600 hover:bg-red-50 rounded"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded"
                   title="Delete asset"
                 >
                   <IoTrashOutline className="w-5 h-5" />

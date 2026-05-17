@@ -20,7 +20,7 @@ const Sidebar = ({ collapsed, setCollapsed, isMobile }) => {
     return (
         <aside
             className={`fixed top-16 left-0 h-[calc(100vh-4rem)] ${collapsed ? "w-20" : "w-64"
-                } bg-white text-black flex flex-col pt-6 px-4 pb-6 space-y-6 overflow-hidden border-r border-gray-200 transition-all duration-200 ${isMobile ? "z-20" : "z-20"
+                } bg-white dark:bg-slate-900 text-black dark:text-slate-100 flex flex-col pt-6 px-4 pb-6 space-y-6 overflow-hidden border-r border-gray-200 dark:border-slate-800 transition-all duration-200 ${isMobile ? "z-20" : "z-20"
                 }`}
             aria-label="Main navigation"
         >
@@ -65,7 +65,7 @@ const Sidebar = ({ collapsed, setCollapsed, isMobile }) => {
                 />
             </nav>
 
-            <hr className="border-gray-200" />
+            <hr className="border-gray-200 dark:border-slate-800" />
 
             <nav className="space-y-1">
                 <SidebarItem
@@ -106,10 +106,10 @@ const Sidebar = ({ collapsed, setCollapsed, isMobile }) => {
                 />
             </nav>
 
-            <div className="mt-auto pt-4 border-t border-gray-200">
+            <div className="mt-auto pt-4 border-t border-gray-200 dark:border-slate-800">
                 <button
                     onClick={() => setCollapsed(!collapsed)}
-                    className="flex items-center justify-center w-full text-gray-600 hover:text-blue-600 transition-colors duration-200"
+                    className="flex items-center justify-center w-full text-gray-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
                     aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
                     aria-expanded={!collapsed}
                 >
@@ -130,8 +130,8 @@ const SidebarItem = ({ icon, label, to, count, collapsed }) => (
         to={to}
         className={({ isActive }) =>
             `flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 transform ${isActive
-                ? "bg-blue-50 text-blue-600 font-medium"
-                : "text-gray-600 hover:bg-gray-50"
+                ? "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 font-medium"
+                : "text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800/60"
             }`
         }
     >

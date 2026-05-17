@@ -62,63 +62,63 @@ const TaskActivity = ({ isOpen, onClose, taskId, taskTitle }) => {
         switch (type) {
             case "status_change":
                 return (
-                    <p className="text-sm text-slate-700">
+                    <p className="text-sm text-slate-700 dark:text-slate-300">
                         {action}{" "}
-                        <span className="font-semibold text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-xs">{details?.to || ''}</span>
+                        <span className="font-semibold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-xs">{details?.to || ''}</span>
                     </p>
                 );
             case "priority_change":
                 return (
-                    <p className="text-sm text-slate-700">
+                    <p className="text-sm text-slate-700 dark:text-slate-300">
                         {action}{" "}
-                        <span className="font-semibold text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-xs">{details?.to || ''}</span>
+                        <span className="font-semibold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-xs">{details?.to || ''}</span>
                     </p>
                 );
             case "assignee_added":
             case "assignee_removed":
                 return (
-                    <p className="text-sm text-slate-700">
+                    <p className="text-sm text-slate-700 dark:text-slate-300">
                         {action}
                     </p>
                 );
             case "due_date":
                 return (
-                    <p className="text-sm text-slate-700">
+                    <p className="text-sm text-slate-700 dark:text-slate-300">
                         {action}
                     </p>
                 );
             case "comment":
                 return (
                     <div>
-                        <p className="text-sm text-slate-700 font-medium mb-1">{action}:</p>
-                        <p className="text-xs bg-slate-50 border border-slate-200/80 p-3 rounded-xl text-slate-600 italic">
+                        <p className="text-sm text-slate-700 dark:text-slate-300 font-medium mb-1">{action}:</p>
+                        <p className="text-xs bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 p-3 rounded-xl text-slate-600 dark:text-slate-400 italic">
                             "{details?.comment || ''}"
                         </p>
                     </div>
                 );
             case "created":
-                return <p className="text-sm text-slate-700">{action}</p>;
+                return <p className="text-sm text-slate-700 dark:text-slate-300">{action}</p>;
             default:
-                return <p className="text-sm text-slate-700">{action}</p>;
+                return <p className="text-sm text-slate-700 dark:text-slate-300">{action}</p>;
         }
     };
 
     return (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex justify-end z-50 transition-opacity duration-300">
-            <div className="bg-white w-full max-w-md h-full shadow-2xl flex flex-col animate-slide-in-right border-l border-slate-200/80">
+            <div className="bg-white dark:bg-slate-900 w-full max-w-md h-full shadow-2xl flex flex-col animate-slide-in-right border-l border-slate-200/80 dark:border-slate-800">
                 {/* Header */}
-                <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/80">
                     <div>
-                        <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                            <LuSquareActivity className="text-blue-600" /> Activity Log
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <LuSquareActivity className="text-blue-600 dark:text-blue-400" /> Activity Log
                         </h2>
-                        <p className="text-xs text-slate-500 mt-1 truncate max-w-[280px]">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate max-w-[280px]">
                             {taskTitle || "Task History"}
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-slate-200/60 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                        className="p-2 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                         title="Close"
                     >
                         <FaTimes className="w-4 h-4" />
@@ -133,27 +133,27 @@ const TaskActivity = ({ isOpen, onClose, taskId, taskTitle }) => {
                             <p className="text-xs text-slate-400 font-medium">Loading task activities...</p>
                         </div>
                     ) : error ? (
-                        <div className="text-center py-12 bg-rose-50 border border-rose-100 rounded-2xl p-6">
-                            <p className="text-xs text-rose-600 font-semibold">Failed to load activity history.</p>
+                        <div className="text-center py-12 bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/50 rounded-2xl p-6">
+                            <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold">Failed to load activity history.</p>
                             <p className="text-[10px] text-rose-400 mt-1">{error.message}</p>
                         </div>
                     ) : activities.length === 0 ? (
-                        <div className="text-center py-16 border-2 border-dashed border-slate-100 rounded-2xl p-6">
-                            <LuSquareActivity className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                            <p className="text-sm font-semibold text-slate-700">No Activity Recorded</p>
+                        <div className="text-center py-16 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl p-6">
+                            <LuSquareActivity className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">No Activity Recorded</p>
                             <p className="text-xs text-slate-400 mt-1">Actions taken on this task will appear here.</p>
                         </div>
                     ) : (
-                        <div className="relative pl-6 border-l-2 border-slate-100 space-y-8 before:absolute before:top-0 before:bottom-0 before:left-[-1px]">
+                        <div className="relative pl-6 border-l-2 border-slate-100 dark:border-slate-800 space-y-8 before:absolute before:top-0 before:bottom-0 before:left-[-1px]">
                             {activities.map((activity) => (
                                 <div key={activity.id} className="relative group">
                                     {/* Icon Badge */}
-                                    <span className="absolute -left-[35px] top-1.5 bg-white border-2 border-slate-100 rounded-full p-1.5 shadow-sm group-hover:border-blue-200 transition-colors flex items-center justify-center">
+                                    <span className="absolute -left-[35px] top-1.5 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-full p-1.5 shadow-sm group-hover:border-blue-200 dark:group-hover:border-blue-800 transition-colors flex items-center justify-center">
                                         {getActivityIcon(activity.type)}
                                     </span>
 
                                     {/* Activity Card */}
-                                    <div className="bg-slate-50/60 border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200 hover:bg-white hover:border-slate-200/80">
+                                    <div className="bg-slate-50/60 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/80 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200 hover:bg-white dark:hover:bg-slate-800/80 hover:border-slate-200/80 dark:hover:border-slate-700">
                                         <div className="flex items-center justify-between gap-3 mb-2">
                                             <div className="flex items-center gap-2.5">
                                                 <Avatar
@@ -161,11 +161,11 @@ const TaskActivity = ({ isOpen, onClose, taskId, taskTitle }) => {
                                                     url={activity.user?.avatar}
                                                     size={6}
                                                 />
-                                                <span className="text-xs font-bold text-slate-900">
+                                                <span className="text-xs font-bold text-slate-900 dark:text-white">
                                                     {activity.user?.display_name || activity.user?.email || "System"}
                                                 </span>
                                             </div>
-                                            <span className="text-[10px] font-medium text-slate-400 bg-slate-100/80 px-2 py-0.5 rounded-full">
+                                            <span className="text-[10px] font-medium text-slate-400 bg-slate-100/80 dark:bg-slate-800 px-2 py-0.5 rounded-full">
                                                 {formatTimestamp(activity.timestamp)}
                                             </span>
                                         </div>

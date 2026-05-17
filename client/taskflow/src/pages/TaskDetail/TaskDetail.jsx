@@ -76,12 +76,12 @@ const TaskDetail = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-950 py-8 transition-colors duration-200">
             <div className="max-w-6xl mx-auto px-4">
                 <div className="mb-6 flex items-center justify-between">
                     <button
                         onClick={() => window.history.back()}
-                        className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
+                        className="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
                     >
                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -91,17 +91,17 @@ const TaskDetail = () => {
 
                     <button
                         onClick={() => setShowActivityModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 hover:border-gray-300 dark:hover:border-slate-700 transition-all shadow-sm"
                     >
-                        <FiActivity className="w-5 h-5 text-gray-600" />
-                        <span className="font-medium text-gray-700">Activity</span>
+                        <FiActivity className="w-5 h-5 text-gray-600 dark:text-slate-300" />
+                        <span className="font-medium text-gray-700 dark:text-slate-200">Activity</span>
                     </button>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-6">
                         <TaskInfo task={task} onUpdate={refetch} />
-                        <div className="mb-6 shadow-sm border border-gray-200 rounded-lg p-6 bg-white">
+                        <div className="mb-6 shadow-sm border border-gray-200 dark:border-slate-800 rounded-lg p-6 bg-white dark:bg-slate-900">
                             <Subtasks task={task} taskId={task.id} creator={task.creator} assignees={task.assignees} refetch={refetch} />
                         </div>
                         <TaskComments taskId={task.id} task={task} />
@@ -109,9 +109,9 @@ const TaskDetail = () => {
 
                     <div className="space-y-6">
                         <DueDate task={task} onUpdate={refetch} isCreator={isCreator} />
-                        <div className="bg-white rounded-xl shadow-sm p-6 space-y-6 border border-gray-100">
+                        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-6 space-y-6 border border-gray-100 dark:border-slate-800">
                             <TaskCreator task={task} />
-                            <div className="h-px bg-gray-200" />
+                            <div className="h-px bg-gray-200 dark:bg-slate-800" />
                             <Assignee
                                 assignees={task.assignees}
                                 taskId={task.id}

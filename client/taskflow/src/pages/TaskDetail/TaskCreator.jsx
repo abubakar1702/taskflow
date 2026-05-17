@@ -4,7 +4,7 @@ const TaskCreator = ({ task }) => {
     return (
         <div>
             <div className="space-y-3">
-                <p className="text-sm font-semibold">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
                     Created by
                 </p>
 
@@ -23,10 +23,10 @@ const TaskCreator = ({ task }) => {
                     )}
 
                     <div className="flex flex-col">
-                        <span className="font-medium text-gray-900 text-base">
+                        <span className="font-medium text-gray-900 dark:text-white text-base">
                             {task.creator?.display_name}
                         </span>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-gray-500 dark:text-slate-400">
                             {task.creator?.email}
                         </span>
                     </div>
