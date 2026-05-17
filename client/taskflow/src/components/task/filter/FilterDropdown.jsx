@@ -1,14 +1,24 @@
 import { useState, useRef, useEffect } from "react";
 import { FaFilter, FaChevronDown, FaTimes } from "react-icons/fa";
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "../../../utils/apiClient";
+import { QUERY_KEYS } from "../../../utils/queryKeys";
 
-const FilterDropdown = ({ filters, onFilterChange, sortBy, onSortChange, setFilters }) => {
+const FilterDropdown = ({ filters, onFilterChange, sortBy, onSortChange, setFilters, onClearFilters }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  const { data: projectsData } = useQuery({
+    queryKey: QUERY_KEYS.projects(),
+    queryFn: async () => (await apiClient.get("/api/projects/")).data,
+  });
+  const projects = Array.isArray(projectsData) ? projectsData : (projectsData?.results || []);
 
   // Fixed: Only count non-empty string filters and true boolean filters
   const activeFilterCount = [
     filters.priority && filters.priority !== "",
     filters.status && filters.status !== "",
+    filters.project_id && filters.project_id !== "",
     filters.due_today === true,
     filters.overdue === true,
   ].filter(Boolean).length;
@@ -16,18 +26,18 @@ const FilterDropdown = ({ filters, onFilterChange, sortBy, onSortChange, setFilt
   const hasActiveFilters = activeFilterCount > 0;
 
   const clearAllFilters = () => {
-    const clearedFilters = {
-      priority: "",
-      status: "",
-      due_today: false,
-      overdue: false,
-    };
-    setFilters(clearedFilters);
-
-    // Apply cleared filters
-    Object.keys(clearedFilters).forEach((key) =>
-      onFilterChange(key, clearedFilters[key])
-    );
+    if (onClearFilters) {
+      onClearFilters();
+    } else {
+      const clearedFilters = {
+        priority: "",
+        status: "",
+        project_id: "",
+        due_today: false,
+        overdue: false,
+      };
+      setFilters(clearedFilters);
+    }
   };
 
   useEffect(() => {
@@ -89,6 +99,23 @@ const FilterDropdown = ({ filters, onFilterChange, sortBy, onSortChange, setFilt
               <option value="To Do">To Do</option>
               <option value="In Progress">In Progress</option>
               <option value="Done">Done</option>
+            </select>
+          </div>
+
+          {/* Project Filter */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Project</label>
+            <select
+              value={filters.project_id || ""}
+              onChange={(e) => onFilterChange("project_id", e.target.value)}
+              className={selectStyles}
+            >
+              <option value="">All Projects</option>
+              {projects.map((proj) => (
+                <option key={proj.id} value={proj.id}>
+                  {proj.name}
+                </option>
+              ))}
             </select>
           </div>
 

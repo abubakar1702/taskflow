@@ -13,7 +13,7 @@ import { PRIORITY_COLORS, STATUS_COLORS } from "../components/constants/uiColors
 const Tasks = () => {
     const [activeTab, setActiveTab] = useState("All");
     const [viewMode, setViewMode] = useState("grid");
-    const [filters, setFilters] = useState({ priority: "", status: "", due_today: false, overdue: false });
+    const [filters, setFilters] = useState({ priority: "", status: "", due_today: false, overdue: false, project_id: "" });
     const [sortBy, setSortBy] = useState("Date Created (Desc)");
 
     const mapSortToApi = (sortLabel) => {
@@ -32,6 +32,7 @@ const Tasks = () => {
         if (filters.status) query.append("status", filters.status);
         if (filters.due_today) query.append("due_today", "true");
         if (filters.overdue) query.append("overdue", "true");
+        if (filters.project_id) query.append("project_id", filters.project_id);
         if (activeTab === "Assigned to me") query.append("assigned_to_me", "true");
         if (activeTab === "Created by me") query.append("created_by_me", "true");
         const apiSort = mapSortToApi(sortBy);

@@ -9,6 +9,7 @@ import ProjectOverview from "../../components/project/ProjectOverview";
 import ProjectMembers from "../../components/project/ProjectMembers";
 import ProjectTasks from "../../components/project/ProjectTasks";
 import ProjectAssets from "../../components/project/ProjectAssets";
+import ProjectDependencyGraph from "../../components/project/ProjectDependencyGraph";
 import EditProjectModal from "../../components/modals/EditProjectModal";
 import LoadingScreen from "../../components/common/LoadingScreen";
 import { useUser } from "../../contexts/UserContext";
@@ -111,6 +112,9 @@ const ProjectDetail = () => {
                         onAssetsUpdated={refetchAssets}
                         isProjectAdmin={isProjectAdmin}
                     />
+                )}
+                {activeTab === "dependencyMap" && (
+                    <ProjectDependencyGraph tasks={tasks} projectId={project.id} />
                 )}
             </div>
         </div>

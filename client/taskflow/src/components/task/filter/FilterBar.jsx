@@ -11,6 +11,7 @@ const FilterBar = ({ onFilterUpdate, viewMode, setViewMode }) => {
         status: "",
         due_today: false,
         overdue: false,
+        project_id: "",
     });
 
     const [sortBy, setSortBy] = useState("Date Created (Desc)");
@@ -35,6 +36,18 @@ const FilterBar = ({ onFilterUpdate, viewMode, setViewMode }) => {
     const handleSortChange = (newSortBy) => {
         setSortBy(newSortBy);
         triggerUpdate(filters, newSortBy, activeTab);
+    };
+
+    const handleClearFilters = () => {
+        const clearedFilters = {
+            priority: "",
+            status: "",
+            due_today: false,
+            overdue: false,
+            project_id: "",
+        };
+        setFilters(clearedFilters);
+        triggerUpdate(clearedFilters, sortBy, activeTab);
     };
 
     return (
@@ -76,6 +89,7 @@ const FilterBar = ({ onFilterUpdate, viewMode, setViewMode }) => {
                     sortBy={sortBy}
                     onSortChange={handleSortChange}
                     setFilters={setFilters}
+                    onClearFilters={handleClearFilters}
                 />
             </div>
         </div>

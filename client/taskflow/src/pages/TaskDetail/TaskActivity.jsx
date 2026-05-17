@@ -1,89 +1,43 @@
-import { FaTimes, FaCheckCircle, FaUserPlus, FaClock, FaEdit, FaTrash, FaPaperclip } from "react-icons/fa";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
+import { FaTimes, FaCheckCircle, FaUserPlus, FaClock, FaEdit, FaTrash, FaPaperclip, FaUserMinus } from "react-icons/fa";
 import { LuSquareActivity } from "react-icons/lu";
 import Avatar from "../../components/common/Avatar";
+import { ClipLoader } from "react-spinners";
 
-const TaskActivity = ({ isOpen, onClose, taskTitle }) => {
+const TaskActivity = ({ isOpen, onClose, taskId, taskTitle }) => {
     if (!isOpen) return null;
 
-    // Static activity data for demonstration
-    const activities = [
-        {
-            id: 1,
-            type: "status_change",
-            user: { display_name: "John Doe", avatar: null },
-            action: "changed status from",
-            from: "In Progress",
-            to: "Done",
-            timestamp: "2025-01-07T10:30:00",
-        },
-        {
-            id: 2,
-            type: "assignee_added",
-            user: { display_name: "Sarah Smith", avatar: null },
-            action: "assigned",
-            assignee: { display_name: "Mike Johnson", avatar: null },
-            timestamp: "2025-01-07T09:15:00",
-        },
-        {
-            id: 3,
-            type: "comment",
-            user: { display_name: "Emily Brown", avatar: null },
-            action: "commented",
-            comment: "Great progress on this task! Let's aim to complete the testing phase by tomorrow.",
-            timestamp: "2025-01-07T08:45:00",
-        },
-        {
-            id: 4,
-            type: "due_date",
-            user: { display_name: "John Doe", avatar: null },
-            action: "updated due date to",
-            date: "Jan 10, 2025",
-            timestamp: "2025-01-06T16:20:00",
-        },
-        {
-            id: 5,
-            type: "asset_added",
-            user: { display_name: "Mike Johnson", avatar: null },
-            action: "added attachment",
-            fileName: "design_mockup_v2.pdf",
-            timestamp: "2025-01-06T14:30:00",
-        },
-        {
-            id: 6,
-            type: "priority_change",
-            user: { display_name: "Sarah Smith", avatar: null },
-            action: "changed priority from",
-            from: "Medium",
-            to: "High",
-            timestamp: "2025-01-06T11:00:00",
-        },
-        {
-            id: 7,
-            type: "created",
-            user: { display_name: "John Doe", avatar: null },
-            action: "created this task",
-            timestamp: "2025-01-05T09:00:00",
-        },
-    ];
+    const { data: activitiesData, isLoading, error } = useQuery({
+        queryKey: QUERY_KEYS.taskActivity(taskId),
+        queryFn: async () => (await apiClient.get(`/api/tasks/${taskId}/activities/`)).data,
+        enabled: !!taskId && isOpen,
+    });
+
+    const activities = Array.isArray(activitiesData) ? activitiesData : (activitiesData?.results || []);
 
     const getActivityIcon = (type) => {
         switch (type) {
             case "status_change":
-                return <FaCheckCircle className="text-green-500" />;
+                return <FaCheckCircle className="text-emerald-500 w-4 h-4" />;
             case "assignee_added":
-                return <FaUserPlus className="text-blue-500" />;
+                return <FaUserPlus className="text-blue-500 w-4 h-4" />;
+            case "assignee_removed":
+                return <FaUserMinus className="text-rose-500 w-4 h-4" />;
             case "due_date":
-                return <FaClock className="text-orange-500" />;
+                return <FaClock className="text-amber-500 w-4 h-4" />;
             case "comment":
-                return <LuSquareActivity className="text-purple-500" />;
+                return <LuSquareActivity className="text-purple-500 w-4 h-4" />;
             case "asset_added":
-                return <FaPaperclip className="text-gray-500" />;
+                return <FaPaperclip className="text-slate-500 w-4 h-4" />;
             case "priority_change":
-                return <FaEdit className="text-amber-500" />;
+                return <FaEdit className="text-amber-500 w-4 h-4" />;
             case "created":
-                return <FaCheckCircle className="text-blue-500" />;
+                return <FaCheckCircle className="text-blue-500 w-4 h-4" />;
             default:
-                return <LuSquareActivity className="text-gray-500" />;
+                return <LuSquareActivity className="text-slate-500 w-4 h-4" />;
         }
     };
 
@@ -98,115 +52,130 @@ const TaskActivity = ({ isOpen, onClose, taskTitle }) => {
         if (diffMins < 1) return "Just now";
         if (diffMins < 60) return `${diffMins}m ago`;
         if (diffHours < 24) return `${diffHours}h ago`;
-        if (diffDays < 7) return `${diffDays}d ago`;
-        
-        return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        if (diffDays === 1) return "Yesterday";
+        return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    };
+
+    const renderActivityContent = (activity) => {
+        const { type, action, details } = activity;
+
+        switch (type) {
+            case "status_change":
+                return (
+                    <p className="text-sm text-slate-700">
+                        {action}{" "}
+                        <span className="font-semibold text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-xs">{details?.to || ''}</span>
+                    </p>
+                );
+            case "priority_change":
+                return (
+                    <p className="text-sm text-slate-700">
+                        {action}{" "}
+                        <span className="font-semibold text-slate-900 bg-slate-100 px-2 py-0.5 rounded text-xs">{details?.to || ''}</span>
+                    </p>
+                );
+            case "assignee_added":
+            case "assignee_removed":
+                return (
+                    <p className="text-sm text-slate-700">
+                        {action}
+                    </p>
+                );
+            case "due_date":
+                return (
+                    <p className="text-sm text-slate-700">
+                        {action}
+                    </p>
+                );
+            case "comment":
+                return (
+                    <div>
+                        <p className="text-sm text-slate-700 font-medium mb-1">{action}:</p>
+                        <p className="text-xs bg-slate-50 border border-slate-200/80 p-3 rounded-xl text-slate-600 italic">
+                            "{details?.comment || ''}"
+                        </p>
+                    </div>
+                );
+            case "created":
+                return <p className="text-sm text-slate-700">{action}</p>;
+            default:
+                return <p className="text-sm text-slate-700">{action}</p>;
+        }
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-200 p-4">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex justify-end z-50 transition-opacity duration-300">
+            <div className="bg-white w-full max-w-md h-full shadow-2xl flex flex-col animate-slide-in-right border-l border-slate-200/80">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                            <LuSquareActivity className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-bold text-gray-900">Activity</h2>
-                            <p className="text-sm text-gray-500 line-clamp-1">{taskTitle || "Task Activity"}</p>
-                        </div>
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                    <div>
+                        <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <LuSquareActivity className="text-blue-600" /> Activity Log
+                        </h2>
+                        <p className="text-xs text-slate-500 mt-1 truncate max-w-[280px]">
+                            {taskTitle || "Task History"}
+                        </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="p-2 hover:bg-slate-200/60 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                        title="Close"
                     >
-                        <FaTimes className="w-5 h-5 text-gray-500" />
+                        <FaTimes className="w-4 h-4" />
                     </button>
                 </div>
 
-                {/* Activity List */}
-                <div className="flex-1 overflow-y-auto p-6">
-                    <div className="space-y-4">
-                        {activities.map((activity, index) => (
-                            <div key={activity.id} className="flex gap-4 relative">
-                                {/* Timeline line */}
-                                {index !== activities.length - 1 && (
-                                    <div className="absolute left-5 top-12 bottom-0 w-0.5 bg-gray-200" />
-                                )}
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center h-64 space-y-3">
+                            <ClipLoader color="#2563eb" size={40} speedMultiplier={0.8} />
+                            <p className="text-xs text-slate-400 font-medium">Loading task activities...</p>
+                        </div>
+                    ) : error ? (
+                        <div className="text-center py-12 bg-rose-50 border border-rose-100 rounded-2xl p-6">
+                            <p className="text-xs text-rose-600 font-semibold">Failed to load activity history.</p>
+                            <p className="text-[10px] text-rose-400 mt-1">{error.message}</p>
+                        </div>
+                    ) : activities.length === 0 ? (
+                        <div className="text-center py-16 border-2 border-dashed border-slate-100 rounded-2xl p-6">
+                            <LuSquareActivity className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                            <p className="text-sm font-semibold text-slate-700">No Activity Recorded</p>
+                            <p className="text-xs text-slate-400 mt-1">Actions taken on this task will appear here.</p>
+                        </div>
+                    ) : (
+                        <div className="relative pl-6 border-l-2 border-slate-100 space-y-8 before:absolute before:top-0 before:bottom-0 before:left-[-1px]">
+                            {activities.map((activity) => (
+                                <div key={activity.id} className="relative group">
+                                    {/* Icon Badge */}
+                                    <span className="absolute -left-[35px] top-1.5 bg-white border-2 border-slate-100 rounded-full p-1.5 shadow-sm group-hover:border-blue-200 transition-colors flex items-center justify-center">
+                                        {getActivityIcon(activity.type)}
+                                    </span>
 
-                                {/* Icon */}
-                                <div className="flex-shrink-0 w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center border-2 border-white shadow-sm relative z-10">
-                                    {getActivityIcon(activity.type)}
-                                </div>
-
-                                {/* Content */}
-                                <div className="flex-1 pb-6">
-                                    <div className="flex items-start justify-between gap-2 mb-1">
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                            <Avatar
-                                                name={activity.user.display_name}
-                                                url={activity.user.avatar}
-                                                size={6}
-                                            />
-                                            <span className="font-semibold text-gray-900 text-sm">
-                                                {activity.user.display_name}
+                                    {/* Activity Card */}
+                                    <div className="bg-slate-50/60 border border-slate-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200 hover:bg-white hover:border-slate-200/80">
+                                        <div className="flex items-center justify-between gap-3 mb-2">
+                                            <div className="flex items-center gap-2.5">
+                                                <Avatar
+                                                    name={activity.user?.display_name || activity.user?.email || "System"}
+                                                    url={activity.user?.avatar}
+                                                    size={6}
+                                                />
+                                                <span className="text-xs font-bold text-slate-900">
+                                                    {activity.user?.display_name || activity.user?.email || "System"}
+                                                </span>
+                                            </div>
+                                            <span className="text-[10px] font-medium text-slate-400 bg-slate-100/80 px-2 py-0.5 rounded-full">
+                                                {formatTimestamp(activity.timestamp)}
                                             </span>
-                                            <span className="text-gray-600 text-sm">
-                                                {activity.action}
-                                            </span>
-                                            {activity.from && activity.to && (
-                                                <span className="text-sm">
-                                                    <span className="text-gray-500 line-through">{activity.from}</span>
-                                                    {" → "}
-                                                    <span className="font-medium text-gray-900">{activity.to}</span>
-                                                </span>
-                                            )}
-                                            {activity.assignee && (
-                                                <div className="flex items-center gap-1">
-                                                    <Avatar
-                                                        name={activity.assignee.display_name}
-                                                        url={activity.assignee.avatar}
-                                                        size={5}
-                                                    />
-                                                    <span className="font-medium text-gray-900 text-sm">
-                                                        {activity.assignee.display_name}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            {activity.date && (
-                                                <span className="font-medium text-gray-900 text-sm">
-                                                    {activity.date}
-                                                </span>
-                                            )}
-                                            {activity.fileName && (
-                                                <span className="font-medium text-gray-900 text-sm bg-gray-100 px-2 py-0.5 rounded">
-                                                    {activity.fileName}
-                                                </span>
-                                            )}
                                         </div>
-                                        <span className="text-xs text-gray-400 whitespace-nowrap">
-                                            {formatTimestamp(activity.timestamp)}
-                                        </span>
+
+                                        {renderActivityContent(activity)}
                                     </div>
-
-                                    {/* Comment content */}
-                                    {activity.comment && (
-                                        <div className="mt-2 bg-gray-50 rounded-lg p-3 text-sm text-gray-700 border border-gray-200">
-                                            {activity.comment}
-                                        </div>
-                                    )}
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="p-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
-                    <p className="text-xs text-gray-500 text-center">
-                        Showing {activities.length} activities
-                    </p>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

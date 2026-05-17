@@ -12,8 +12,8 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 
-from .models import Task, Subtask, ImportantTask
-from .serializers import TaskSerializer, SubtaskSerializer, SearchForAssigneeSerializer, ImportantTaskSerializer
+from .models import Task, Subtask, ImportantTask, TaskComment, TaskActivity
+from .serializers import TaskSerializer, SubtaskSerializer, SearchForAssigneeSerializer, ImportantTaskSerializer, TaskCommentSerializer, TaskActivitySerializer
 from .filters import TaskFilter
 
 from user.models import User
@@ -67,6 +67,13 @@ class TaskAPIView(generics.ListCreateAPIView):
 
         task = serializer.save(creator=self.request.user)
 
+        TaskActivity.objects.create(
+            task=task,
+            user=self.request.user,
+            type="created",
+            action="created this task"
+        )
+
         for assignee in task.assignees.all():
             send_notification_to_user(assignee.id, {
                 "type": "task_assigned",
@@ -95,6 +102,39 @@ class TaskDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return _task_queryset_for_user(self.request.user)
+
+    def perform_update(self, serializer):
+        old_status = serializer.instance.status
+        old_priority = serializer.instance.priority
+        old_due_date = serializer.instance.due_date
+
+        updated_task = serializer.save()
+
+        if old_status != updated_task.status:
+            TaskActivity.objects.create(
+                task=updated_task,
+                user=self.request.user,
+                type="status_change",
+                action=f"changed status from {old_status} to {updated_task.status}",
+                details={"from": old_status, "to": updated_task.status}
+            )
+        if old_priority != updated_task.priority:
+            TaskActivity.objects.create(
+                task=updated_task,
+                user=self.request.user,
+                type="priority_change",
+                action=f"changed priority from {old_priority} to {updated_task.priority}",
+                details={"from": old_priority, "to": updated_task.priority}
+            )
+        if old_due_date != updated_task.due_date:
+            date_str = updated_task.due_date.strftime('%b %d, %Y') if updated_task.due_date else 'None'
+            TaskActivity.objects.create(
+                task=updated_task,
+                user=self.request.user,
+                type="due_date",
+                action=f"updated due date to {date_str}",
+                details={"date": date_str}
+            )
 
     def destroy(self, request, *args, **kwargs):
         task = self.get_object()
@@ -171,6 +211,14 @@ class AddAssigneeAPIView(generics.UpdateAPIView):
             task.assignees.add(*new_users)
 
             for user in new_users:
+                TaskActivity.objects.create(
+                    task=task,
+                    user=request.user,
+                    type="assignee_added",
+                    action=f"assigned {user.display_name or user.email}",
+                    details={"assignee": {"display_name": user.display_name, "email": user.email}}
+                )
+
                 send_notification_to_user(user.id, {
                     "type": "task_assigned",
                     "message": f"You have been assigned to task: {task.title}",
@@ -209,6 +257,18 @@ class RemoveAssigneeAPIView(generics.DestroyAPIView):
             return Response({"detail": "assignee_id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         task.assignees.remove(assignee_id)
+        try:
+            removed_user = User.objects.get(id=assignee_id)
+            TaskActivity.objects.create(
+                task=task,
+                user=request.user,
+                type="assignee_removed",
+                action=f"removed assignee {removed_user.display_name or removed_user.email}",
+                details={"assignee": {"display_name": removed_user.display_name, "email": removed_user.email}}
+            )
+        except User.DoesNotExist:
+            pass
+
         Subtask.objects.filter(task=task, assignee_id=assignee_id).update(assignee=None, is_completed=False)
 
         return Response({"detail": "Assignee removed successfully and related subtasks unassigned."})
@@ -315,3 +375,45 @@ class RunningTasksAPIView(generics.ListAPIView):
             )
             .order_by('-timer_start_time', '-updated_at')
         )
+
+class TaskCommentAPIView(generics.ListCreateAPIView):
+    serializer_class = TaskCommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return TaskComment.objects.filter(task_id=self.kwargs['task_id']).select_related('author')
+
+    def perform_create(self, serializer):
+        task = get_object_or_404(Task, id=self.kwargs['task_id'])
+        if task.creator != self.request.user and not task.assignees.filter(id=self.request.user.id).exists():
+            raise PermissionDenied("Only the task creator and assignees can add comments to this task.")
+        comment = serializer.save(author=self.request.user, task=task)
+        TaskActivity.objects.create(
+            task=task,
+            user=self.request.user,
+            type="comment",
+            action="commented",
+            details={"comment": comment.content}
+        )
+
+class TaskCommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = TaskCommentSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = TaskComment.objects.all()
+
+    def perform_update(self, serializer):
+        if serializer.instance.author != self.request.user:
+            raise PermissionDenied("You can only edit your own comments.")
+        serializer.save(is_edited=True)
+
+    def perform_destroy(self, instance):
+        if instance.author != self.request.user and instance.task.creator != self.request.user:
+            raise PermissionDenied("You do not have permission to delete this comment.")
+        instance.delete()
+
+class TaskActivityAPIView(generics.ListAPIView):
+    serializer_class = TaskActivitySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return TaskActivity.objects.filter(task_id=self.kwargs['task_id']).select_related('user')

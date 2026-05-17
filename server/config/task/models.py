@@ -21,6 +21,7 @@ class Task(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.TODO)
     priority = models.CharField(max_length=20, choices=Priority.choices, default=Priority.MEDIUM)
     assignees = models.ManyToManyField(User, related_name='assigned_tasks', blank=True)
+    dependencies = models.ManyToManyField('self', symmetrical=False, related_name='blocking', blank=True)
     due_date = models.DateField(null=True, blank=True)
     due_time = models.TimeField(null=True, blank=True)
     time_taken = models.DurationField(null=True, blank=True)
@@ -58,3 +59,33 @@ class ImportantTask(models.Model):
     class Meta:
         unique_together = ('user', 'task')
         db_table = 'api_importanttask'
+
+class TaskComment(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='task_comments')
+    content = models.TextField()
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    is_edited = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Comment by {self.author} on {self.task}"
+
+    class Meta:
+        db_table = 'api_taskcomment'
+        ordering = ['created_at']
+
+class TaskActivity(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='activities')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    type = models.CharField(max_length=50) # 'created', 'status_change', 'priority_change', 'due_date', 'assignee_added', 'assignee_removed', 'comment', 'asset_added', 'asset_removed'
+    action = models.CharField(max_length=255)
+    details = models.JSONField(default=dict, blank=True) # stores from/to, comment text, assignee info, etc.
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'api_taskactivity'
+        ordering = ['-timestamp']

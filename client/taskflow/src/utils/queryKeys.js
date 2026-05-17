@@ -33,4 +33,5 @@ export const QUERY_KEYS = {
     // Notes
     notes: () => ['notes'],
     note: (id) => ['note', String(id)],
+    taskComments: (taskId) => ['task-comments', String(taskId)],
 };

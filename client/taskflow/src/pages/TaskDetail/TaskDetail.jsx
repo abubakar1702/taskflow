@@ -15,6 +15,7 @@ import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
 import { toast } from "react-toastify";
 import { FiActivity } from "react-icons/fi";
 import TaskActivity from "./TaskActivity";
+import TaskComments from "./TaskComments";
 
 const TaskDetail = () => {
     const { id } = useParams();
@@ -103,6 +104,7 @@ const TaskDetail = () => {
                         <div className="mb-6 shadow-sm border border-gray-200 rounded-lg p-6 bg-white">
                             <Subtasks task={task} taskId={task.id} creator={task.creator} assignees={task.assignees} refetch={refetch} />
                         </div>
+                        <TaskComments taskId={task.id} task={task} />
                     </div>
 
                     <div className="space-y-6">

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from django.db.models import Count
 
-from .models import Task, Subtask, ImportantTask
+from .models import Task, Subtask, ImportantTask, TaskComment, TaskActivity
 from project.models import Project
 from project.serializers import ProjectSerializer
 from user.serializers import UserSerializer
@@ -92,6 +92,13 @@ class TaskSerializer(serializers.ModelSerializer):
         many=True,
         write_only=True
     )
+    dependencies_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Task.objects.all(),
+        source='dependencies',
+        many=True,
+        write_only=True,
+        required=False
+    )
 
     subtasks_data = serializers.ListField(
         child=serializers.DictField(),
@@ -101,6 +108,11 @@ class TaskSerializer(serializers.ModelSerializer):
 
     assignees = UserSerializer(many=True, read_only=True)
     subtasks = SubtaskSerializer(many=True, read_only=True)
+    
+    dependencies = serializers.PrimaryKeyRelatedField(
+        many=True, 
+        read_only=True
+    )
 
     total_assets = serializers.SerializerMethodField()
 
@@ -110,6 +122,7 @@ class TaskSerializer(serializers.ModelSerializer):
             'id', 'title', 'description', 'creator', 'project_id', 'project',
             'assignees_ids', 'assignees', 'status', 'priority',
             'subtasks', 'subtasks_data', 'total_assets',
+            'dependencies', 'dependencies_ids',
             'due_date', 'due_time', 'time_taken', 'timer_start_time',
             'created_at', 'updated_at'
         ]
@@ -117,10 +130,12 @@ class TaskSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         subtasks_data = validated_data.pop('subtasks_data', [])
         assignees = validated_data.pop('assignees', [])
+        dependencies = validated_data.pop('dependencies', [])
         project = validated_data.pop('project', None)
 
         task = Task.objects.create(project=project, **validated_data)
         task.assignees.set(assignees)
+        task.dependencies.set(dependencies)
 
         # Build a set of valid assignee IDs to avoid repeated DB queries
         valid_ids = {str(a.id) for a in assignees}
@@ -170,6 +185,27 @@ class ImportantTaskSerializer(serializers.ModelSerializer):
         task = get_object_or_404(Task, id=task_id)
 
         return ImportantTask.objects.create(
-            user=self.context['request'].user,
             task=task
         )
+
+class TaskCommentSerializer(serializers.ModelSerializer):
+    author = UserSerializer(read_only=True)
+    replies = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TaskComment
+        fields = ['id', 'task', 'author', 'content', 'parent', 'replies', 'is_edited', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'task', 'author', 'replies', 'is_edited', 'created_at', 'updated_at']
+
+    def get_replies(self, obj):
+        if obj.replies.exists():
+            return TaskCommentSerializer(obj.replies.all(), many=True, context=self.context).data
+        return []
+
+class TaskActivitySerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = TaskActivity
+        fields = ['id', 'task', 'user', 'type', 'action', 'details', 'timestamp']
+        read_only_fields = ['id', 'task', 'user', 'timestamp']
