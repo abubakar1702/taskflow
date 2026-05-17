@@ -4,15 +4,49 @@ import { FaCrown, FaUserShield, FaStar } from "react-icons/fa";
 import { FiUserPlus } from "react-icons/fi";
 import AddProjectMemberModal from "../modals/AddProjectMemberModal";
 import DeleteModal from "../modals/DeleteModal";
-import { useApi } from "../hooks/useApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import { toast } from "react-toastify";
 
 const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCreator }) => {
+    const queryClient = useQueryClient();
     const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [memberToDelete, setMemberToDelete] = useState(null);
-    const { makeRequest: deleteMember, loading: isDeleting } = useApi();
-    const { makeRequest: updateMemberRole, loading: isRoleChangeLoading } = useApi();
+
+    const { mutate: updateMemberRole, isPending: isRoleChangeLoading } = useMutation({
+        mutationFn: async ({ memberId, newRole }) => {
+            const response = await apiClient.patch(`/api/projects/${project.id}/members/${memberId}/`, { role: newRole });
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success("Member role updated successfully");
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project(project.id) });
+            onProjectUpdated();
+        },
+        onError: (error) => {
+            console.error("Failed to update member role:", error);
+            toast.error(error.response?.data?.detail || error.message || "Failed to update member role");
+        }
+    });
+
+    const { mutate: removeMember, isPending: isDeleting } = useMutation({
+        mutationFn: async (memberId) => {
+            await apiClient.delete(`/api/projects/${project.id}/members/${memberId}/`);
+        },
+        onSuccess: () => {
+            toast.success("Member removed from project");
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project(project.id) });
+            onProjectUpdated();
+            setIsDeleteModalOpen(false);
+            setMemberToDelete(null);
+        },
+        onError: (error) => {
+            console.error("Failed to remove member:", error);
+            toast.error(error.response?.data?.detail || error.message || "Failed to remove member");
+        }
+    });
 
     const formatDate = (date) => {
         if (!date) return null;
@@ -24,19 +58,8 @@ const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCr
         });
     };
 
-    const handleChangeRole = async (memberId, newRole) => {
-        try {
-            await updateMemberRole(
-                `/api/projects/${project.id}/members/${memberId}/`,
-                "PATCH",
-                { role: newRole }
-            );
-            toast.success("Member role updated successfully");
-            onProjectUpdated();
-        } catch (error) {
-            console.error("Failed to update member role:", error);
-            toast.error(error.message || "Failed to update member role");
-        }
+    const handleChangeRole = (memberId, newRole) => {
+        updateMemberRole({ memberId, newRole });
     };
 
     const getRoleIcon = (role) => {
@@ -66,22 +89,9 @@ const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCr
         setIsDeleteModalOpen(true);
     };
 
-    const handleConfirmDelete = async () => {
+    const handleConfirmDelete = () => {
         if (!memberToDelete) return;
-
-        try {
-            await deleteMember(
-                `/api/projects/${project.id}/members/${memberToDelete.id}/`,
-                "DELETE"
-            );
-            toast.success("Member removed from project");
-            onProjectUpdated();
-            setIsDeleteModalOpen(false);
-            setMemberToDelete(null);
-        } catch (error) {
-            console.error("Failed to remove member:", error);
-            toast.error(error.message || "Failed to remove member");
-        }
+        removeMember(memberToDelete.id);
     };
 
     return (

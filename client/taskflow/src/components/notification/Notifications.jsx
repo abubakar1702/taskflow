@@ -2,10 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiCheckSquare, FiSettings } from 'react-icons/fi';
 import NotificationCard from './NotificationCard';
-import { useApi } from '../hooks/useApi';
+import { apiClient } from '../../utils/apiClient';
 
 const Notifications = ({ notifications: rawNotifications, loading, onClose, refetch }) => {
-    const { makeRequest } = useApi();
     const notifications = rawNotifications || [];
     const unreadCount = notifications.filter(n => !n.is_read).length;
 
@@ -13,7 +12,7 @@ const Notifications = ({ notifications: rawNotifications, loading, onClose, refe
         const unreadNotifications = notifications.filter(n => !n.is_read);
         try {
             await Promise.all(
-                unreadNotifications.map(n => makeRequest(`/api/notifications/${n.id}/read/`, 'PATCH'))
+                unreadNotifications.map(n => apiClient.patch(`/api/notifications/${n.id}/read/`))
             );
             if (refetch) refetch();
         } catch (err) {

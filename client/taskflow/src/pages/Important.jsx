@@ -1,15 +1,21 @@
 import React from 'react';
-import { useApi } from "../components/hooks/useApi";
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "../utils/apiClient";
+import { QUERY_KEYS } from "../utils/queryKeys";
 import ProjectTasks from "../components/project/ProjectTasks";
 import { FaStar } from "react-icons/fa";
 import LoadingScreen from "../components/common/LoadingScreen";
 
 const Important = () => {
-    const { data: importantData, loading, error } = useApi('/api/important-tasks/');
+    const { data: importantData, isLoading: loading, error } = useQuery({
+        queryKey: QUERY_KEYS.importantTasks(),
+        queryFn: async () => (await apiClient.get('/api/important-tasks/')).data,
+    });
 
     const getTasks = () => {
         if (!importantData) return [];
-        return importantData.map(item => item.task || item);
+        const rawData = Array.isArray(importantData) ? importantData : (importantData.results || []);
+        return rawData.map(item => item.task || item);
     };
 
     const tasks = getTasks();

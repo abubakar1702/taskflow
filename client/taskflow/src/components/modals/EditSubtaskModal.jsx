@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { useApi } from "../hooks/useApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import Avatar from "../common/Avatar";
 import { FaRegUser, FaCircleInfo, FaUserLargeSlash } from "react-icons/fa6";
 import { MdOutlineTask } from "react-icons/md";
@@ -8,11 +10,27 @@ import { ClipLoader } from 'react-spinners'
 import { toast } from "react-toastify";
 
 const EditSubtaskModal = ({ taskId, subtask, creator, assignees = [], onClose, onUpdated }) => {
+    const queryClient = useQueryClient();
     const [text, setText] = useState(subtask.text);
     const [assigneeId, setAssigneeId] = useState(subtask.assignee?.id || null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
-    const { makeRequest } = useApi();
+
+    const { mutate: updateSubtask, isPending: isSubmitting } = useMutation({
+        mutationFn: async (payload) => {
+            const response = await apiClient.patch(`/api/tasks/${taskId}/subtasks/${subtask.id}/`, payload);
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success("Subtask updated successfully");
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.task(taskId) });
+            onUpdated?.();
+            handleClose();
+        },
+        onError: (error) => {
+            console.error("Failed to update subtask:", error);
+            toast.error(error.response?.data?.detail || error.message || "Failed to update subtask. Please try again.");
+        }
+    });
 
     const filteredAssignees = assignees.filter(a => a.id !== creator?.id);
 
@@ -28,33 +46,22 @@ const EditSubtaskModal = ({ taskId, subtask, creator, assignees = [], onClose, o
         setTimeout(onClose, 200);
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (!text.trim() || !taskId) return;
 
-        setIsSubmitting(true);
-        try {
-            const assigneeChanged = String(assigneeId ?? "") !== String(subtask.assignee?.id ?? "");
+        const assigneeChanged = String(assigneeId ?? "") !== String(subtask.assignee?.id ?? "");
 
-            const payload = {
-                text: text.trim(),
-                assignee_id: assigneeId || null,
-            };
+        const payload = {
+            text: text.trim(),
+            assignee_id: assigneeId || null,
+        };
 
-            if (assigneeChanged) {
-                payload.is_completed = false;
-            }
-
-            await makeRequest(`/api/tasks/${taskId}/subtasks/${subtask.id}/`, "PATCH", payload);
-            toast.success("Subtask updated successfully");
-            onUpdated?.();
-            handleClose();
-        } catch (error) {
-            console.error("Failed to update subtask:", error);
-            toast.error("Failed to update subtask. Please try again.");
-        } finally {
-            setIsSubmitting(false);
+        if (assigneeChanged) {
+            payload.is_completed = false;
         }
+
+        updateSubtask(payload);
     };
 
     const selectedAssignee = (creator && String(assigneeId) === String(creator.id))

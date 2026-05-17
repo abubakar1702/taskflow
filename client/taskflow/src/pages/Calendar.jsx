@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { useApi } from '../components/hooks/useApi';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '../utils/apiClient';
+import { QUERY_KEYS } from '../utils/queryKeys';
 
 import {
     format, startOfMonth, endOfMonth, startOfWeek, endOfWeek,
@@ -11,14 +13,17 @@ import LoadingScreen from '../components/common/LoadingScreen';
 import DayTasksModal from '../components/modals/DayTasksModal';
 import { useUser } from '../contexts/UserContext';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 function Calendar() {
     const { currentUser } = useUser();
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDay, setSelectedDay] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const { data: tasks = [], loading, error } = useApi(`${API_BASE_URL}/api/user-tasks/`, "GET");
+    const { data: tasksData = [], isLoading: loading, error } = useQuery({
+        queryKey: QUERY_KEYS.userTasks(),
+        queryFn: async () => (await apiClient.get('/api/user-tasks/')).data,
+    });
+    const tasks = Array.isArray(tasksData) ? tasksData : (tasksData?.results || []);
 
     const calendarDays = useMemo(() => {
         const monthStart = startOfMonth(currentDate);

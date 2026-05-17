@@ -1,11 +1,10 @@
 import React from 'react';
 import { FiMessageSquare, FiUserPlus, FiCalendar, FiClock, FiCheckCircle, FiTrash2 } from 'react-icons/fi';
 import { formatDistanceToNow } from 'date-fns';
-import { useApi } from '../hooks/useApi';
+import { apiClient } from '../../utils/apiClient';
 
 const NotificationCard = ({ notification, onUpdate }) => {
     const { id, type, message, created_at, is_read, data } = notification;
-    const { makeRequest } = useApi();
 
     const getIcon = () => {
         switch (type) {
@@ -44,7 +43,7 @@ const NotificationCard = ({ notification, onUpdate }) => {
         e.stopPropagation();
         if (is_read) return;
         try {
-            await makeRequest(`/api/notifications/${id}/read/`, 'PATCH');
+            await apiClient.patch(`/api/notifications/${id}/read/`);
             if (onUpdate) onUpdate();
         } catch (err) {
             console.error('Failed to mark notification as read:', err);
@@ -54,7 +53,7 @@ const NotificationCard = ({ notification, onUpdate }) => {
     const handleDelete = async (e) => {
         e.stopPropagation();
         try {
-            await makeRequest(`/api/notifications/${id}/delete/`, 'DELETE');
+            await apiClient.delete(`/api/notifications/${id}/delete/`);
             if (onUpdate) onUpdate();
         } catch (err) {
             console.error('Failed to delete notification:', err);

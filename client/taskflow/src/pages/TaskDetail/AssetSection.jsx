@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useApi } from "../../components/hooks/useApi";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
 import { IoCloudUploadOutline, IoTrashOutline } from "react-icons/io5";
 import UploadModal from "../../components/modals/UploadModal";
 import DeleteModal from "../../components/modals/DeleteModal";
@@ -8,18 +9,15 @@ import { toast } from "react-toastify";
 import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
 
 const AssetSection = ({ task, taskId, projectId, total_assets }) => {
+  const queryClient = useQueryClient();
+  const { canUpload, currentUser } = useTaskPermissions(task);
+  const canDelete = task?.creator?.id === currentUser.id || task?.uploaded_by?.id === currentUser.id;
+
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
-
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingAsset, setDeletingAsset] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const { canUpload, currentUser } = useTaskPermissions(task);
-
-  const canDelete = task?.creator?.id === currentUser.id || task?.uploaded_by?.id === currentUser.id;
 
   const endpoint = taskId
     ? `/api/tasks/${taskId}/assets/`
@@ -27,8 +25,36 @@ const AssetSection = ({ task, taskId, projectId, total_assets }) => {
       ? `/api/projects/${projectId}/assets/`
       : null;
 
-  const { data, loading, error, refetch, makeRequest } = useApi(endpoint, "GET", null, [taskId, projectId]);
-  const assets = data || [];
+  const assetQueryKey = ['assets', taskId || projectId];
+
+  const { data, isLoading: loading, error } = useQuery({
+    queryKey: assetQueryKey,
+    queryFn: async () => (await apiClient.get(endpoint)).data,
+    enabled: !!endpoint,
+  });
+  const assets = Array.isArray(data) ? data : (data?.results || []);
+
+  const { mutate: uploadAsset, isPending: uploading } = useMutation({
+    mutationFn: (formData) => apiClient.post(endpoint, formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: assetQueryKey });
+      setShowUploadModal(false);
+      setSelectedFile(null);
+      toast.success("Asset uploaded successfully");
+    },
+    onError: (err) => toast.error("Failed to upload asset: " + (err.message || "Unknown error")),
+  });
+
+  const { mutate: deleteAsset, isPending: isDeleting } = useMutation({
+    mutationFn: (assetId) => apiClient.delete(`/api/assets/${assetId}/`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: assetQueryKey });
+      setShowDeleteModal(false);
+      setDeletingAsset(null);
+      toast.success("Asset deleted successfully");
+    },
+    onError: (err) => toast.error("Failed to delete asset: " + (err.message || "Unknown error")),
+  });
 
   const handleUploadClick = () => {
     setShowUploadModal(true);
@@ -43,29 +69,16 @@ const AssetSection = ({ task, taskId, projectId, total_assets }) => {
     }
   };
 
-  const handleUpload = async () => {
+  const handleUpload = () => {
     if (!selectedFile) {
       setUploadError("Please select a file");
       return;
     }
-
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-      if (taskId) formData.append("task", taskId);
-      else if (projectId) formData.append("project", projectId);
-
-      await makeRequest(endpoint, "POST", formData);
-      setShowUploadModal(false);
-      setSelectedFile(null);
-      toast.success("Asset uploaded successfully");
-      refetch();
-    } catch (err) {
-      toast.error("Failed to upload asset: " + (err.message || "Unknown error"));
-    } finally {
-      setUploading(false);
-    }
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    if (taskId) formData.append("task", taskId);
+    else if (projectId) formData.append("project", projectId);
+    uploadAsset(formData);
   };
 
   const openDeleteModal = (asset) => {
@@ -73,21 +86,9 @@ const AssetSection = ({ task, taskId, projectId, total_assets }) => {
     setShowDeleteModal(true);
   };
 
-  const confirmDeleteAsset = async () => {
+  const confirmDeleteAsset = () => {
     if (!deletingAsset) return;
-
-    setIsDeleting(true);
-    try {
-      await makeRequest(`/api/assets/${deletingAsset.id}/`, "DELETE");
-      setShowDeleteModal(false);
-      setDeletingAsset(null);
-      refetch();
-      toast.success("Asset deleted successfully");
-    } catch (err) {
-      toast.error("Failed to delete asset: " + (err.message || "Unknown error"));
-    } finally {
-      setIsDeleting(false);
-    }
+    deleteAsset(deletingAsset.id);
   };
 
   const getFileExtension = (filename) => filename.split('.').pop().toLowerCase();

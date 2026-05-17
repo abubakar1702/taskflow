@@ -1,27 +1,19 @@
 import React, { useState, useMemo } from "react";
-import { useApi } from "../components/hooks/useApi";
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "../utils/apiClient";
+import { QUERY_KEYS } from "../utils/queryKeys";
 import { Link } from "react-router-dom";
 import { FaPlus, FaExclamationCircle, FaClipboardList, FaCalendarAlt, FaClock, FaPaperclip } from "react-icons/fa";
-import { IoGrid, IoList } from "react-icons/io5";
-import { FaList } from "react-icons/fa6";
 import TaskCard from "../components/task/TaskCard";
 import FilterBar from "../components/task/filter/FilterBar";
 import LoadingScreen from "../components/common/LoadingScreen";
 import Avatar from "../components/common/Avatar";
 import { PRIORITY_COLORS, STATUS_COLORS } from "../components/constants/uiColors";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-
 const Tasks = () => {
     const [activeTab, setActiveTab] = useState("All");
     const [viewMode, setViewMode] = useState("grid");
-    const [filters, setFilters] = useState({
-        priority: "",
-        status: "",
-        due_today: false,
-        overdue: false,
-    });
-
+    const [filters, setFilters] = useState({ priority: "", status: "", due_today: false, overdue: false });
     const [sortBy, setSortBy] = useState("Date Created (Desc)");
 
     const mapSortToApi = (sortLabel) => {
@@ -42,20 +34,17 @@ const Tasks = () => {
         if (filters.overdue) query.append("overdue", "true");
         if (activeTab === "Assigned to me") query.append("assigned_to_me", "true");
         if (activeTab === "Created by me") query.append("created_by_me", "true");
-
         const apiSort = mapSortToApi(sortBy);
         if (apiSort) query.append("ordering", apiSort);
-
         return query.toString();
     }, [activeTab, filters, sortBy]);
 
-    const {
-        data: tasks = [],
-        loading,
-        error,
-    } = useApi(`${API_BASE_URL}/api/tasks/?${queryString}`, "GET", null, [
-        queryString,
-    ]);
+    const { data: tasksData = [], isLoading: loading, error } = useQuery({
+        queryKey: QUERY_KEYS.tasks(queryString),
+        queryFn: async () => (await apiClient.get(`/api/tasks/?${queryString}`)).data,
+        placeholderData: (prev) => prev, // Keep previous data while filters change
+    });
+    const tasks = Array.isArray(tasksData) ? tasksData : (tasksData?.results || []);
 
     const onFilterUpdate = (newActiveTab, newFilters, newSortBy) => {
         setActiveTab(newActiveTab);
@@ -65,10 +54,7 @@ const Tasks = () => {
 
     const formatDate = (date) => {
         if (!date) return null;
-        return new Date(date).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-        });
+        return new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     };
 
     const formatTime = (time) => {
@@ -90,7 +76,6 @@ const Tasks = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-                {/* TITLE + CONTROLS */}
                 <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <h1 className="text-3xl font-bold text-gray-900">
                         Tasks{" "}
@@ -98,7 +83,6 @@ const Tasks = () => {
                             <span className="text-gray-400 font-medium text-2xl ml-2">({tasks.length})</span>
                         )}
                     </h1>
-
                     <div className="flex items-center gap-3 w-full md:w-auto">
                         <Link to="/new-task/">
                             <button className="bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium shadow-sm hover:shadow active:scale-95 transform transition-transform">
@@ -108,29 +92,17 @@ const Tasks = () => {
                     </div>
                 </div>
 
-                <FilterBar
-                    onFilterUpdate={onFilterUpdate}
-                    viewMode={viewMode}
-                    setViewMode={setViewMode}
-                />
+                <FilterBar onFilterUpdate={onFilterUpdate} viewMode={viewMode} setViewMode={setViewMode} />
 
                 <div className="mt-6 min-h-[50vh] relative">
                     {loading ? (
                         <LoadingScreen message="Loading tasks..." height="60vh" />
-
                     ) : error ? (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
                             <FaExclamationCircle className="mx-auto h-12 w-12 text-red-600 mb-4" />
-                            <h3 className="text-lg font-medium text-red-900 mb-2">
-                                Failed to load tasks
-                            </h3>
-                            <p className="text-red-700 mb-4">
-                                {error.data?.detail || error.message}
-                            </p>
-                            <button
-                                onClick={() => window.location.reload()}
-                                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-                            >
+                            <h3 className="text-lg font-medium text-red-900 mb-2">Failed to load tasks</h3>
+                            <p className="text-red-700 mb-4">{error.response?.data?.detail || error.message}</p>
+                            <button onClick={() => window.location.reload()} className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
                                 Try Again
                             </button>
                         </div>
@@ -139,9 +111,7 @@ const Tasks = () => {
                             <div className="bg-blue-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <FaClipboardList className="h-10 w-10 text-blue-400" />
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                No tasks found
-                            </h3>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">No tasks found</h3>
                             <p className="text-gray-500 mb-8 max-w-sm mx-auto">
                                 You don't have any tasks matching your filters. Create a new task to get started.
                             </p>
@@ -155,13 +125,10 @@ const Tasks = () => {
                         <>
                             {viewMode === "grid" ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                    {tasks.map((task) => (
-                                        <TaskCard key={task.id} {...task} />
-                                    ))}
+                                    {tasks.map((task) => <TaskCard key={task.id} {...task} />)}
                                 </div>
                             ) : (
                                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                                    {/* Table Header */}
                                     <div className="bg-gray-50 border-b border-gray-200 px-6 py-3">
                                         <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                             <div className="col-span-4">Title</div>
@@ -173,18 +140,12 @@ const Tasks = () => {
                                             <div className="col-span-1">Assignees</div>
                                         </div>
                                     </div>
-
-                                    {/* Table Body */}
                                     <div className="divide-y divide-gray-100">
                                         {tasks.map((task) => (
                                             <div key={task.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                                                 <div className="grid grid-cols-12 gap-4 items-center">
-                                                    {/* Title */}
                                                     <div className="col-span-4">
-                                                        <Link
-                                                            to={`/tasks/${task.id}`}
-                                                            className="text-sm font-semibold text-gray-900 hover:text-blue-600 line-clamp-2 block"
-                                                        >
+                                                        <Link to={`/tasks/${task.id}`} className="text-sm font-semibold text-gray-900 hover:text-blue-600 line-clamp-2 block">
                                                             {task.title}
                                                         </Link>
                                                         <div className="flex items-center gap-2">
@@ -194,45 +155,34 @@ const Tasks = () => {
                                                                     <span className="text-xs">({task.total_assets})</span>
                                                                 </div>
                                                             )}
-                                                            
-                                                            {task.subtasks?.length > 0 && (<div className="flex text-xs items-center gap-1.5 text-gray-400 mt-1">
-                                                                Subtasks: <span>{task.subtasks?.filter((subtask) => subtask.status === "Done").length || 0} / {task.subtasks?.length || 0}</span>
-                                                            </div>)}
+                                                            {task.subtasks?.length > 0 && (
+                                                                <div className="flex text-xs items-center gap-1.5 text-gray-400 mt-1">
+                                                                    Subtasks: <span>{task.subtasks?.filter((st) => st.status === "Done").length || 0} / {task.subtasks?.length || 0}</span>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
-
-                                                    {/* Status */}
                                                     <div className="col-span-1">
                                                         <span className={`px-2.5 py-1 rounded text-xs font-semibold whitespace-nowrap ${STATUS_COLORS[task.status]}`}>
                                                             {task.status}
                                                         </span>
                                                     </div>
-
-                                                    {/* Priority */}
                                                     <div className="col-span-1">
                                                         <span className={`px-2.5 py-1 rounded text-xs font-semibold border whitespace-nowrap ${PRIORITY_COLORS[task.priority]}`}>
                                                             {task.priority}
                                                         </span>
                                                     </div>
-
-                                                    {/* Project */}
                                                     <div className="col-span-2">
                                                         <span className="text-sm font-medium text-gray-800 truncate block">
                                                             {task.project?.name || "No Project"}
                                                         </span>
                                                     </div>
-
-                                                    {/* Creator */}
                                                     <div className="col-span-2">
                                                         <div className="flex items-center gap-2">
                                                             <Avatar name={task.creator?.display_name} url={task.creator?.avatar} size={6} />
-                                                            <span className="text-sm text-gray-700 truncate">
-                                                                {task.creator?.display_name}
-                                                            </span>
+                                                            <span className="text-sm text-gray-700 truncate">{task.creator?.display_name}</span>
                                                         </div>
                                                     </div>
-
-                                                    {/* Due Date */}
                                                     <div className="col-span-1">
                                                         {task.due_date ? (
                                                             <div className={`text-sm ${isOverdue(task) ? "text-red-600 font-medium" : "text-gray-600"}`}>
@@ -251,8 +201,6 @@ const Tasks = () => {
                                                             <span className="text-xs text-gray-400">-</span>
                                                         )}
                                                     </div>
-
-                                                    {/* Assignees */}
                                                     <div className="col-span-1">
                                                         {task.assignees && task.assignees.length > 0 ? (
                                                             <div className="flex items-center -space-x-2">

@@ -1,10 +1,16 @@
-import { useApi } from "../components/hooks/useApi";
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "../utils/apiClient";
+import { QUERY_KEYS } from "../utils/queryKeys";
 import Avatar from "../components/common/Avatar";
 import LoadingScreen from "../components/common/LoadingScreen";
 import { FaExclamationTriangle } from "react-icons/fa";
 
 const Team = () => {
-    const { data: teamMembers, loading, error, refetch } = useApi("/api/team/");
+    const { data: teamData, isLoading: loading, error, refetch } = useQuery({
+        queryKey: QUERY_KEYS.team(),
+        queryFn: async () => (await apiClient.get("/api/team/")).data,
+    });
+    const teamMembers = Array.isArray(teamData) ? teamData : (teamData?.results || []);
 
     return (
         <div className="min-h-screen bg-gray-50 p-6 md:p-8">

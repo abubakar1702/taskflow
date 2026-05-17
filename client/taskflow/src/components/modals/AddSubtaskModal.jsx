@@ -1,5 +1,7 @@
 import { useState, useEffect, useContext } from "react";
-import { useApi } from "../hooks/useApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import Avatar from "../common/Avatar";
 import { FaPlus, FaRegUser, FaCircleInfo } from "react-icons/fa6";
 import { MdOutlineTask } from "react-icons/md";
@@ -8,10 +10,28 @@ import { toast } from "react-toastify";
 
 const AddSubtaskModal = ({ taskId, creator, assignees = [], onClose, onUpdated }) => {
     const [text, setText] = useState("");
+    const queryClient = useQueryClient();
     const [assigneeId, setAssigneeId] = useState(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
-    const { makeRequest } = useApi();
+
+    const { mutate: addSubtask, isPending: isSubmitting } = useMutation({
+        mutationFn: async (data) => {
+            const response = await apiClient.post(`/api/tasks/${taskId}/subtasks/`, data);
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success("Subtask added successfully");
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.task(taskId) });
+            setText("");
+            setAssigneeId(null);
+            onUpdated?.();
+            handleClose();
+        },
+        onError: (error) => {
+            console.error("Failed to add subtask:", error);
+            toast.error(error.response?.data?.detail || error.message || "Failed to add subtask. Please try again.");
+        }
+    });
 
     const filteredAssignees = assignees.filter(a => a.id !== creator?.id);
 
@@ -24,28 +44,15 @@ const AddSubtaskModal = ({ taskId, creator, assignees = [], onClose, onUpdated }
         setTimeout(onClose, 200);
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (!text.trim() || !taskId) return;
 
-        setIsSubmitting(true);
-        try {
-            await makeRequest(`/api/tasks/${taskId}/subtasks/`, "POST", {
-                text: text.trim(),
-                assignee_id: assigneeId || null,
-                is_completed: false,
-            });
-            toast.success("Subtask added successfully");
-            setText("");
-            setAssigneeId(null);
-            onUpdated?.();
-            handleClose();
-        } catch (error) {
-            console.error("Failed to add subtask:", error);
-            toast.error("Failed to add subtask. Please try again.");
-        } finally {
-            setIsSubmitting(false);
-        }
+        addSubtask({
+            text: text.trim(),
+            assignee_id: assigneeId || null,
+            is_completed: false,
+        });
     };
 
     const selectedAssignee = (creator && String(assigneeId) === String(creator.id))

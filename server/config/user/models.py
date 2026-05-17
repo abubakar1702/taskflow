@@ -6,6 +6,10 @@ from django.utils import timezone
 from datetime import timedelta
 
 
+def _otp_default_expiry():
+    """Callable default so bulk_create also gets a correct expiry."""
+    return timezone.now() + timedelta(minutes=10)
+
 class CustomUserManager(BaseUserManager):
     def _generate_username(self, first_name, last_name):
         first_clean = re.sub(
@@ -30,9 +34,11 @@ class CustomUserManager(BaseUserManager):
         if not email:
             raise ValueError('The Email field must be set')
         email = self.normalize_email(email)
-        first_name = extra_fields.get('first_name', '')
-        last_name = extra_fields.get('last_name', '')
-        username = self._generate_username(first_name, last_name)
+        username = extra_fields.pop('username', None)
+        if not username:
+            first_name = extra_fields.get('first_name', '')
+            last_name = extra_fields.get('last_name', '')
+            username = self._generate_username(first_name, last_name)
         user = self.model(email=email, username=username, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -89,18 +95,14 @@ class OneTimePassword(models.Model):
         ('REGISTRATION', 'Account Registration'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otps')
-    otp = models.CharField(max_length=6)
+    # Stores a SHA-256 hex digest — never the raw OTP
+    otp = models.CharField(max_length=64)
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='RESET')
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
-
-    def save(self, *args, **kwargs):
-        if not self.expires_at:
-            self.expires_at = timezone.now() + timedelta(minutes=10)
-        super().save(*args, **kwargs)
+    expires_at = models.DateTimeField(default=_otp_default_expiry)
 
     def is_valid(self):
         return timezone.now() <= self.expires_at
 
     def __str__(self):
-        return f"{self.user.email} - {self.otp} ({self.type})"
+        return f"{self.user.email} - ({self.type})"

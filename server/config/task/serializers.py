@@ -1,9 +1,13 @@
 from rest_framework import serializers
+from django.shortcuts import get_object_or_404
+from django.db.models import Count
+
 from .models import Task, Subtask, ImportantTask
 from project.models import Project
 from project.serializers import ProjectSerializer
 from user.serializers import UserSerializer
 from user.models import User
+
 
 class SearchForAssigneeSerializer(serializers.Serializer):
     id = serializers.UUIDField(read_only=True)
@@ -35,6 +39,7 @@ class SearchForAssigneeSerializer(serializers.Serializer):
             )
         }
 
+
 class SubtaskSerializer(serializers.ModelSerializer):
     assignee = UserSerializer(read_only=True)
     assignee_id = serializers.PrimaryKeyRelatedField(
@@ -54,40 +59,61 @@ class SubtaskSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'assignee', 'created_at', 'updated_at']
 
     def validate(self, attrs):
-        request = self.context['request']
-        parent_task = self.context.get('parent_task')  
+        parent_task = self.context.get('parent_task')
         task = parent_task or getattr(self.instance, 'task', None)
 
         assignee = attrs.get('assignee')
 
-        if assignee and assignee != task.creator and assignee not in task.assignees.all():
-            raise serializers.ValidationError({
-                "assignee": "Subtask assignee must be a task assignee or the task creator."
-            })
+        if assignee and task:
+            # Use .filter().exists() to avoid fetching all assignees
+            is_creator = (assignee == task.creator)
+            is_assignee = task.assignees.filter(id=assignee.id).exists()
+            if not is_creator and not is_assignee:
+                raise serializers.ValidationError({
+                    "assignee": "Subtask assignee must be a task assignee or the task creator."
+                })
         return attrs
+
 
 class TaskSerializer(serializers.ModelSerializer):
     creator = UserSerializer(read_only=True)
     project = ProjectSerializer(read_only=True)
-    
-    project_id = serializers.PrimaryKeyRelatedField(queryset=Project.objects.all(), source='project', write_only=True, required=False, allow_null=True)
-    assignees_ids = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), source='assignees', many=True, write_only=True)
-    
+
+    project_id = serializers.PrimaryKeyRelatedField(
+        queryset=Project.objects.all(),
+        source='project',
+        write_only=True,
+        required=False,
+        allow_null=True
+    )
+    assignees_ids = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        source='assignees',
+        many=True,
+        write_only=True
+    )
+
     subtasks_data = serializers.ListField(
         child=serializers.DictField(),
         write_only=True,
         required=False
     )
-    
+
     assignees = UserSerializer(many=True, read_only=True)
     subtasks = SubtaskSerializer(many=True, read_only=True)
-    
+
     total_assets = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Task
-        fields = ['id', 'title', 'description', 'creator','project_id', 'project','assignees_ids', 'assignees', 'status', 'priority','subtasks','subtasks_data','total_assets', 'due_date', 'due_time', 'time_taken', 'timer_start_time', 'created_at', 'updated_at']
-        
+        fields = [
+            'id', 'title', 'description', 'creator', 'project_id', 'project',
+            'assignees_ids', 'assignees', 'status', 'priority',
+            'subtasks', 'subtasks_data', 'total_assets',
+            'due_date', 'due_time', 'time_taken', 'timer_start_time',
+            'created_at', 'updated_at'
+        ]
+
     def create(self, validated_data):
         subtasks_data = validated_data.pop('subtasks_data', [])
         assignees = validated_data.pop('assignees', [])
@@ -96,26 +122,39 @@ class TaskSerializer(serializers.ModelSerializer):
         task = Task.objects.create(project=project, **validated_data)
         task.assignees.set(assignees)
 
+        # Build a set of valid assignee IDs to avoid repeated DB queries
+        valid_ids = {str(a.id) for a in assignees}
+        creator_id = str(task.creator_id) if task.creator_id else None
+
         for subtask_data in subtasks_data:
             assignee_id = subtask_data.pop('assignee_id', None)
-    
             assignee = None
-            if assignee_id:
-                assignee = User.objects.get(id=assignee_id)
 
-            if assignee:
-                if assignee != task.creator and assignee not in task.assignees.all():
+            if assignee_id:
+                str_id = str(assignee_id)
+                if str_id != creator_id and str_id not in valid_ids:
                     raise serializers.ValidationError({
-                        "subtasks_data": "Each subtask assignee must be one of the task assignees or the task creator."
-                })
+                        "subtasks_data": "Each subtask assignee must be a task assignee or the creator."
+                    })
+                # Safe to fetch now — we know they're valid
+                try:
+                    assignee = User.objects.get(id=assignee_id)
+                except User.DoesNotExist:
+                    raise serializers.ValidationError({
+                        "subtasks_data": f"User with id {assignee_id} does not exist."
+                    })
 
             Subtask.objects.create(task=task, assignee=assignee, **subtask_data)
 
-
         return task
-    
+
     def get_total_assets(self, obj):
+        # Use annotation if the view provided it; fallback to a count query
+        annotated = getattr(obj, 'total_assets_annotated', None)
+        if annotated is not None:
+            return annotated
         return obj.assets.count()
+
 
 class ImportantTaskSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -128,7 +167,7 @@ class ImportantTaskSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         task_id = validated_data.pop('task_id')
-        task = Task.objects.get(id=task_id)
+        task = get_object_or_404(Task, id=task_id)
 
         return ImportantTask.objects.create(
             user=self.context['request'].user,

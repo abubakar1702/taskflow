@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { useApi } from "../../components/hooks/useApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import Avatar from "../../components/common/Avatar";
 import { FiSearch, FiX, FiCheck, FiUsers } from "react-icons/fi";
 import { toast } from "react-toastify";
@@ -9,8 +11,7 @@ const getPlainUser = (result) => (result ? result.user || result : {});
 
 const AddAssigneeModal = ({ isOpen, onClose, taskId, currentAssignees = [], project, onAdd }) => {
     const { currentUser } = useUser();
-    const { makeRequest: searchUsers } = useApi();
-    const { makeRequest: addAssignees } = useApi();
+    const queryClient = useQueryClient();
 
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
@@ -97,7 +98,7 @@ const AddAssigneeModal = ({ isOpen, onClose, taskId, currentAssignees = [], proj
         searchTimeoutRef.current = setTimeout(async () => {
             try {
                 const url = `/api/search-assignees/?user=${encodeURIComponent(query)}`;
-                const results = await searchUsers(url, "GET");
+                const results = (await apiClient.get(url)).data;
 
                 const filteredResults = Array.isArray(results)
                     ? results.filter(result => {
@@ -151,20 +152,21 @@ const AddAssigneeModal = ({ isOpen, onClose, taskId, currentAssignees = [], proj
         setSelectedUsers(selectedUsers.filter(u => u.id !== id));
     };
 
-    const handleAddAssignees = async () => {
-        if (!selectedUsers.length) return;
-
-        try {
-            await addAssignees(`/api/tasks/${taskId}/assignees/`, "PATCH", {
-                assignee_ids: selectedUsers.map(u => u.id)
-            });
+    const { mutate: addAssigneesMutation, isPending: isAdding } = useMutation({
+        mutationFn: (ids) =>
+            apiClient.patch(`/api/tasks/${taskId}/assignees/`, { assignee_ids: ids }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.task(taskId) });
             onAdd();
             toast.success("Assignees added successfully");
             onClose();
-        } catch (err) {
-            console.error("Failed to add assignees:", err);
-            toast.error("Failed to add assignees. Please try again.");
-        }
+        },
+        onError: () => toast.error("Failed to add assignees. Please try again."),
+    });
+
+    const handleAddAssignees = () => {
+        if (!selectedUsers.length) return;
+        addAssigneesMutation(selectedUsers.map((u) => u.id));
     };
 
     if (!isOpen) return null;

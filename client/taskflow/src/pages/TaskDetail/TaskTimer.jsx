@@ -1,10 +1,21 @@
 import { useState, useEffect } from "react";
-import { useApi } from "../../components/hooks/useApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import { toast } from "react-toastify";
 import { IoPlay, IoPause, IoStop } from "react-icons/io5";
 
 const TaskTimer = ({ task, onUpdate, isCreator }) => {
-    const { makeRequest, loading } = useApi();
+    const queryClient = useQueryClient();
+
+    const invalidate = () =>
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.task(task?.id) });
+
+    const { mutate: patchTask, isPending: loading } = useMutation({
+        mutationFn: (payload) => apiClient.patch(`/api/tasks/${task.id}/`, payload),
+        onSuccess: () => { invalidate(); onUpdate(); },
+        onError: (_, __, ctx) => toast.error(ctx?.errMsg || "Timer action failed"),
+    });
     const [seconds, setSeconds] = useState(0);
 
     // Parse duration string to seconds
@@ -64,50 +75,17 @@ const TaskTimer = ({ task, onUpdate, isCreator }) => {
         return () => clearInterval(interval);
     }, [task]);
 
-    const handleStart = async () => {
-        try {
-            await makeRequest(`/api/tasks/${task.id}/`, "PATCH", {
-                timer_start_time: new Date().toISOString(),
-                status: "In Progress"
-            });
-            onUpdate();
-        } catch (error) {
-            toast.error("Failed to start timer");
-        }
+    const handleStart = () => {
+        patchTask({ timer_start_time: new Date().toISOString(), status: "In Progress" });
     };
 
-    const handlePause = async () => {
-        try {
-            if (!task.timer_start_time) return;
-
-            const durationStr = formatTime(seconds);
-
-            await makeRequest(`/api/tasks/${task.id}/`, "PATCH", {
-                timer_start_time: null,
-                time_taken: durationStr
-            });
-            onUpdate();
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to pause timer");
-        }
+    const handlePause = () => {
+        if (!task.timer_start_time) return;
+        patchTask({ timer_start_time: null, time_taken: formatTime(seconds) });
     };
 
-    const handleStop = async () => {
-        try {
-            const durationStr = formatTime(seconds);
-            const payload = {
-                status: "To Do",
-                time_taken: durationStr,
-                timer_start_time: null
-            };
-
-            await makeRequest(`/api/tasks/${task.id}/`, "PATCH", payload);
-            onUpdate();
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to stop timer");
-        }
+    const handleStop = () => {
+        patchTask({ status: "To Do", time_taken: formatTime(seconds), timer_start_time: null });
     };
 
     const isRunning = !!task?.timer_start_time;

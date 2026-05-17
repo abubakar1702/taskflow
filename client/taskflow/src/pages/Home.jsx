@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { useApi } from '../components/hooks/useApi';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '../utils/apiClient';
+import { QUERY_KEYS } from '../utils/queryKeys';
 import { useUser } from '../contexts/UserContext';
 import { Link } from 'react-router-dom';
 import { FaPlus, FaCalendar } from 'react-icons/fa';
@@ -10,12 +12,20 @@ import TodaysTasks from '../components/home/TodaysTasks';
 import UpcomingTasks from '../components/home/UpcomingTasks';
 import RunningProjects from '../components/home/RunningProjects';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-
 const Home = () => {
     const { currentUser } = useUser();
-    const { data: tasks = [], loading: tasksLoading } = useApi(`${API_BASE_URL}/api/user-tasks/`, "GET");
-    const { data: projects = [], loading: projectsLoading } = useApi(`${API_BASE_URL}/api/projects/`, "GET");
+
+    const { data: tasksData = [], isLoading: tasksLoading } = useQuery({
+        queryKey: QUERY_KEYS.userTasks(),
+        queryFn: async () => (await apiClient.get('/api/user-tasks/')).data,
+    });
+    const tasks = Array.isArray(tasksData) ? tasksData : (tasksData?.results || []);
+
+    const { data: projectsData = [], isLoading: projectsLoading } = useQuery({
+        queryKey: QUERY_KEYS.projects(),
+        queryFn: async () => (await apiClient.get('/api/projects/')).data,
+    });
+    const projects = Array.isArray(projectsData) ? projectsData : (projectsData?.results || []);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalData, setModalData] = useState({ tasks: [], title: "" });

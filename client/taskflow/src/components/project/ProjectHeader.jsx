@@ -2,13 +2,30 @@ import { useState } from "react";
 import { FaCalendarAlt, FaEdit, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useApi } from "../hooks/useApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import DeleteModal from "../modals/DeleteModal";
 
 const ProjectHeader = ({ project, activeTab, setActiveTab, tasks, assets, onEditClick, isProjectAdmin, isProjectCreator }) => {
+    const queryClient = useQueryClient();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const navigate = useNavigate();
-    const { makeRequest: deleteProject, loading: isDeleting } = useApi();
+
+    const { mutate: deleteProjectMutation, isPending: isDeleting } = useMutation({
+        mutationFn: async () => {
+            await apiClient.delete(`/api/projects/${project.id}/`);
+        },
+        onSuccess: () => {
+            toast.success("Project deleted successfully");
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects() });
+            navigate("/projects");
+        },
+        onError: (error) => {
+            console.error("Failed to delete project:", error);
+            toast.error(error.response?.data?.detail || error.message || "Failed to delete project");
+        }
+    });
 
     const formatDate = (date) => {
         if (!date) return null;
@@ -20,15 +37,8 @@ const ProjectHeader = ({ project, activeTab, setActiveTab, tasks, assets, onEdit
         });
     };
 
-    const handleDeleteProject = async () => {
-        try {
-            await deleteProject(`/api/projects/${project.id}/`, "DELETE");
-            toast.success("Project deleted successfully");
-            navigate("/projects");
-        } catch (error) {
-            console.error("Failed to delete project:", error);
-            toast.error(error.message || "Failed to delete project");
-        }
+    const handleDeleteProject = () => {
+        deleteProjectMutation();
     };
 
     return (

@@ -15,10 +15,13 @@ import {
 import { useUser } from "../../contexts/UserContext";
 import UploadModal from "../modals/UploadModal";
 import DeleteModal from "../modals/DeleteModal";
-import { useApi } from "../hooks/useApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import { toast } from "react-toastify";
 
 const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isProjectAdmin }) => {
+    const queryClient = useQueryClient();
     const { currentUser } = useUser();
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -27,9 +30,40 @@ const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isPr
     // Delete state
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deletingAsset, setDeletingAsset] = useState(null);
-    const [isDeleting, setIsDeleting] = useState(false);
 
-    const { makeRequest, loading: uploading } = useApi();
+    const { mutate: uploadAsset, isPending: uploading } = useMutation({
+        mutationFn: async (formData) => {
+            const response = await apiClient.post(`/api/projects/${projectId}/assets/`, formData);
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success("Asset uploaded successfully");
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project(projectId) });
+            onAssetsUpdated();
+            handleCloseModal();
+        },
+        onError: (err) => {
+            console.error("Upload failed:", err);
+            setUploadError(err.response?.data?.detail || err.message || "Failed to upload file");
+            toast.error("Failed to upload asset");
+        }
+    });
+
+    const { mutate: deleteAsset, isPending: isDeleting } = useMutation({
+        mutationFn: async (assetId) => {
+            await apiClient.delete(`/api/assets/${assetId}/`);
+        },
+        onSuccess: () => {
+            toast.success("Asset deleted successfully");
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project(projectId) });
+            onAssetsUpdated();
+            setShowDeleteModal(false);
+            setDeletingAsset(null);
+        },
+        onError: (err) => {
+            toast.error("Failed to delete asset: " + (err.response?.data?.detail || err.message || "Unknown error"));
+        }
+    });
 
     const formatDate = (date) => {
         if (!date) return null;
@@ -54,27 +88,14 @@ const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isPr
         }
     };
 
-    const handleUpload = async () => {
+    const handleUpload = () => {
         if (!selectedFile) return;
 
         const formData = new FormData();
         formData.append("file", selectedFile);
         formData.append("project", projectId);
 
-        try {
-            await makeRequest(
-                `/api/projects/${projectId}/assets/`,
-                "POST",
-                formData
-            );
-            toast.success("Asset uploaded successfully");
-            onAssetsUpdated();
-            handleCloseModal();
-        } catch (err) {
-            console.error("Upload failed:", err);
-            setUploadError(err.message || "Failed to upload file");
-            toast.error("Failed to upload asset");
-        }
+        uploadAsset(formData);
     };
 
     const handleCloseModal = () => {
@@ -89,21 +110,9 @@ const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isPr
         setShowDeleteModal(true);
     };
 
-    const confirmDeleteAsset = async () => {
+    const confirmDeleteAsset = () => {
         if (!deletingAsset) return;
-
-        setIsDeleting(true);
-        try {
-            await makeRequest(`/api/assets/${deletingAsset.id}/`, "DELETE");
-            setShowDeleteModal(false);
-            setDeletingAsset(null);
-            onAssetsUpdated();
-            toast.success("Asset deleted successfully");
-        } catch (err) {
-            toast.error("Failed to delete asset: " + (err.message || "Unknown error"));
-        } finally {
-            setIsDeleting(false);
-        }
+        deleteAsset(deletingAsset.id);
     };
 
     return (

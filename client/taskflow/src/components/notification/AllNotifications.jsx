@@ -1,14 +1,32 @@
 import React, { useState } from 'react';
 import { FiSearch, FiCheckCircle, FiSettings, FiBellOff, FiRefreshCw } from 'react-icons/fi';
 import NotificationCard from './NotificationCard';
-import { useApi } from '../hooks/useApi';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '../../utils/apiClient';
+import { QUERY_KEYS } from '../../utils/queryKeys';
 
 const AllNotifications = () => {
     const [activeTab, setActiveTab] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
 
-    const { data, loading, error, refetch, makeRequest } = useApi('/api/notifications/', 'GET', null, []);
-    const notifications = data || [];
+    const queryClient = useQueryClient();
+    const { data, isLoading: loading, error, refetch } = useQuery({
+        queryKey: QUERY_KEYS.notifications(),
+        queryFn: async () => (await apiClient.get('/api/notifications/')).data,
+    });
+    const notifications = Array.isArray(data) ? data : (data?.results || []);
+
+    const invalidate = () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notifications() });
+
+    const { mutate: markAllRead } = useMutation({
+        mutationFn: (ids) => Promise.all(ids.map(id => apiClient.patch(`/api/notifications/${id}/read/`))),
+        onSuccess: invalidate,
+    });
+
+    const handleMarkAllAsRead = () => {
+        const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
+        if (unreadIds.length) markAllRead(unreadIds);
+    };
 
     const tabs = [
         { id: 'all', label: 'All' },
@@ -17,17 +35,6 @@ const AllNotifications = () => {
         { id: 'system', label: 'System' },
     ];
 
-    const handleMarkAllAsRead = async () => {
-        const unreadNotifications = notifications.filter(n => !n.is_read);
-        try {
-            await Promise.all(
-                unreadNotifications.map(n => makeRequest(`/api/notifications/${n.id}/read/`, 'PATCH'))
-            );
-            refetch();
-        } catch (err) {
-            console.error('Failed to mark all as read:', err);
-        }
-    };
 
     const filteredNotifications = notifications.filter(n => {
         if (activeTab === 'unread') return !n.is_read;
@@ -121,7 +128,7 @@ const AllNotifications = () => {
                             <NotificationCard
                                 key={notification.id}
                                 notification={notification}
-                                onUpdate={refetch}
+                                onUpdate={invalidate}
                             />
                         ))}
                     </div>

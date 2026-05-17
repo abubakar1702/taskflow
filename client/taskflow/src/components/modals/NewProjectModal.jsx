@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { useApi } from "../hooks/useApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import { BsPlusLg } from "react-icons/bs";
 import { FaLayerGroup, FaAlignLeft } from "react-icons/fa";
 import { FaXmark } from "react-icons/fa6";
@@ -8,39 +10,39 @@ import { toast } from "react-toastify";
 import { createPortal } from "react-dom";
 
 const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
+    const queryClient = useQueryClient();
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
-    const { makeRequest } = useApi(null);
-    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!name.trim()) return;
-
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            await makeRequest(
-                "/api/projects/",
-                "POST",
-                { name, description }
-            );
+    const { mutate: createProject, isPending: isLoading } = useMutation({
+        mutationFn: async (data) => {
+            const response = await apiClient.post("/api/projects/", data);
+            return response.data;
+        },
+        onSuccess: () => {
             toast.success("Project created successfully");
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects() });
             if (onProjectCreated) onProjectCreated();
 
             // Reset form
             setName("");
             setDescription("");
             onClose();
-        } catch (err) {
+        },
+        onError: (err) => {
             console.error("Failed to create project:", err);
-            setError(err.message || "Failed to create project");
+            setError(err.response?.data?.detail || err.message || "Failed to create project");
             toast.error("Failed to create project. Please try again.");
-        } finally {
-            setIsLoading(false);
         }
+    });
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!name.trim()) return;
+
+        setError(null);
+        createProject({ name, description });
     };
 
     if (!isOpen) return null;

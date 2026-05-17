@@ -1,20 +1,31 @@
 import { useState } from "react";
-import { useApi } from "../../components/hooks/useApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import Avatar from "../../components/common/Avatar";
 import DeleteModal from "../../components/modals/DeleteModal";
 import AddAssigneeModal from "../../components/modals/AddAssigneeModal";
 import { FiUserPlus } from "react-icons/fi";
 import { FaXmark } from "react-icons/fa6";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
 const Assignee = ({ assignees = [], taskId, refetch, project, isCreator }) => {
-    const { makeRequest: removeAssignee } = useApi();
-
+    const queryClient = useQueryClient();
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deletingAssignee, setDeletingAssignee] = useState(null);
-    const [isDeleting, setIsDeleting] = useState(false);
-
     const [showAddAssigneeModal, setShowAddAssigneeModal] = useState(false);
+
+    const { mutate: removeAssignee, isPending: isDeleting } = useMutation({
+        mutationFn: (assigneeId) =>
+            apiClient.delete(`/api/tasks/${taskId}/assignees/${assigneeId}/`),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.task(taskId) });
+            toast.success("Assignee removed successfully");
+            setDeletingAssignee(null);
+            setShowDeleteModal(false);
+        },
+        onError: () => toast.error("Failed to remove assignee. Please try again."),
+    });
 
     const openDeleteModal = (assignee) => {
         setDeletingAssignee(assignee);
@@ -26,31 +37,8 @@ const Assignee = ({ assignees = [], taskId, refetch, project, isCreator }) => {
         setShowDeleteModal(false);
     };
 
-    const confirmDeleteAssignee = async () => {
-        if (!deletingAssignee) return;
-
-        try {
-            setIsDeleting(true);
-            await removeAssignee(
-                `/api/tasks/${taskId}/assignees/${deletingAssignee.id}/`,
-                "DELETE"
-            );
-            setIsDeleting(false);
-            closeDeleteModal();
-            toast.success("Assignee removed successfully");
-            refetch();
-        } catch (err) {
-            setIsDeleting(false);
-            console.error("Failed to remove assignee:", err);
-            toast.error("Failed to remove assignee. Please try again.");
-        }
-    };
-
-    const openAddModal = () => setShowAddAssigneeModal(true);
-
     return (
         <div>
-            {/* Header with Add button */}
             <div className="flex justify-between items-center mb-3">
                 <h2 className="text-sm font-semibold">
                     Assignees{" "}
@@ -58,15 +46,16 @@ const Assignee = ({ assignees = [], taskId, refetch, project, isCreator }) => {
                         {assignees.length || 0}
                     </span>
                 </h2>
-                {isCreator && (<button
-                    onClick={openAddModal}
-                    className="text-blue-600 hover:bg-blue-100 px-2 py-1 rounded-md flex items-center gap-2 border border-blue-600"
-                >
-                    <FiUserPlus /> Add New
-                </button>)}
+                {isCreator && (
+                    <button
+                        onClick={() => setShowAddAssigneeModal(true)}
+                        className="text-blue-600 hover:bg-blue-100 px-2 py-1 rounded-md flex items-center gap-2 border border-blue-600"
+                    >
+                        <FiUserPlus /> Add New
+                    </button>
+                )}
             </div>
 
-            {/* Assignee list */}
             {assignees.length === 0 ? (
                 <div className="text-center py-4">
                     <p className="text-gray-500">No assignees yet</p>
@@ -80,11 +69,7 @@ const Assignee = ({ assignees = [], taskId, refetch, project, isCreator }) => {
                         >
                             <div className="flex items-center gap-3">
                                 {a.avatar ? (
-                                    <img
-                                        src={a.avatar}
-                                        alt={a.display_name}
-                                        className="w-10 h-10 rounded-full"
-                                    />
+                                    <img src={a.avatar} alt={a.display_name} className="w-10 h-10 rounded-full" />
                                 ) : (
                                     <Avatar name={a.display_name} size={10} />
                                 )}
@@ -94,22 +79,23 @@ const Assignee = ({ assignees = [], taskId, refetch, project, isCreator }) => {
                                 </div>
                             </div>
 
-                            {isCreator && (<button
-                                onClick={() => openDeleteModal(a)}
-                                className="text-gray-500 hover:text-gray-700 p-2"
-                            >
-                                <FaXmark size={20} title="Remove Assignee" />
-                            </button>)}
+                            {isCreator && (
+                                <button
+                                    onClick={() => openDeleteModal(a)}
+                                    className="text-gray-500 hover:text-gray-700 p-2"
+                                >
+                                    <FaXmark size={20} title="Remove Assignee" />
+                                </button>
+                            )}
                         </div>
                     ))}
                 </div>
             )}
 
-            {/* Delete modal */}
             <DeleteModal
                 isOpen={showDeleteModal}
                 onClose={closeDeleteModal}
-                onConfirm={confirmDeleteAssignee}
+                onConfirm={() => removeAssignee(deletingAssignee?.id)}
                 title="Remove Assignee"
                 message={
                     deletingAssignee
@@ -119,7 +105,6 @@ const Assignee = ({ assignees = [], taskId, refetch, project, isCreator }) => {
                 isLoading={isDeleting}
             />
 
-            {/* Add Assignee modal */}
             <AddAssigneeModal
                 isOpen={showAddAssigneeModal}
                 onClose={() => setShowAddAssigneeModal(false)}
@@ -127,7 +112,7 @@ const Assignee = ({ assignees = [], taskId, refetch, project, isCreator }) => {
                 project={project}
                 currentAssignees={assignees}
                 onAdd={() => {
-                    refetch();
+                    queryClient.invalidateQueries({ queryKey: QUERY_KEYS.task(taskId) });
                     setShowAddAssigneeModal(false);
                 }}
             />

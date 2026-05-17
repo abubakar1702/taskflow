@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { useApi } from '../components/hooks/useApi';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '../utils/apiClient';
+import { QUERY_KEYS } from '../utils/queryKeys';
 import { BsPlus } from 'react-icons/bs';
 import { FaStickyNote } from 'react-icons/fa';
 import { toast } from 'react-toastify';
@@ -10,36 +12,37 @@ import NoteCard from '../components/note/NoteCard';
 import NoteSearch from '../components/note/NoteSearch';
 
 const Notes = () => {
-    const { data: notes, loading, refetch } = useApi('/api/notes/');
-    const { makeRequest } = useApi();
+    const queryClient = useQueryClient();
+    const { data: notesData, isLoading: loading } = useQuery({
+        queryKey: QUERY_KEYS.notes(),
+        queryFn: async () => (await apiClient.get('/api/notes/')).data,
+    });
+    const notes = Array.isArray(notesData) ? notesData : (notesData?.results || []);
+
+    const invalidate = () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notes() });
+
+    const { mutate: togglePin } = useMutation({
+        mutationFn: (note) => apiClient.patch(`/api/notes/${note.id}/`, { is_pinned: !note.is_pinned }),
+        onSuccess: (_, note) => { invalidate(); toast.success(note.is_pinned ? 'Note unpinned' : 'Note pinned'); },
+        onError: () => toast.error('Failed to update pin status'),
+    });
+
+    const { mutate: deleteNote } = useMutation({
+        mutationFn: (note) => apiClient.delete(`/api/notes/${note.id}/`),
+        onSuccess: () => { invalidate(); toast.success('Note deleted'); setNoteToDelete(null); },
+        onError: () => toast.error('Failed to delete note'),
+    });
 
     const [searchTerm, setSearchTerm] = useState('');
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [noteToDelete, setNoteToDelete] = useState(null);
     const [selectedNoteId, setSelectedNoteId] = useState(null);
 
-    const handlePinToggle = async (note) => {
-        try {
-            await makeRequest(`/api/notes/${note.id}/`, 'PATCH', { is_pinned: !note.is_pinned });
-            toast.success(note.is_pinned ? 'Note unpinned' : 'Note pinned');
-            refetch();
-        } catch (err) {
-            console.error(err);
-            toast.error('Failed to update pin status');
-        }
-    };
+    const handlePinToggle = (note) => togglePin(note);
 
-    const handleDelete = async () => {
+    const handleDelete = () => {
         if (!noteToDelete) return;
-        try {
-            await makeRequest(`/api/notes/${noteToDelete.id}/`, 'DELETE');
-            toast.success('Note deleted');
-            setNoteToDelete(null);
-            refetch();
-        } catch (err) {
-            console.error(err);
-            toast.error('Failed to delete note');
-        }
+        deleteNote(noteToDelete);
     };
 
     const filteredNotes = notes?.filter(note =>
@@ -136,14 +139,14 @@ const Notes = () => {
             <CreateNoteModal
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
-                onCreated={refetch}
+                onCreated={invalidate}
             />
 
             <NoteDetailModal
                 isOpen={!!selectedNoteId}
                 onClose={() => setSelectedNoteId(null)}
                 noteId={selectedNoteId}
-                onUpdate={refetch}
+                onUpdate={invalidate}
             />
 
             <DeleteModal

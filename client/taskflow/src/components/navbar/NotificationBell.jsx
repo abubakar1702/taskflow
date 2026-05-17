@@ -1,15 +1,21 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FiBell } from "react-icons/fi";
 import Notifications from "../notification/Notifications";
-import { useApi } from "../hooks/useApi";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 
 const NotificationBell = () => {
     const [isOpen, setIsOpen] = useState(false);
     const bellRef = useRef(null);
 
-    // Fetch notifications using useApi hook
-    const { data, loading, refetch } = useApi('/api/notifications/', 'GET', null, []);
-    const notifications = data || [];
+    // Fetch notifications using useQuery — auto-refreshes every 60s
+    const { data, isLoading: loading, refetch } = useQuery({
+        queryKey: QUERY_KEYS.notifications(),
+        queryFn: async () => (await apiClient.get('/api/notifications/')).data,
+        refetchInterval: 1000 * 60,
+    });
+    const notifications = Array.isArray(data) ? data : (data?.results || []);
 
     const unreadCount = notifications.filter(n => !n.is_read).length;
 

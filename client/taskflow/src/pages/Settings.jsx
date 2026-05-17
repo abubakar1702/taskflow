@@ -1,15 +1,36 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useApi } from "../components/hooks/useApi";
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../utils/apiClient";
+import { QUERY_KEYS } from "../utils/queryKeys";
 import Avatar from "../components/common/Avatar";
 import LoadingScreen from "../components/common/LoadingScreen";
-import { FaUser, FaEnvelope, FaSave, FaLock, FaCamera, FaSpinner, FaAt } from "react-icons/fa";
+import { FaLock } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Profile from "../components/settings/Profile";
 import PasswordReset from "../components/settings/PasswordReset";
 
 const Settings = () => {
-    const { data: user, loading: fetching, error, makeRequest, refetch } = useApi("/user/me/");
+    const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState("profile");
+
+    const { data: user, isLoading: fetching, error, refetch } = useQuery({
+        queryKey: QUERY_KEYS.currentUser(),
+        queryFn: async () => (await apiClient.get("/user/me/")).data,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    // Generic mutation wrapper exposed to child components
+    const { mutateAsync: makeRequest } = useMutation({
+        mutationFn: ({ url, method = "PATCH", data }) =>
+            apiClient({ method, url, data }).then((res) => res.data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.currentUser() });
+        },
+    });
+
+    // Adapter so Profile/PasswordReset keep the same makeRequest(url, method, body) signature
+    const makeRequestAdapter = (url, method, body) =>
+        makeRequest({ url, method, data: body });
 
     if (fetching) return <LoadingScreen message="Loading settings..." />;
 
@@ -21,10 +42,7 @@ const Settings = () => {
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-2">Unavailable</h2>
                 <p className="text-gray-600 mb-6">Could not load your profile settings.</p>
-                <button
-                    onClick={refetch}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
+                <button onClick={refetch} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                     Retry
                 </button>
             </div>
@@ -34,7 +52,6 @@ const Settings = () => {
     return (
         <div className="min-h-screen bg-gray-50/50 p-6 md:p-8">
             <div className="max-w-3xl mx-auto space-y-6">
-                {/* Tabs Header */}
                 <div className="flex border-b border-gray-200 bg-white rounded-md px-2 shadow-sm pt-2">
                     <button
                         onClick={() => setActiveTab("profile")}
@@ -58,11 +75,10 @@ const Settings = () => {
 
                 <div className="bg-white rounded-b-2xl rounded-t-none shadow-sm border border-gray-100 border-t-0 p-8">
                     {activeTab === "profile" && (
-                        <Profile user={user} makeRequest={makeRequest} refetch={refetch} />
+                        <Profile user={user} makeRequest={makeRequestAdapter} refetch={refetch} />
                     )}
-
                     {activeTab === "security" && (
-                        <PasswordReset user={user} makeRequest={makeRequest} />
+                        <PasswordReset user={user} makeRequest={makeRequestAdapter} />
                     )}
                 </div>
             </div>

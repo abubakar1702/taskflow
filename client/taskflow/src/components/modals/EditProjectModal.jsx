@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { useApi } from "../hooks/useApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import { BsSave2 } from "react-icons/bs";
 import { FaLayerGroup, FaAlignLeft } from "react-icons/fa";
 import { FaXmark } from "react-icons/fa6";
@@ -7,11 +9,29 @@ import { ClipLoader } from "react-spinners";
 import { toast } from "react-toastify";
 
 const EditProjectModal = ({ isOpen, onClose, project, onProjectUpdated }) => {
+    const queryClient = useQueryClient();
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
-    const { makeRequest } = useApi(null);
-    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    const { mutate: updateProject, isPending: isLoading } = useMutation({
+        mutationFn: async (data) => {
+            const response = await apiClient.patch(`/api/projects/${project.id}/`, data);
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success("Project updated successfully");
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.projects() });
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project(project.id) });
+            onProjectUpdated();
+            onClose();
+        },
+        onError: (err) => {
+            console.error("Failed to update project:", err);
+            setError(err.response?.data?.detail || err.message || "Failed to update project");
+            toast.error("Failed to update project. Please try again.");
+        }
+    });
 
     useEffect(() => {
         if (project && isOpen) {
@@ -24,29 +44,12 @@ const EditProjectModal = ({ isOpen, onClose, project, onProjectUpdated }) => {
         name !== (project?.name || "") ||
         description !== (project?.description || "");
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (!name.trim()) return;
 
-        setIsLoading(true);
         setError(null);
-
-        try {
-            await makeRequest(
-                `/api/projects/${project.id}/`,
-                "PATCH",
-                { name, description }
-            );
-            toast.success("Project updated successfully");
-            onProjectUpdated();
-            onClose();
-        } catch (err) {
-            console.error("Failed to update project:", err);
-            setError(err.message || "Failed to update project");
-            toast.error("Failed to update project. Please try again.");
-        } finally {
-            setIsLoading(false);
-        }
+        updateProject({ name, description });
     };
 
     if (!isOpen) return null;

@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { useApi } from "../../components/hooks/useApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import Avatar from "../../components/common/Avatar";
 import { FiSearch, FiX, FiCheck, FiUserPlus, FiUsers } from "react-icons/fi";
 import { FaCrown, FaUserShield } from "react-icons/fa";
@@ -8,8 +10,7 @@ import { useUser } from "../../contexts/UserContext";
 
 const AddProjectMemberModal = ({ isOpen, onClose, projectId, currentMembers = [], onMemberAdded }) => {
     const { currentUser } = useUser();
-    const { makeRequest: searchUsers } = useApi();
-    const { makeRequest: addMembers, loading: isSubmitting } = useApi();
+    const queryClient = useQueryClient();
 
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
@@ -66,7 +67,7 @@ const AddProjectMemberModal = ({ isOpen, onClose, projectId, currentMembers = []
         searchTimeoutRef.current = setTimeout(async () => {
             try {
                 const url = `/api/search-assignees/?user=${encodeURIComponent(query)}`;
-                const results = await searchUsers(url, "GET");
+                const results = (await apiClient.get(url)).data;
 
                 const filteredResults = Array.isArray(results)
                     ? results.filter(result => {
@@ -110,23 +111,21 @@ const AddProjectMemberModal = ({ isOpen, onClose, projectId, currentMembers = []
         ));
     };
 
-    const handleSubmit = async () => {
-        if (!selectedUsers.length) return;
-
-        try {
-            const payload = selectedUsers.map(u => ({
-                member_id: u.user.id,
-                role: u.role
-            }));
-
-            await addMembers(`/api/projects/${projectId}/members/`, "POST", payload);
+    const { mutate: submitMembers, isPending: isSubmitting } = useMutation({
+        mutationFn: (payload) =>
+            apiClient.post(`/api/projects/${projectId}/members/`, payload),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project(projectId) });
             toast.success("Members added successfully");
             onMemberAdded();
             onClose();
-        } catch (err) {
-            console.error("Failed to add members:", err);
-            toast.error(err.message || "Failed to add members");
-        }
+        },
+        onError: (err) => toast.error(err.message || "Failed to add members"),
+    });
+
+    const handleSubmit = () => {
+        if (!selectedUsers.length) return;
+        submitMembers(selectedUsers.map((u) => ({ member_id: u.user.id, role: u.role })));
     };
 
     if (!isOpen) return null;

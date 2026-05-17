@@ -1,69 +1,64 @@
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import axios from "axios";
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+import { createContext, useContext, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../utils/apiClient";
+import { QUERY_KEYS } from "../utils/queryKeys";
 
 const UserContext = createContext(null);
 
 export const UserProvider = ({ children }) => {
-    const [currentUser, setCurrentUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const queryClient = useQueryClient();
 
-    const fetchUser = useCallback(async () => {
-        const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+    const token =
+        localStorage.getItem("accessToken") ||
+        sessionStorage.getItem("accessToken");
 
-        if (!token) {
-            setLoading(false);
-            return;
-        }
-
-        try {
-            setLoading(true);
-            setError(null);
-            const response = await axios.get(`${API_BASE_URL}/user/me/`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
+    const {
+        data: currentUser,
+        isLoading: loading,
+        error: rawError,
+        refetch,
+    } = useQuery({
+        queryKey: QUERY_KEYS.currentUser(),
+        queryFn: async () => {
+            const response = await apiClient.get("/user/me/");
             const userData = response.data;
-            setCurrentUser(userData);
-
+            // Keep local storage in sync for offline / cached reads
             localStorage.setItem("user", JSON.stringify(userData));
-        } catch (err) {
-            console.error("Failed to fetch user:", err);
-            setError(err.message);
-            const cachedUser = localStorage.getItem("user") || sessionStorage.getItem("user");
-            if (cachedUser) {
-                try {
-                    setCurrentUser(JSON.parse(cachedUser));
-                } catch (parseErr) {
-                    console.error("Failed to parse cached user:", parseErr);
-                }
+            return userData;
+        },
+        enabled: !!token,
+        staleTime: 1000 * 60 * 5, // 5 minutes — user data rarely changes
+        // Fall back to cached user from localStorage on error
+        placeholderData: () => {
+            try {
+                const cached =
+                    localStorage.getItem("user") ||
+                    sessionStorage.getItem("user");
+                return cached ? JSON.parse(cached) : undefined;
+            } catch {
+                return undefined;
             }
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+        },
+    });
 
-    useEffect(() => {
-        fetchUser();
-    }, [fetchUser]);
+    const error = rawError ? rawError.message : null;
+
     const refreshUser = useCallback(() => {
-        return fetchUser();
-    }, [fetchUser]);
+        return refetch();
+    }, [refetch]);
 
     const clearUser = useCallback(() => {
-        setCurrentUser(null);
+        queryClient.removeQueries({ queryKey: QUERY_KEYS.currentUser() });
         localStorage.removeItem("user");
         sessionStorage.removeItem("user");
-    }, []);
+    }, [queryClient]);
 
     const value = {
         currentUser,
         loading,
         error,
         refreshUser,
-        clearUser
+        clearUser,
     };
 
     return (

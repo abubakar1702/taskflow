@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { useApi } from "../../components/hooks/useApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import ClipLoader from "react-spinners/ClipLoader";
 import { BsSave2 } from "react-icons/bs";
 import { FaClock, FaCalendarDays, FaBarsProgress, FaArrowRightArrowLeft, FaFilePen, FaXmark } from "react-icons/fa6";
@@ -13,7 +15,18 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
     const [dueDate, setDueDate] = useState("");
     const [dueTime, setDueTime] = useState("");
 
-    const { makeRequest, loading, error } = useApi();
+    const queryClient = useQueryClient();
+
+    const { mutate: updateTask, isPending: loading, error } = useMutation({
+        mutationFn: (payload) => apiClient.patch(`/api/tasks/${task.id}/`, payload),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.task(task.id) });
+            onUpdate();
+            toast.success("Task updated successfully");
+            onClose();
+        },
+        onError: () => toast.error("Failed to update task. Please try again."),
+    });
 
     useEffect(() => {
         if (task && isOpen) {
@@ -34,27 +47,9 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
         dueDate !== (task?.due_date || "") ||
         dueTime !== (task?.due_time || "");
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-
-        const payload = {
-            title,
-            description,
-            priority,
-            status,
-            due_date: dueDate || null,
-            due_time: dueTime || null,
-        };
-
-        try {
-            await makeRequest(`/api/tasks/${task.id}/`, "PATCH", payload);
-            onUpdate();
-            toast.success("Task updated successfully");
-            onClose();
-        } catch (err) {
-            console.error("Failed to update task:", err);
-            toast.error("Failed to update task. Please try again.");
-        }
+        updateTask({ title, description, priority, status, due_date: dueDate || null, due_time: dueTime || null });
     };
 
     if (!isOpen) return null;

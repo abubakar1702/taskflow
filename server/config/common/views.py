@@ -44,19 +44,15 @@ class TeamAPIView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
 
-        project_members = ProjectMember.objects.filter(
-            Q(project__members=user) |
-            Q(project__creator=user)
-        ).exclude(user=user)
-
-        task_assignees = User.objects.filter(
-            assigned_tasks__in=user.assigned_tasks.all()
-        ).exclude(id=user.id)
-
+        # Single query: users who share a project or task with the requesting user
         return User.objects.filter(
-            Q(id__in=project_members.values_list('user_id', flat=True)) |
-            Q(id__in=task_assignees.values_list('id', flat=True))
-        ).distinct()
+            Q(projects__in=Project.objects.filter(
+                Q(creator=user) | Q(members=user)
+            )) |
+            Q(assigned_tasks__in=Task.objects.filter(
+                Q(creator=user) | Q(assignees=user)
+            ))
+        ).exclude(id=user.id).distinct()
 
 class SearchAPIView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]

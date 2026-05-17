@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from .serializers import NotificationSerializer
 from .models import Notification
 from rest_framework import generics
@@ -10,9 +9,17 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
-def send_notification_to_user(user_id, notification_data):
+
+def send_notification_to_user(user_id, notification_data, recipient=None):
+    """
+    Persist a Notification record and push it over WebSocket.
+
+    Pass `recipient` (a User instance) to avoid the extra DB lookup when
+    the caller already has the object.
+    """
     try:
-        recipient = User.objects.get(id=user_id)
+        if recipient is None:
+            recipient = User.objects.get(id=user_id)
         Notification.objects.create(
             recipient=recipient,
             type=notification_data.get('type', 'generic'),
@@ -31,32 +38,40 @@ def send_notification_to_user(user_id, notification_data):
         }
     )
 
+
 class NotificationListAPIView(generics.ListAPIView):
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Notification.objects.filter(recipient=self.request.user)
+        return (
+            Notification.objects
+            .filter(recipient=self.request.user)
+            .select_related('recipient')
+        )
+
 
 class MarkNotificationReadAPIView(generics.UpdateAPIView):
-    queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        # Scope to the requesting user — no need for a manual ownership check
+        return Notification.objects.filter(recipient=self.request.user)
+
     def patch(self, request, *args, **kwargs):
         notification = self.get_object()
-        if notification.recipient != request.user:
-            return Response({"detail": "Not authorized"}, status=status.HTTP_403_FORBIDDEN)
         notification.is_read = True
-        notification.save()
+        notification.save(update_fields=['is_read'])
         return Response(NotificationSerializer(notification).data)
 
+
 class DeleteNotificationAPIView(generics.DestroyAPIView):
-    queryset = Notification.objects.all()
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Notification.objects.filter(recipient=self.request.user)
+
 
 class NotificationConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
@@ -67,6 +82,11 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
             self.group_name = f"user_{user.id}"
             await self.channel_layer.group_add(self.group_name, self.channel_name)
             await self.accept()
+
+    async def disconnect(self, close_code):
+        """Remove this channel from the group so resources are freed."""
+        if hasattr(self, 'group_name'):
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def notify(self, event):
         await self.send_json(event["data"])

@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import TaskInfoAction from "./TaskInfoAction";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaProjectDiagram } from "react-icons/fa";
 import { format } from "date-fns";
 import EditTaskInfoModal from "../../components/modals/EditTaskInfoModal";
 import DeleteModal from "../../components/modals/DeleteModal";
-import { useApi } from "../../components/hooks/useApi";
 import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
 import { toast } from "react-toastify";
 import { PRIORITY_COLORS, STATUS_COLORS } from "../../components/constants/uiColors";
@@ -15,61 +17,57 @@ const TaskInfo = ({ task, onUpdate }) => {
     const [showActionMenu, setShowActionMenu] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [isImportant, setIsImportant] = useState(false);
 
     const { isCreator, isAssignee } = useTaskPermissions(task);
-    const { data: importantTasks, refetch: refetchImportant } = useApi("/api/important-tasks/");
-    const { makeRequest: toggleImportant } = useApi();
-    const { makeRequest: leaveTask } = useApi();
-    const { makeRequest: deleteTask, loading: deleteLoading } = useApi();
-
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
-    useEffect(() => {
-        if (importantTasks && task) {
-            const important = importantTasks.some(
-                t => t.id === task.id || t.task?.id === task.id || t.task_id === task.id
-            );
-            setIsImportant(important);
-        }
-    }, [importantTasks, task]);
+    // Fetch important tasks to derive isImportant
+    const { data: importantTasksData } = useQuery({
+        queryKey: QUERY_KEYS.importantTasks(),
+        queryFn: async () => (await apiClient.get("/api/important-tasks/")).data,
+    });
+    const importantTasks = Array.isArray(importantTasksData) ? importantTasksData : (importantTasksData?.results || []);
 
-    const handleToggleImportant = async () => {
-        try {
-            if (isImportant) {
-                await toggleImportant(`/api/important-tasks/${task.id}/`, "DELETE");
-                toast.success("Removed from important tasks");
-            } else {
-                await toggleImportant("/api/important-tasks/", "POST", { task_id: task.id });
-                toast.success("Marked as important");
-            }
-            refetchImportant();
-            setIsImportant(!isImportant);
-        } catch {
-            toast.error("Failed to update importance");
-        }
-    };
+    const isImportant = importantTasks.some(
+        (t) => t.id === task.id || t.task?.id === task.id || t.task_id === task.id
+    );
 
-    const handleLeaveTask = async () => {
-        try {
-            await leaveTask(`/api/tasks/${task.id}/leave/`, "PATCH");
+    // Toggle important
+    const { mutate: toggleImportant } = useMutation({
+        mutationFn: () =>
+            isImportant
+                ? apiClient.delete(`/api/important-tasks/${task.id}/`)
+                : apiClient.post("/api/important-tasks/", { task_id: task.id }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.importantTasks() });
+            toast.success(isImportant ? "Removed from important tasks" : "Marked as important");
+        },
+        onError: () => toast.error("Failed to update importance"),
+    });
+
+    // Leave task
+    const { mutate: leaveTask } = useMutation({
+        mutationFn: () => apiClient.patch(`/api/tasks/${task.id}/leave/`),
+        onSuccess: () => {
             toast.success("Task left successfully");
             navigate("/tasks");
-        } catch {
-            toast.error("Failed to leave task");
-        }
-    };
+        },
+        onError: () => toast.error("Failed to leave task"),
+    });
 
-    const handleDelete = async () => {
-        try {
-            await deleteTask(`/api/tasks/${task.id}/`, "DELETE");
+    // Delete task
+    const { mutate: deleteTask, isPending: deleteLoading } = useMutation({
+        mutationFn: () => apiClient.delete(`/api/tasks/${task.id}/`),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tasks"] });
+            queryClient.removeQueries({ queryKey: QUERY_KEYS.task(task.id) });
             toast.success("Task deleted successfully");
             setShowDeleteModal(false);
             navigate("/tasks");
-        } catch {
-            toast.error("Failed to delete task");
-        }
-    };
+        },
+        onError: () => toast.error("Failed to delete task"),
+    });
 
     const safeFormatDate = (value, fmt = "MMM dd, yyyy HH:mm") => {
         if (!value) return "N/A";
@@ -102,28 +100,22 @@ const TaskInfo = ({ task, onUpdate }) => {
                             setShowActionMenu={setShowActionMenu}
                             onEdit={() => setShowEditModal(true)}
                             onDelete={() => setShowDeleteModal(true)}
-                            onLeave={handleLeaveTask}
+                            onLeave={leaveTask}
                             task={task}
                             isImportant={isImportant}
-                            onToggleImportant={handleToggleImportant}
+                            onToggleImportant={toggleImportant}
                         />
                     </div>
                 )}
             </div>
 
             <div className="flex flex-wrap gap-3 mb-6">
-                <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold border ${PRIORITY_COLORS[task.priority]}`}
-                >
+                <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${PRIORITY_COLORS[task.priority]}`}>
                     {task.priority}
                 </span>
-
-                <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold border ${STATUS_COLORS[task.status]}`}
-                >
+                <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${STATUS_COLORS[task.status]}`}>
                     {task.status}
                 </span>
-
                 {task.project && (
                     <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-800 border border-purple-300 flex items-center gap-2">
                         <FaProjectDiagram className="w-4 h-4" />
@@ -131,7 +123,6 @@ const TaskInfo = ({ task, onUpdate }) => {
                     </span>
                 )}
             </div>
-
 
             <div className="mb-8">
                 <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>
@@ -160,7 +151,7 @@ const TaskInfo = ({ task, onUpdate }) => {
                 <DeleteModal
                     isOpen={showDeleteModal}
                     onClose={() => setShowDeleteModal(false)}
-                    onConfirm={handleDelete}
+                    onConfirm={() => deleteTask()}
                     title="Delete Task"
                     message="Are you sure you want to delete this task?"
                     isLoading={deleteLoading}

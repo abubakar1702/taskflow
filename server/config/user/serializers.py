@@ -26,7 +26,8 @@ class UserSerializer(serializers.ModelSerializer):
         return value
 
     def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
+        user = self.instance
+        if User.objects.exclude(pk=user.pk if user else None).filter(email=value).exists():
             raise serializers.ValidationError("A user with this email already exists.")
         return value
     
@@ -85,7 +86,6 @@ class LoginSerializer(serializers.Serializer):
 
 class GoogleAuthSerializer(serializers.Serializer):
     token = serializers.CharField()
-    print(f"GOOGLE_CLIENT_ID: {settings.GOOGLE_CLIENT_ID}")
 
     def validate(self, attrs):
         try:

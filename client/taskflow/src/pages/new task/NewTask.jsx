@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useApi } from "../../components/hooks/useApi";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import NewSubtasks from "./NewSubtasks";
 import { FiCalendar, FiClock, FiFlag, FiList } from "react-icons/fi";
 import { MdTaskAlt } from "react-icons/md";
@@ -25,29 +27,61 @@ const NewTask = () => {
   });
 
   const [subtasks, setSubtasks] = useState([{ text: "", assignee_id: null }]);
-  const [projects, setProjects] = useState([]);
   const [selectedAssigneeObjects, setSelectedAssigneeObjects] = useState([]);
   const [selectedProjectMembers, setSelectedProjectMembers] = useState([]);
   const [assigneeSearchQuery, setAssigneeSearchQuery] = useState("");
   const [assigneeSearchResults, setAssigneeSearchResults] = useState([]);
   const [showAssigneeDropdown, setShowAssigneeDropdown] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { makeRequest } = useApi(null);
+  const queryClient = useQueryClient();
   const taskAssigneeRef = useRef();
   const searchTimeoutRef = useRef(null);
 
-  useEffect(() => {
-    const loadProjects = async () => {
-      try {
-        const data = await makeRequest("/api/projects/", "GET");
-        setProjects(data || []);
-      } catch {
-        toast.error("Failed to load projects");
+  const { data: projectsData } = useQuery({
+    queryKey: QUERY_KEYS.projects(),
+    queryFn: async () => {
+      const response = await apiClient.get("/api/projects/");
+      return response.data;
+    },
+  });
+  const projects = Array.isArray(projectsData) ? projectsData : (projectsData?.results || []);
+
+  const { mutate: createTask, isPending: isSubmitting } = useMutation({
+    mutationFn: async (data) => {
+      const response = await apiClient.post("/api/tasks/", data);
+      return response.data;
+    },
+    onSuccess: (response) => {
+      toast.success(`Task "${response.title}" and ${response.subtasks?.length || 0} subtasks created successfully!`);
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.tasks() });
+      if (taskFormData.project_id) {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.project(taskFormData.project_id) });
       }
-    };
-    loadProjects();
-  }, []);
+
+      setTaskFormData({
+        title: "",
+        description: "",
+        due_date: "",
+        due_time: "",
+        priority: "Medium",
+        status: "To Do",
+        project_id: taskFormData.project_id,
+        assignees_ids: []
+      });
+      setSelectedAssigneeObjects([]);
+      setAssigneeSearchQuery("");
+      setSubtasks([{ text: "", assignee_id: null }]);
+    },
+    onError: (err) => {
+      const detail = err.response?.data?.detail || err.message;
+      const fieldErrors =
+        err.response?.data && Object.keys(err.response.data).length > 0
+          ? Object.entries(err.response.data)
+            .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(", ") : value}`)
+            .join("; ")
+          : null;
+      toast.error(fieldErrors || detail || "Failed to create task");
+    },
+  });
 
   useEffect(() => {
     if (taskFormData.project_id) {
@@ -126,16 +160,16 @@ const NewTask = () => {
             member.email?.toLowerCase().includes(searchTerm.toLowerCase())
         );
       } else if (searchTerm.trim()) {
-        const searchData = await makeRequest(`/user/search/?q=${encodeURIComponent(searchTerm)}`, "GET");
-        results = Array.isArray(searchData)
-          ? searchData.map(getPlainUser).filter((user) => user.id !== currentUser?.id)
+        const searchResponse = await apiClient.get(`/user/search/?q=${encodeURIComponent(searchTerm)}`);
+        results = Array.isArray(searchResponse.data)
+          ? searchResponse.data.map(getPlainUser).filter((user) => user.id !== currentUser?.id)
           : [];
       }
       setAssigneeSearchResults(results);
     } catch {
       setAssigneeSearchResults([]);
     }
-  }, [taskFormData.project_id, selectedProjectMembers, makeRequest, currentUser]);
+  }, [taskFormData.project_id, selectedProjectMembers, currentUser]);
 
   useEffect(() => {
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
@@ -189,67 +223,22 @@ const NewTask = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-
-  const handleSubmit = async () => {
-
-    if (isSubmitting) return;
-    if (!taskFormData.title.trim()) {
-      toast.error("Task title is required");
-      return;
-    }
+  const handleSubmit = (e) => {
+    if (e) e.preventDefault();
+    if (!taskFormData.title.trim()) return;
 
     const dataToSend = {
       ...taskFormData,
-      due_date: taskFormData.due_date || null,
-      due_time: taskFormData.due_time || null,
-      subtasks_data: subtasks.filter(subtask => subtask.text.trim() !== "")
+      subtasks: subtasks
+        .filter((st) => st.text.trim() !== "")
+        .map((st) => ({
+          text: st.text.trim(),
+          assignee_id: st.assignee_id || null,
+          is_completed: false
+        }))
     };
 
-    setIsSubmitting(true);
-
-    const toastId = toast.loading("Creating task and subtasks...");
-
-    try {
-      const response = await makeRequest("/api/tasks/", "POST", dataToSend);
-
-      toast.update(toastId, {
-        render: `Task "${response.title}" and ${response.subtasks?.length || 0} subtasks created successfully!`,
-        type: "success",
-        isLoading: false,
-        autoClose: 5000
-      });
-
-      setTaskFormData({
-        title: "",
-        description: "",
-        due_date: "",
-        due_time: "",
-        priority: "Medium",
-        status: "To Do",
-        project_id: taskFormData.project_id,
-        assignees_ids: []
-      });
-      setSelectedAssigneeObjects([]);
-      setAssigneeSearchQuery("");
-      setSubtasks([{ text: "", assignee_id: null }]);
-    } catch (err) {
-      const detail = err.data?.detail || err.message;
-      const fieldErrors =
-        err.data && Object.keys(err.data).length > 0
-          ? Object.entries(err.data)
-            .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(", ") : value}`)
-            .join("; ")
-          : null;
-
-      toast.update(toastId, {
-        render: fieldErrors || detail || "Failed to create task",
-        type: "error",
-        isLoading: false,
-        autoClose: 5000
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    createTask(dataToSend);
   };
 
   return (

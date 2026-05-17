@@ -1,13 +1,64 @@
 import React, { useState, useEffect } from 'react';
-import { useApi } from '../hooks/useApi';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import { BsPin, BsPinFill, BsTrash, BsSave, BsX, BsPencil, BsArrowLeftCircle } from 'react-icons/bs';
 import { toast } from 'react-toastify';
 import DeleteModal from './DeleteModal';
 import { createPortal } from 'react-dom';
 
 const NoteDetailModal = ({ isOpen, onClose, noteId, onUpdate }) => {
-    const { data: note, loading, refetch } = useApi(isOpen && noteId ? `/api/notes/${noteId}/` : null);
-    const { makeRequest, loading: actionLoading } = useApi();
+    const queryClient = useQueryClient();
+    const { data: note, isLoading: loading, refetch } = useQuery({
+        queryKey: QUERY_KEYS.note(noteId),
+        queryFn: async () => {
+            const response = await apiClient.get(`/api/notes/${noteId}/`);
+            return response.data;
+        },
+        enabled: isOpen && !!noteId,
+    });
+
+    const invalidate = () => {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notes() });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.note(noteId) });
+    };
+
+    const { mutate: updateNote, isPending: updateLoading } = useMutation({
+        mutationFn: async (data) => {
+            const response = await apiClient.patch(`/api/notes/${noteId}/`, data);
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success('Note updated');
+            invalidate();
+            setIsDirty(false);
+            setIsEditing(false);
+            onUpdate && onUpdate();
+        },
+        onError: (err) => {
+            console.error(err);
+            toast.error(err.response?.data?.detail || err.message || 'Failed to update note');
+        }
+    });
+
+    const { mutate: deleteNote, isPending: deleteLoading } = useMutation({
+        mutationFn: async () => {
+            await apiClient.delete(`/api/notes/${noteId}/`);
+        },
+        onSuccess: () => {
+            toast.success('Note deleted');
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notes() });
+            setShowDeleteModal(false);
+            onClose();
+            onUpdate && onUpdate();
+        },
+        onError: (err) => {
+            console.error(err);
+            toast.error(err.response?.data?.detail || err.message || 'Failed to delete note');
+        }
+    });
+
+    const actionLoading = updateLoading || deleteLoading;
 
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -35,43 +86,16 @@ const NoteDetailModal = ({ isOpen, onClose, noteId, onUpdate }) => {
         setIsEditing(false);
     };
 
-    const handleSave = async () => {
-        try {
-            await makeRequest(`/api/notes/${noteId}/`, 'PATCH', { title, content });
-            toast.success('Note updated');
-            setIsDirty(false);
-            setIsEditing(false);
-            refetch();
-            onUpdate && onUpdate();
-        } catch (err) {
-            console.error(err);
-            toast.error('Failed to update note');
-        }
+    const handleSave = () => {
+        updateNote({ title, content });
     };
     
-    const handlePinToggle = async () => {
-        try {
-            await makeRequest(`/api/notes/${noteId}/`, 'PATCH', { is_pinned: !note.is_pinned });
-            toast.success(note.is_pinned ? 'Note unpinned' : 'Note pinned');
-            refetch();
-            onUpdate && onUpdate();
-        } catch (err) {
-            console.error(err);
-            toast.error('Failed to update pin status');
-        }
+    const handlePinToggle = () => {
+        updateNote({ is_pinned: !note.is_pinned });
     };
 
-    const handleDelete = async () => {
-        try {
-            await makeRequest(`/api/notes/${noteId}/`, 'DELETE');
-            toast.success('Note deleted');
-            setShowDeleteModal(false);
-            onClose();
-            onUpdate && onUpdate();
-        } catch (err) {
-            console.error(err);
-            toast.error('Failed to delete note');
-        }
+    const handleDelete = () => {
+        deleteNote();
     };
 
     const handleContentChange = (e) => {

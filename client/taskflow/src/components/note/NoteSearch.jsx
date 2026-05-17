@@ -1,42 +1,29 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { BsSearch, BsX } from 'react-icons/bs';
 import { BsPin, BsPinFill } from 'react-icons/bs';
-import { useApi } from '../hooks/useApi';
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import { ClipLoader } from 'react-spinners';
 
 const NoteSearch = ({ searchTerm, onSearchChange, onNoteClick }) => {
     const dropdownRef = useRef(null);
     const [isFocused, setIsFocused] = useState(false);
-    const [searchResults, setSearchResults] = useState([]);
-    const [isSearching, setIsSearching] = useState(false);
-    const { makeRequest } = useApi();
 
-    useEffect(() => {
-        const delayDebounce = setTimeout(() => {
-            if (searchTerm.trim()) {
-                handleSearch(searchTerm);
-            } else {
-                setSearchResults([]);
-            }
-        }, 300);
+    const { data: results, isLoading: isSearching } = useQuery({
+        queryKey: ['noteSearch', searchTerm],
+        queryFn: async () => {
+            if (!searchTerm.trim()) return [];
+            const response = await apiClient.get(`/api/notes/search/?q=${encodeURIComponent(searchTerm)}`);
+            return response.data;
+        },
+        enabled: searchTerm.trim().length > 0,
+        staleTime: 1000 * 60,
+    });
 
-        return () => clearTimeout(delayDebounce);
-    }, [searchTerm]);
+    const searchResults = Array.isArray(results) ? results : (results?.results || []);
 
-    const handleSearch = async (query) => {
-        if (!query.trim()) return;
 
-        setIsSearching(true);
-        try {
-            const results = await makeRequest(`/api/notes/search/?q=${encodeURIComponent(query)}`, 'GET');
-            setSearchResults(results || []);
-        } catch (error) {
-            console.error('Search error:', error);
-            setSearchResults([]);
-        } finally {
-            setIsSearching(false);
-        }
-    };
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -77,13 +64,11 @@ const NoteSearch = ({ searchTerm, onSearchChange, onNoteClick }) => {
         onNoteClick(noteId);
         onSearchChange('');
         setIsFocused(false);
-        setSearchResults([]);
     };
 
     const handleClear = () => {
         onSearchChange('');
         setIsFocused(false);
-        setSearchResults([]);
     };
 
     return (

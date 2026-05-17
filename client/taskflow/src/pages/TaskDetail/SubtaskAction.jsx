@@ -1,18 +1,31 @@
 import { useState, useRef, useEffect } from "react";
-import { useApi } from "../../components/hooks/useApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import { LuUserPlus, LuUserMinus, LuTrash } from "react-icons/lu";
 import { useTaskPermissions } from "../../components/hooks/useTaskPermissions";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 
 const SubtaskAction = ({ task, subtask, onClose, onUpdated, onEdit, onDelete }) => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const { makeRequest } = useApi();
+    const queryClient = useQueryClient();
     const dropdownRef = useRef(null);
     const { isCreator, currentUser } = useTaskPermissions(task);
 
     const taskId = task.id;
-    const creator = task.creator;
-    const assignees = task.assignees || [];
+
+    const { mutate: doAssign, isPending: isSubmitting } = useMutation({
+        mutationFn: ({ assigneeId }) =>
+            apiClient.patch(`/api/tasks/${taskId}/subtasks/${subtask.id}/`, {
+                assignee_id: assigneeId,
+                is_completed: false,
+            }),
+        onSuccess: (_, { successMsg }) => {
+            toast.success(successMsg);
+            onUpdated();
+            onClose();
+        },
+        onError: (_, { errorMsg }) => toast.error(errorMsg),
+    });
 
     const isAssignedToMe = subtask.assignee?.id === currentUser.id;
     const canModify = isCreator || isAssignedToMe;
@@ -42,48 +55,26 @@ const SubtaskAction = ({ task, subtask, onClose, onUpdated, onEdit, onDelete }) 
         onClose();
     };
 
-    const handleAssignToMe = async (e) => {
+    const handleAssignToMe = (e) => {
         e?.preventDefault();
-        setIsSubmitting(true);
-        try {
-            await makeRequest(`/api/tasks/${taskId}/subtasks/${subtask.id}/`, "PATCH", {
-                assignee_id: currentUser.id,
-                is_completed: false,
-            });
-            toast.success("Subtask assigned successfully");
-            onUpdated();
-            onClose();
-
-        } catch (error) {
-            console.error("Failed to assign subtask:", error);
-            toast.error("Failed to assign subtask. Please try again.");
-        } finally {
-            setIsSubmitting(false);
-        }
+        doAssign({
+            assigneeId: currentUser.id,
+            successMsg: "Subtask assigned successfully",
+            errorMsg: "Failed to assign subtask. Please try again.",
+        });
     };
 
-    const handleUnassign = async (e) => {
+    const handleUnassign = (e) => {
         e?.preventDefault();
         if (!subtask.assignee) {
             toast.error("This subtask is already unassigned.");
             return;
         }
-
-        setIsSubmitting(true);
-        try {
-            await makeRequest(`/api/tasks/${taskId}/subtasks/${subtask.id}/`, "PATCH", {
-                assignee_id: null,
-                is_completed: false,
-            });
-            toast.success("Subtask unassigned successfully");
-            onUpdated();
-            onClose();
-        } catch (error) {
-            console.error("Failed to unassign subtask:", error);
-            toast.error("Failed to unassign subtask. Please try again.");
-        } finally {
-            setIsSubmitting(false);
-        }
+        doAssign({
+            assigneeId: null,
+            successMsg: "Subtask unassigned successfully",
+            errorMsg: "Failed to unassign subtask. Please try again.",
+        });
     };
 
     return (

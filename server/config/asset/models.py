@@ -1,11 +1,11 @@
 from django.db import models
 from user.models import User
 import uuid
-from .validators import validate_file_size
+from .validators import validate_file_size, validate_file_type
 
 class Asset(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    file = models.FileField(upload_to='assets/', validators=[validate_file_size])
+    file = models.FileField(upload_to='assets/', validators=[validate_file_size, validate_file_type])
     task = models.ForeignKey('task.Task', on_delete=models.CASCADE, null=True, blank=True, related_name='assets')
     project = models.ForeignKey('project.Project', on_delete=models.CASCADE, null=True, blank=True, related_name='assets')
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='uploaded_assets')

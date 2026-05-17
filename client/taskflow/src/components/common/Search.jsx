@@ -1,18 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
 import { FiSearch, FiX } from "react-icons/fi";
 import { Link } from 'react-router-dom';
-import { useApi } from '../hooks/useApi';
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 import { ClipLoader } from 'react-spinners';
 import { PRIORITY_DOT_COLORS } from '../constants/uiColors';
 
 const Search = ({ className }) => {
     const [query, setQuery] = useState("");
-    const [results, setResults] = useState({ projects: [], tasks: [] });
-    const [isLoading, setIsLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
 
-    const { makeRequest } = useApi(null);
+    const { data: searchResults, isLoading, isError } = useQuery({
+        queryKey: ['globalSearch', query],
+        queryFn: async () => {
+            if (query.trim().length <= 1) return { projects: [], tasks: [] };
+            const response = await apiClient.get(`/api/search/?q=${encodeURIComponent(query)}`);
+            return response.data;
+        },
+        enabled: query.trim().length > 1,
+        staleTime: 1000 * 60, // Cache search results for 1 minute
+    });
+
+    const results = searchResults || { projects: [], tasks: [] };
 
     const Highlight = ({ text, highlight }) => {
         if (!highlight.trim()) return <span>{text}</span>;
@@ -45,29 +56,12 @@ const Search = ({ className }) => {
     }, []);
 
     useEffect(() => {
-        const timer = setTimeout(async () => {
-            if (query.trim().length > 1) {
-                setIsLoading(true);
-                try {
-                    const data = await makeRequest(
-                        `/api/search/?q=${encodeURIComponent(query)}`,
-                        "GET"
-                    );
-                    setResults(data);
-                    setIsOpen(true);
-                } catch {
-                    setResults({ projects: [], tasks: [] });
-                } finally {
-                    setIsLoading(false);
-                }
-            } else {
-                setResults({ projects: [], tasks: [] });
-                setIsOpen(false);
-            }
-        }, 300);
-
-        return () => clearTimeout(timer);
-    }, [query, makeRequest]);
+        if (query.trim().length > 1 && !isLoading && results) {
+            setIsOpen(true);
+        } else if (query.trim().length <= 1) {
+            setIsOpen(false);
+        }
+    }, [query, isLoading, results]);
 
     return (
         <div

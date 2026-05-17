@@ -2,13 +2,32 @@ import React, { useState, useEffect } from 'react'
 import { FiX, FiSave} from "react-icons/fi";
 import { RiStickyNoteAddLine} from "react-icons/ri";
 import { toast } from 'react-toastify';
-import { useApi } from '../hooks/useApi';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../utils/apiClient";
+import { QUERY_KEYS } from "../../utils/queryKeys";
 
 
 const CreateNoteModal = ({ isOpen, onClose, onCreated }) => {
+    const queryClient = useQueryClient();
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-    const { makeRequest, loading } = useApi();
+
+    const { mutate: createNote, isPending: loading } = useMutation({
+        mutationFn: async (data) => {
+            const response = await apiClient.post('/api/notes/', data);
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success('Note created successfully');
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.notes() });
+            onCreated();
+            onClose();
+        },
+        onError: (err) => {
+            console.error(err);
+            toast.error(err.response?.data?.detail || err.message || 'Failed to create note');
+        }
+    });
 
     useEffect(() => {
         if (!isOpen) {
@@ -19,22 +38,14 @@ const CreateNoteModal = ({ isOpen, onClose, onCreated }) => {
 
     if (!isOpen) return null;
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (!title.trim() && !content.trim()) {
             toast.warn('Please enter a title or content for your note.');
             return;
         }
 
-        try {
-            await makeRequest('/api/notes/', 'POST', { title: title.trim(), content: content.trim() });
-            toast.success('Note created successfully');
-            onCreated();
-            onClose();
-        } catch (err) {
-            console.error(err);
-            toast.error('Failed to create note');
-        }
+        createNote({ title: title.trim(), content: content.trim() });
     };
 
     return (

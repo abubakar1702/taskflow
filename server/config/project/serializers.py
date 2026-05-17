@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.shortcuts import get_object_or_404
 from .models import Project, ProjectMember
 from user.serializers import UserSerializer
 from user.models import User
@@ -21,7 +22,7 @@ class ProjectMemberBulkSerializer(serializers.ModelSerializer):
         project = self.context['project']
         member_id = validated_data.pop('member_id')
 
-        user = User.objects.get(id=member_id)
+        user = get_object_or_404(User, id=member_id)
 
         return ProjectMember.objects.create(
             project=project,
