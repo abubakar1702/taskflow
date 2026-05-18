@@ -3,27 +3,54 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../utils/apiClient';
 import { QUERY_KEYS } from '../../utils/queryKeys';
 import Avatar from '../../components/common/Avatar';
-import { FaReply, FaTrash, FaPaperPlane, FaEdit, FaTimes, FaCheck } from 'react-icons/fa';
+import {
+    FaReply,
+    FaTrash,
+    FaPaperPlane,
+    FaEdit,
+    FaTimes,
+    FaCheck,
+    FaChevronDown,
+    FaChevronRight
+} from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { useUser } from '../../contexts/UserContext';
 
-const CommentItem = ({ comment, taskId, onReply, onDelete, currentUser, canComment }) => {
+const MAX_VISUAL_DEPTH = 2;
+const COLLAPSE_AFTER = 5;
+
+const CommentItem = ({
+    comment,
+    taskId,
+    onDelete,
+    currentUser,
+    canComment,
+    depth = 0,
+    parentAuthor = null
+}) => {
     const [showReplyInput, setShowReplyInput] = useState(false);
     const [replyText, setReplyText] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [editText, setEditText] = useState(comment.content);
+    const [expandedReplies, setExpandedReplies] = useState(false);
+
     const queryClient = useQueryClient();
 
     const { mutate: addReply, isPending: replying } = useMutation({
         mutationFn: async (text) => {
-            const response = await apiClient.post(`/api/tasks/${taskId}/comments/`, {
-                content: text,
-                parent: comment.id
-            });
+            const response = await apiClient.post(
+                `/api/tasks/${taskId}/comments/`,
+                {
+                    content: text,
+                    parent: comment.id
+                }
+            );
             return response.data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.taskComments(taskId) });
+            queryClient.invalidateQueries({
+                queryKey: QUERY_KEYS.taskComments(taskId)
+            });
             setReplyText('');
             setShowReplyInput(false);
             toast.success('Reply posted');
@@ -33,13 +60,16 @@ const CommentItem = ({ comment, taskId, onReply, onDelete, currentUser, canComme
 
     const { mutate: editComment, isPending: editing } = useMutation({
         mutationFn: async (text) => {
-            const response = await apiClient.patch(`/api/comments/${comment.id}/`, {
-                content: text
-            });
+            const response = await apiClient.patch(
+                `/api/comments/${comment.id}/`,
+                { content: text }
+            );
             return response.data;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.taskComments(taskId) });
+            queryClient.invalidateQueries({
+                queryKey: QUERY_KEYS.taskComments(taskId)
+            });
             setIsEditing(false);
             toast.success('Comment updated');
         },
@@ -63,21 +93,57 @@ const CommentItem = ({ comment, taskId, onReply, onDelete, currentUser, canComme
 
     const isAuthor = currentUser?.id === comment.author?.id;
 
+    const visibleReplies = expandedReplies
+        ? comment.replies || []
+        : (comment.replies || []).slice(0, COLLAPSE_AFTER);
+
+    const hasHiddenReplies =
+        (comment.replies?.length || 0) > COLLAPSE_AFTER;
+
+    // Outer styling: top-level comments are premium cards; nested replies are transparent stream items
+    const containerClasses = depth > 0
+        ? "bg-transparent p-0 border-none mt-4 transition-colors relative"
+        : "bg-white dark:bg-slate-900 rounded-sm border border-gray-200 dark:border-slate-800 p-5 shadow-none my-4 transition-colors hover:border-gray-300 dark:hover:border-slate-700 relative";
+
+    const avatarSize = depth > 0 ? 8 : 10;
+    const contentPadding = depth > 0 ? "pl-11" : "pl-13";
+
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-sm border border-gray-200 dark:border-slate-800/80 p-4 shadow-none my-3 transition-colors hover:border-gray-300 dark:hover:border-slate-700">
+        <div className={containerClasses}>
             <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex items-center gap-3">
-                    <Avatar name={comment.author?.display_name || comment.author?.email} url={comment.author?.avatar} size={10} className="rounded-sm" />
+                    <Avatar
+                        name={comment.author?.display_name || comment.author?.email}
+                        url={comment.author?.avatar}
+                        size={avatarSize}
+                        className="rounded-sm"
+                    />
+
                     <div>
-                        <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-sm text-gray-900 dark:text-white">{comment.author?.display_name || comment.author?.email}</h4>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-bold text-sm text-gray-900 dark:text-white">
+                                {comment.author?.display_name || comment.author?.email}
+                            </h4>
+                            
+                            {depth >= MAX_VISUAL_DEPTH && parentAuthor && (
+                                <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/30 px-2 py-0.5 rounded-sm border border-blue-100 dark:border-blue-900/50">
+                                    to @{parentAuthor}
+                                </span>
+                            )}
+
                             {comment.is_edited && (
-                                <span className="text-[9px] bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm border border-transparent dark:border-slate-700">edited</span>
+                                <span className="text-[9px] px-1.5 py-0.5 rounded-sm bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 uppercase font-bold">
+                                    edited
+                                </span>
                             )}
                         </div>
-                        <span className="text-[10px] text-gray-400 dark:text-slate-500 font-semibold">{new Date(comment.created_at).toLocaleString()}</span>
+
+                        <span className="text-[10px] text-gray-400 dark:text-slate-500 font-semibold">
+                            {new Date(comment.created_at).toLocaleString()}
+                        </span>
                     </div>
                 </div>
+
                 <div className="flex items-center gap-2">
                     {canComment && !isEditing && (
                         <button
@@ -87,6 +153,7 @@ const CommentItem = ({ comment, taskId, onReply, onDelete, currentUser, canComme
                             <FaReply size={9} /> Reply
                         </button>
                     )}
+
                     {isAuthor && !isEditing && (
                         <>
                             <button
@@ -100,6 +167,7 @@ const CommentItem = ({ comment, taskId, onReply, onDelete, currentUser, canComme
                             >
                                 <FaEdit size={12} />
                             </button>
+
                             <button
                                 onClick={() => onDelete(comment.id)}
                                 className="text-xs text-gray-400 dark:text-slate-500 hover:text-red-650 dark:hover:text-red-400 p-1.5 transition-colors rounded-sm hover:bg-gray-100 dark:hover:bg-slate-800"
@@ -111,17 +179,20 @@ const CommentItem = ({ comment, taskId, onReply, onDelete, currentUser, canComme
                     )}
                 </div>
             </div>
-            
+
             {isEditing ? (
-                <form onSubmit={handleEditSubmit} className="mt-2 pl-13 pr-2 flex gap-2">
+                <form
+                    onSubmit={handleEditSubmit}
+                    className={`mt-2 ${contentPadding} pr-2 flex gap-2`}
+                >
                     <input
-                        type="text"
                         value={editText}
                         onChange={(e) => setEditText(e.target.value)}
                         disabled={editing}
                         className="flex-1 text-xs border border-blue-300 dark:border-blue-800 rounded-sm px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white dark:bg-slate-950 dark:text-white"
                         autoFocus
                     />
+
                     <button
                         type="submit"
                         disabled={editing || !editText.trim()}
@@ -130,6 +201,7 @@ const CommentItem = ({ comment, taskId, onReply, onDelete, currentUser, canComme
                     >
                         <FaCheck /> {editing ? 'Saving...' : 'Save'}
                     </button>
+
                     <button
                         type="button"
                         onClick={() => setIsEditing(false)}
@@ -141,11 +213,16 @@ const CommentItem = ({ comment, taskId, onReply, onDelete, currentUser, canComme
                     </button>
                 </form>
             ) : (
-                <p className="text-gray-750 dark:text-slate-300 text-sm pl-13 pr-2 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
+                <p className={`text-gray-750 dark:text-slate-300 text-sm ${contentPadding} pr-2 whitespace-pre-wrap leading-relaxed`}>
+                    {comment.content}
+                </p>
             )}
 
             {showReplyInput && (
-                <form onSubmit={handleReplySubmit} className="mt-3 pl-13 flex gap-2">
+                <form
+                    onSubmit={handleReplySubmit}
+                    className={`mt-3 ${contentPadding} flex gap-2`}
+                >
                     <input
                         type="text"
                         value={replyText}
@@ -154,6 +231,7 @@ const CommentItem = ({ comment, taskId, onReply, onDelete, currentUser, canComme
                         disabled={replying}
                         className="flex-1 text-xs border border-gray-200 dark:border-slate-800 rounded-sm px-3 py-1.5 focus:outline-none focus:border-blue-500 bg-gray-50/50 dark:bg-slate-950 dark:text-white"
                     />
+
                     <button
                         type="submit"
                         disabled={replying || !replyText.trim()}
@@ -164,19 +242,42 @@ const CommentItem = ({ comment, taskId, onReply, onDelete, currentUser, canComme
                 </form>
             )}
 
-            {comment.replies && comment.replies.length > 0 && (
-                <div className="mt-4 pl-6 border-l-2 border-gray-200 dark:border-slate-800 space-y-3">
-                    {comment.replies.map(reply => (
-                        <CommentItem
-                            key={reply.id}
-                            comment={reply}
-                            taskId={taskId}
-                            onReply={onReply}
-                            onDelete={onDelete}
-                            currentUser={currentUser}
-                            canComment={canComment}
-                        />
-                    ))}
+            {comment.replies?.length > 0 && (
+                <div className="mt-4">
+                    {/* Visual nesting is offset by a vertical thread line if within max visual depth limit */}
+                    <div className={depth < MAX_VISUAL_DEPTH ? "pl-5 ml-5 border-l-2 border-gray-200 dark:border-slate-800/80 space-y-4" : "space-y-4"}>
+                        {visibleReplies.map((reply) => (
+                            <CommentItem
+                                key={reply.id}
+                                comment={reply}
+                                taskId={taskId}
+                                onDelete={onDelete}
+                                currentUser={currentUser}
+                                canComment={canComment}
+                                depth={depth + 1}
+                                parentAuthor={comment.author?.display_name || comment.author?.email}
+                            />
+                        ))}
+                    </div>
+
+                    {hasHiddenReplies && (
+                        <button
+                            onClick={() => setExpandedReplies(!expandedReplies)}
+                            className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-blue-605 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 mt-3 ${contentPadding} transition-colors focus:outline-none`}
+                        >
+                            {expandedReplies ? (
+                                <FaChevronDown size={8} />
+                            ) : (
+                                <FaChevronRight size={8} />
+                            )}
+
+                            <span>
+                                {expandedReplies
+                                    ? 'Hide replies'
+                                    : `Show ${comment.replies.length - COLLAPSE_AFTER} more replies`}
+                            </span>
+                        </button>
+                    )}
                 </div>
             )}
         </div>
@@ -190,22 +291,29 @@ const TaskComments = ({ taskId, task }) => {
 
     const { data: commentsData, isLoading } = useQuery({
         queryKey: QUERY_KEYS.taskComments(taskId),
-        queryFn: async () => (await apiClient.get(`/api/tasks/${taskId}/comments/`)).data,
+        queryFn: async () =>
+            (await apiClient.get(
+                `/api/tasks/${taskId}/comments/`
+            )).data,
         enabled: !!taskId
     });
 
-    // Normalize pagination just in case
-    const comments = Array.isArray(commentsData) ? commentsData : (commentsData?.results || []);
+    const comments = Array.isArray(commentsData)
+        ? commentsData
+        : commentsData?.results || [];
 
     const { mutate: addComment, isPending: submitting } = useMutation({
-        mutationFn: async (text) => {
-            const response = await apiClient.post(`/api/tasks/${taskId}/comments/`, {
-                content: text
-            });
-            return response.data;
-        },
+        mutationFn: async (text) =>
+            (
+                await apiClient.post(
+                    `/api/tasks/${taskId}/comments/`,
+                    { content: text }
+                )
+            ).data,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.taskComments(taskId) });
+            queryClient.invalidateQueries({
+                queryKey: QUERY_KEYS.taskComments(taskId)
+            });
             setNewComment('');
             toast.success('Comment posted');
         },
@@ -213,15 +321,22 @@ const TaskComments = ({ taskId, task }) => {
     });
 
     const { mutate: deleteComment } = useMutation({
-        mutationFn: async (commentId) => {
-            await apiClient.delete(`/api/comments/${commentId}/`);
-        },
+        mutationFn: async (id) =>
+            apiClient.delete(`/api/comments/${id}/`),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.taskComments(taskId) });
+            queryClient.invalidateQueries({
+                queryKey: QUERY_KEYS.taskComments(taskId)
+            });
             toast.success('Comment deleted');
         },
         onError: () => toast.error('Failed to delete comment')
     });
+
+    const topLevelComments = comments.filter((c) => !c.parent);
+
+    const isCreator = currentUser?.id === task?.creator?.id;
+    const isAssignee = task?.assignees?.some((a) => a.id === currentUser?.id);
+    const canComment = isCreator || isAssignee;
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -229,15 +344,8 @@ const TaskComments = ({ taskId, task }) => {
         addComment(newComment);
     };
 
-    // Filter out replies from top level view (they are rendered inside parents)
-    const topLevelComments = comments.filter(c => !c.parent);
-
-    const isCreator = currentUser?.id === task?.creator?.id;
-    const isAssignee = task?.assignees?.some(a => a.id === currentUser?.id);
-    const canComment = isCreator || isAssignee;
-
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-sm border border-gray-200 dark:border-slate-800/80 p-6 shadow-none mt-6">
+        <div className="bg-white dark:bg-slate-900 rounded-sm border border-gray-200 dark:border-slate-800 p-6 mt-6">
             <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2">
                 Comments <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-sm border border-blue-200 dark:border-blue-900">{comments.length}</span>
             </h3>
@@ -246,14 +354,14 @@ const TaskComments = ({ taskId, task }) => {
                 <form onSubmit={handleSubmit} className="mb-6">
                     <div className="flex gap-4">
                         <Avatar name={currentUser?.display_name || currentUser?.email} url={currentUser?.avatar} size={11} className="rounded-sm" />
-                        <div className="flex-1 flex flex-col gap-3">
+                        <div className="flex-grow flex flex-col gap-3">
                             <textarea
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
                                 placeholder="Add a comment or ask a question..."
                                 rows="3"
                                 disabled={submitting}
-                                className="w-full border border-gray-200 dark:border-slate-800 rounded-sm p-4 text-xs focus:outline-none focus:border-blue-500 bg-gray-50/50 dark:bg-slate-955 dark:text-white resize-none leading-relaxed"
+                                className="w-full border border-gray-200 dark:border-slate-800 rounded-sm p-4 text-xs focus:outline-none focus:border-blue-500 bg-gray-50/50 dark:bg-slate-950 dark:text-white resize-none leading-relaxed"
                             />
                             <div className="flex justify-end">
                                 <button
@@ -283,7 +391,7 @@ const TaskComments = ({ taskId, task }) => {
                 </div>
             ) : (
                 <div className="space-y-4 divide-y divide-gray-200 dark:divide-slate-800/50">
-                    {topLevelComments.map(comment => (
+                    {topLevelComments.map((comment) => (
                         <CommentItem
                             key={comment.id}
                             comment={comment}
