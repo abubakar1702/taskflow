@@ -116,26 +116,26 @@ const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isPr
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800">
+        <div className="bg-white dark:bg-slate-900 rounded-sm shadow-none border border-gray-200 dark:border-slate-800/80">
             <div className="p-6 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
+                <h2 className="text-sm font-bold text-gray-900 dark:text-slate-100 uppercase tracking-wider">
                     Project Assets
                 </h2>
                 <button
                     onClick={() => setShowUploadModal(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-2"
+                    className="px-3 py-1.5 bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors text-xs font-semibold flex items-center gap-1.5"
                 >
-                    <FaCloudUploadAlt /> Upload Asset
+                    <FaCloudUploadAlt className="w-3.5 h-3.5" /> Upload Asset
                 </button>
             </div>
 
             {assetsLoading ? (
                 <div className="p-12 text-center">
                     <FaSpinner className="animate-spin text-3xl text-blue-600 mx-auto mb-3" />
-                    <p className="text-gray-600 dark:text-slate-400">Loading assets...</p>
+                    <p className="text-sm text-gray-600 dark:text-slate-400">Loading assets...</p>
                 </div>
             ) : assets && assets.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 p-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 p-6">
                     {assets.map((asset) => {
                         const fileName = asset.file.split('/').pop();
                         const fileExtension = fileName.split('.').pop().toLowerCase();
@@ -161,42 +161,43 @@ const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isPr
                         return (
                             <div
                                 key={asset.id}
-                                className="border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow group relative"
+                                className="border border-gray-200 dark:border-slate-800 rounded-sm overflow-hidden hover:border-gray-300 dark:hover:border-slate-700 transition-colors group relative shadow-none"
                             >
                                 {/* File Preview/Icon */}
-                                <div className="bg-gray-50 dark:bg-slate-800 h-32 flex items-center justify-center relative overflow-hidden">
+                                <div className="bg-gray-50 dark:bg-slate-800/50 h-32 flex items-center justify-center relative overflow-hidden">
                                     {isImage ? (
                                         <img
                                             src={asset.file}
                                             alt={fileName}
-                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                            className="w-full h-full object-cover transition-transform duration-355 group-hover:scale-105"
                                         />
                                     ) : (
-                                        <div className="text-4xl transform transition-transform duration-300 group-hover:scale-110">
+                                        <div className="text-4xl transform transition-transform duration-355 group-hover:scale-110">
                                             {getFileIcon()}
                                         </div>
                                     )}
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
                                 </div>
 
                                 {/* File Info */}
                                 <div className="p-3">
-                                    <h3 className="font-medium text-gray-900 dark:text-slate-100 text-xs truncate mb-2" title={fileName}>
+                                    <h3 className="font-bold text-gray-900 dark:text-slate-100 text-xs truncate mb-2" title={fileName}>
                                         {fileName}
                                     </h3>
 
                                     {/* Uploader Info */}
-                                    <div className="flex items-center gap-2 mb-2">
+                                    <div className="flex items-center gap-2 mb-3">
                                         <Avatar
                                             name={asset.uploaded_by.display_name}
                                             url={asset.uploaded_by.avatar}
                                             size={6}
+                                            className="rounded-sm"
                                         />
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs text-gray-600 dark:text-slate-300 truncate">
+                                            <p className="text-[10px] font-semibold text-gray-700 dark:text-slate-300 truncate">
                                                 {asset.uploaded_by.display_name}
                                             </p>
-                                            <p className="text-xs text-gray-400 dark:text-slate-500">
+                                            <p className="text-[9px] text-gray-400 dark:text-slate-500">
                                                 {formatDate(asset.uploaded_at)}
                                             </p>
                                         </div>
@@ -208,18 +209,18 @@ const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isPr
                                             href={asset.file}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors font-medium"
+                                            className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 text-xs rounded-sm hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors font-semibold border border-transparent hover:border-blue-100 dark:hover:border-blue-900"
                                         >
-                                            <FaDownload size={12} />
+                                            <FaDownload size={11} />
                                             <span>Download</span>
                                         </a>
 
                                         {canDelete && (
                                             <button
                                                 onClick={() => openDeleteModal(asset)}
-                                                className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs rounded hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors font-medium"
+                                                className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-red-50 dark:bg-red-950/20 text-red-650 dark:text-red-400 text-xs rounded-sm hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors font-semibold border border-transparent hover:border-red-100 dark:hover:border-red-900"
                                             >
-                                                <FaTrash size={12} />
+                                                <FaTrash size={11} />
                                                 <span>Delete</span>
                                             </button>
                                         )}
@@ -231,11 +232,11 @@ const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isPr
                 </div>
             ) : (
                 <div className="p-12 text-center">
-                    <FaFileAlt className="text-4xl text-gray-300 dark:text-slate-600 mx-auto mb-3" />
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-slate-100 mb-2">
+                    <FaFileAlt className="text-4xl text-gray-300 dark:text-slate-700 mx-auto mb-3" />
+                    <h3 className="text-sm font-bold text-gray-800 dark:text-slate-100 uppercase tracking-wider mb-2">
                         No Assets Yet
                     </h3>
-                    <p className="text-gray-600 dark:text-slate-400 mb-4">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-4">
                         Upload files to share with your project team
                     </p>
                 </div>

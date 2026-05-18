@@ -172,16 +172,16 @@ const AddAssigneeModal = ({ isOpen, onClose, taskId, currentAssignees = [], proj
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
             <div
-                className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh]"
+                className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-sm shadow-none w-full max-w-2xl flex flex-col max-h-[90vh]"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-800">Add Assignees</h2>
-                        <p className="text-gray-500 mt-1">
+                        <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Add Assignees</h2>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-semibold">
                             {project
                                 ? "Select team members from the project to assign to this task"
                                 : "Search and select team members to assign to this task"
@@ -190,9 +190,9 @@ const AddAssigneeModal = ({ isOpen, onClose, taskId, currentAssignees = [], proj
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-gray-100 rounded-full text-gray-500 hover:text-gray-700"
+                        className="p-1.5 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-colors"
                     >
-                        <FiX size={24} />
+                        <FiX size={16} />
                     </button>
                 </div>
 
@@ -205,30 +205,30 @@ const AddAssigneeModal = ({ isOpen, onClose, taskId, currentAssignees = [], proj
                                 {selectedUsers.map(user => (
                                     <div
                                         key={user.id}
-                                        className="flex items-center gap-2 pl-1 pr-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 rounded-full"
+                                        className="flex items-center gap-2 pl-1 pr-2.5 py-1 bg-blue-50/40 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/80 text-blue-700 dark:text-blue-400 rounded-sm"
                                     >
-                                        <div className="w-6 h-6">
-                                            <Avatar name={user.display_name} url={user.avatar} size={6} />
+                                        <div className="w-5.5 h-5.5">
+                                            <Avatar name={user.display_name} url={user.avatar} size={5.5} className="rounded-sm" />
                                         </div>
-                                        <span className="text-sm font-medium">{user.display_name}</span>
+                                        <span className="text-xs font-bold">{user.display_name}</span>
                                         <button
                                             onClick={() => handleRemoveSelectedUser(user.id)}
-                                            className="ml-1 p-0.5 rounded-full hover:bg-blue-200 text-blue-500"
+                                            className="ml-1 p-0.5 rounded-sm hover:bg-blue-200/60 dark:hover:bg-blue-900/50 text-blue-500 dark:text-blue-400 transition-colors"
                                         >
-                                            <FiX size={14} />
+                                            <FiX size={12} />
                                         </button>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-gray-400 italic text-sm">No new assignees selected yet...</p>
+                            <p className="text-slate-400 dark:text-slate-500 italic text-xs font-semibold">No new assignees selected yet...</p>
                         )}
                     </div>
 
                     {/* Search */}
                     <div ref={dropdownRef} className="relative">
                         <div className="relative">
-                            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                             <input
                                 ref={inputRef}
                                 type="text"
@@ -240,46 +240,46 @@ const AddAssigneeModal = ({ isOpen, onClose, taskId, currentAssignees = [], proj
                                         ? "Search project members..."
                                         : "Search by name or email (e.g. @john)"
                                 }
-                                className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                className="w-full pl-11 pr-4 py-2.5 bg-gray-50/50 dark:bg-slate-955 border border-gray-200 dark:border-slate-800 rounded-sm text-slate-800 dark:text-slate-200 text-xs font-medium focus:bg-white dark:focus:bg-slate-950 focus:ring-1 focus:ring-blue-500 focus:border-transparent transition-all"
                             />
                             {project && (
-                                <span className="absolute right-4 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium">
-                                    <FiUsers size={12} />
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-blue-50/40 dark:bg-blue-950/25 border border-blue-200 dark:border-blue-900/80 text-blue-700 dark:text-blue-400 text-[9px] font-bold uppercase tracking-wider">
+                                    <FiUsers size={10} />
                                     Project Members
                                 </span>
                             )}
                         </div>
 
                         {showResults && searchResults.length > 0 && (
-                            <div className="absolute z-50 left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 max-h-80 overflow-y-auto">
-                                <ul className="py-2">
+                            <div className="absolute z-50 left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-sm shadow-none border border-gray-200 dark:border-slate-800 max-h-80 overflow-y-auto">
+                                <ul className="py-1">
                                     {searchResults.map((uResult) => {
                                         const u = getPlainUser(uResult);
                                         const isSelected = selectedUsers.some(s => s.id === u.id);
                                         return (
                                             <li
                                                 key={u.id}
-                                                className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 ${isSelected
-                                                    ? "bg-blue-50 border-l-4 border-blue-500"
-                                                    : "hover:bg-gray-50"
+                                                className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors ${isSelected
+                                                    ? "bg-blue-50/40 dark:bg-blue-950/20 border-l-2 border-blue-500"
+                                                    : "hover:bg-gray-50 dark:hover:bg-slate-800"
                                                     }`}
                                                 onClick={() => handleSelectUser(uResult)}
                                             >
-                                                <Avatar name={u.display_name} url={u.avatar} size={8} />
-                                                <div className="flex-1">
-                                                    <p className={`font-semibold ${isSelected ? "text-blue-800" : "text-gray-800"}`}>
+                                                <Avatar name={u.display_name} url={u.avatar} size={7.5} className="rounded-sm" />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className={`text-xs font-bold truncate ${isSelected ? "text-blue-800 dark:text-blue-400" : "text-slate-800 dark:text-slate-200"}`}>
                                                         {u.display_name}
                                                     </p>
-                                                    <p className="text-sm text-gray-500">{u.email}</p>
+                                                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold truncate">{u.email}</p>
                                                 </div>
                                                 {isSelected ? (
-                                                    <div className="flex-shrink-0 p-1.5 bg-blue-100 rounded-full">
-                                                        <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <div className="flex-shrink-0 p-1 bg-blue-100/60 dark:bg-blue-950/40 rounded-sm">
+                                                        <svg className="w-3.5 h-3.5 text-blue-600 dark:text-blue-450" fill="currentColor" viewBox="0 0 20 20">
                                                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                                         </svg>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-xs font-medium px-2 py-1 bg-gray-100 rounded-md text-gray-600">
+                                                    <span className="text-[9px] font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-sm text-slate-650 dark:text-slate-400 border border-slate-200 dark:border-slate-700 uppercase tracking-wider">
                                                         Add
                                                     </span>
                                                 )}
@@ -293,20 +293,29 @@ const AddAssigneeModal = ({ isOpen, onClose, taskId, currentAssignees = [], proj
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-end gap-3 rounded-b-xl">
+                <div className="p-6 bg-slate-50/60 dark:bg-slate-950/60 border-t border-gray-200 dark:border-slate-800 flex justify-end gap-3 rounded-b-sm">
                     <button
                         onClick={onClose}
-                        className="px-5 py-2.5 text-gray-600 font-medium hover:text-gray-800 hover:bg-gray-200/50 rounded-lg"
+                        className="px-5 py-2 rounded-sm border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider transition-colors"
                     >
                         Cancel
                     </button>
                     <button
-                        disabled={!selectedUsers.length}
+                        disabled={!selectedUsers.length || isAdding}
                         onClick={handleAddAssignees}
-                        className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        className="px-5 py-2 bg-blue-650 hover:bg-blue-755 text-white rounded-sm text-xs font-bold uppercase tracking-wider transition-colors border border-transparent shadow-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
                     >
-                        <FiCheck size={18} />
-                        Add {selectedUsers.length > 0 ? `${selectedUsers.length} Member${selectedUsers.length > 1 ? "s" : ""}` : "Members"}
+                        {isAdding ? (
+                            <>
+                                <ClipLoader size={12} color="#ffffff" />
+                                <span>Adding...</span>
+                            </>
+                        ) : (
+                            <>
+                                <FiCheck size={14} />
+                                <span>Add {selectedUsers.length > 0 ? `${selectedUsers.length} Member${selectedUsers.length > 1 ? "s" : ""}` : "Members"}</span>
+                            </>
+                        )}
                     </button>
                 </div>
             </div>

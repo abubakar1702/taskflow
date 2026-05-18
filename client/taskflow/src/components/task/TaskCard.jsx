@@ -53,52 +53,52 @@ const TaskCard = ({
 
     return (
         <Link to={`/tasks/${id}`}>
-            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 hover:shadow-md dark:hover:shadow-slate-800/50 transition-shadow p-5 cursor-pointer h-full flex flex-col">
+            <div className="bg-white dark:bg-slate-900 rounded-sm shadow-none border border-gray-200 dark:border-slate-800/80 hover:border-gray-300 dark:hover:border-slate-700 transition-colors p-5 cursor-pointer h-full flex flex-col">
                 {/* Header with Priority and Status */}
                 <div className="space-x-2 mb-3">
                     <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium border ${PRIORITY_COLORS[priority]}`}
+                        className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider border ${PRIORITY_COLORS[priority]}`}
                     >
                         {priority}
                     </span>
                     <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[status]}`}
+                        className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider ${STATUS_COLORS[status]}`}
                     >
                         {status}
                     </span>
                 </div>
 
                 {/* Task Title */}
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-2.5 line-clamp-2 leading-snug">
                     {title}
                 </h3>
 
                 {/* Project Name */}
                 {project && (
-                    <p className="text-sm text-gray-500 dark:text-slate-400 mb-2">
-                        <span className="font-medium">Project:</span> {project.name}
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1.5">
+                        <span className="font-semibold text-gray-400 uppercase tracking-wider text-[10px]">Project:</span> <span className="text-gray-700 dark:text-slate-300">{project.name}</span>
                     </p>
                 )}
 
                 {/* Task Creator */}
-                <p className="text-sm text-gray-500 dark:text-slate-400 mb-2">
-                    <span className="font-medium">Created by:</span> {creator.display_name}
+                <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">
+                    <span className="font-semibold text-gray-400 uppercase tracking-wider text-[10px]">Created by:</span> <span className="text-gray-700 dark:text-slate-300">{creator.display_name}</span>
                 </p>
 
                 {/* Subtasks Progress */}
                 {totalSubtasks > 0 && (
-                    <div className="mb-4">
+                    <div className="mb-4 mt-1.5">
                         <div className="flex justify-between items-center mb-1">
-                            <span className="text-xs text-gray-600 dark:text-slate-400 font-medium">
+                            <span className="text-[10px] text-gray-550 dark:text-slate-450 font-bold uppercase tracking-wider">
                                 Subtasks
                             </span>
-                            <span className="text-xs text-gray-500 dark:text-slate-400">
+                            <span className="text-xs text-gray-500 dark:text-slate-450 font-semibold">
                                 {completedSubtasks}/{totalSubtasks}
                             </span>
                         </div>
-                        <div className="w-full bg-gray-200 dark:bg-slate-800 rounded-full h-2">
+                        <div className="w-full bg-gray-100 dark:bg-slate-800 rounded-sm h-1.5">
                             <div
-                                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                className="bg-blue-600 h-1.5 rounded-sm transition-all duration-300"
                                 style={{ width: `${completionPercentage}%` }}
                             />
                         </div>
@@ -108,30 +108,30 @@ const TaskCard = ({
                 {/* Due Date & Time */}
                 {due_date && (
                     <div
-                        className={`flex items-center gap-4 text-xs mb-4 ${isOverdue() ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-slate-400"
+                        className={`flex items-center gap-4 text-xs mb-4 mt-auto pt-2.5 ${isOverdue() ? "text-red-650 dark:text-red-400" : "text-gray-550 dark:text-slate-400"
                             }`}
                     >
-                        <div className="flex items-center gap-1">
-                            <FaCalendarAlt />
+                        <div className="flex items-center gap-1.5">
+                            <FaCalendarAlt className="w-3 h-3 text-gray-400 dark:text-slate-500" />
                             <span>{formatDate(due_date)}</span>
                         </div>
                         {due_time && (
-                            <div className="flex items-center gap-1">
-                                <FaClock />
+                            <div className="flex items-center gap-1.5">
+                                <FaClock className="w-3 h-3 text-gray-400 dark:text-slate-500" />
                                 <span>{formatTime(due_time)}</span>
                             </div>
                         )}
                         {isOverdue() && (
-                            <span className="font-semibold text-red-600">Overdue</span>
+                            <span className="font-bold text-red-650 uppercase tracking-wider text-[10px]">Overdue</span>
                         )}
                     </div>
                 )}
 
                 {/* Assignees */}
                 {assignees.length > 0 && (
-                    <div className="flex justify-between items-center border-t border-gray-100 dark:border-slate-800 pt-3 mt-auto">
+                    <div className="flex justify-between items-center border-t border-gray-100 dark:border-slate-800/80 pt-3 mt-auto">
                         <div className="flex items-center gap-2">
-                            <div className="flex -space-x-2">
+                            <div className="flex -space-x-1.5">
                                 {assignees.slice(0, 4).map((assignee, index) => (
                                     <div
                                         key={assignee.id}
@@ -141,23 +141,23 @@ const TaskCard = ({
                                         <Avatar
                                             name={assignee.display_name}
                                             url={assignee.avatar}
-                                            size={8}
-                                            className="border-2 border-white dark:border-slate-900"
+                                            size={7}
+                                            className="border border-white dark:border-slate-900 rounded-sm"
                                         />
-                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                                             {assignee.display_name}
                                         </div>
                                     </div>
                                 ))}
                                 {assignees.length > 4 && (
-                                    <div className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 bg-gray-300 dark:bg-slate-800 flex items-center justify-center text-gray-700 dark:text-slate-300 text-xs font-semibold">
+                                    <div className="w-7 h-7 rounded-sm border border-white dark:border-slate-900 bg-gray-200 dark:bg-slate-800 flex items-center justify-center text-gray-700 dark:text-slate-300 text-[10px] font-bold">
                                         +{assignees.length - 4}
                                     </div>
                                 )}
                             </div>
                         </div>
                         <div>
-                            {total_assets > 0 && (<span className="flex items-center gap-2 text-gray-400 dark:text-slate-500"><FaPaperclip size={16} />{total_assets}</span>)}
+                            {total_assets > 0 && (<span className="flex items-center gap-1.5 text-gray-400 dark:text-slate-550 text-xs font-semibold"><FaPaperclip size={12} />{total_assets}</span>)}
                         </div>
                     </div>
                 )}

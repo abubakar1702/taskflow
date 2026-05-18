@@ -40,16 +40,16 @@ const Assignee = ({ assignees = [], taskId, refetch, project, isCreator }) => {
     return (
         <div>
             <div className="flex justify-between items-center mb-3">
-                <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+                <h2 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">
                     Assignees{" "}
-                    <span className="bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                    <span className="ml-1.5 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-[10px] font-bold rounded-sm border border-blue-200 dark:border-blue-900">
                         {assignees.length || 0}
                     </span>
                 </h2>
                 {isCreator && (
                     <button
                         onClick={() => setShowAddAssigneeModal(true)}
-                        className="text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950/50 px-2 py-1 rounded-md flex items-center gap-2 border border-blue-600 dark:border-blue-500"
+                        className="text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 px-2 py-1 rounded-sm flex items-center gap-1.5 border border-blue-600 dark:border-blue-500 text-xs font-semibold"
                     >
                         <FiUserPlus /> Add New
                     </button>
@@ -58,33 +58,33 @@ const Assignee = ({ assignees = [], taskId, refetch, project, isCreator }) => {
 
             {assignees.length === 0 ? (
                 <div className="text-center py-4">
-                    <p className="text-gray-500 dark:text-slate-400">No assignees yet</p>
+                    <p className="text-xs text-gray-450 dark:text-slate-400 font-medium">No assignees yet</p>
                 </div>
             ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                     {assignees.map((a) => (
                         <div
                             key={a.id}
-                            className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                            className="flex items-center justify-between p-3 bg-gray-50/50 dark:bg-slate-800/20 border border-gray-200/40 dark:border-slate-800/80 rounded-sm hover:bg-gray-100/70 dark:hover:bg-slate-800 transition-colors"
                         >
                             <div className="flex items-center gap-3">
                                 {a.avatar ? (
-                                    <img src={a.avatar} alt={a.display_name} className="w-10 h-10 rounded-full" />
+                                    <img src={a.avatar} alt={a.display_name} className="w-8 h-8 rounded-sm object-cover" />
                                 ) : (
-                                    <Avatar name={a.display_name} size={10} />
+                                    <Avatar name={a.display_name} size={8} className="rounded-sm" />
                                 )}
                                 <div>
-                                    <p className="font-medium text-gray-900 dark:text-white">{a.display_name}</p>
-                                    <p className="text-sm text-gray-500 dark:text-slate-400">{a.email}</p>
+                                    <p className="font-bold text-xs text-gray-800 dark:text-slate-100">{a.display_name}</p>
+                                    <p className="text-[10px] font-semibold text-gray-400 dark:text-slate-500 mt-0.5">{a.email}</p>
                                 </div>
                             </div>
 
                             {isCreator && (
                                 <button
                                     onClick={() => openDeleteModal(a)}
-                                    className="text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 p-2"
+                                    className="text-gray-400 hover:text-red-650 dark:text-slate-500 dark:hover:text-red-400 p-1.5 rounded-sm hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
                                 >
-                                    <FaXmark size={20} title="Remove Assignee" />
+                                    <FaXmark size={14} title="Remove Assignee" />
                                 </button>
                             )}
                         </div>

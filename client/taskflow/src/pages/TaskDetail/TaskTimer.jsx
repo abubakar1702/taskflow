@@ -100,15 +100,15 @@ const TaskTimer = ({ task, onUpdate, isCreator }) => {
     };
 
     return (
-        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-slate-800">
-            <p className="text-lg py-2 font-semibold text-gray-900 dark:text-white">Time Tracker</p>
-            <div className={`flex items-center ${isCreator ? 'justify-between' : 'justify-center'} bg-gray-50 dark:bg-slate-800/50 p-3 rounded-lg relative overflow-hidden`}>
-                <div className="flex flex-col items-center">
-                    <span className={`text-2xl font-mono font-bold transition-colors ${getTimeStyle()}`}>
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-800">
+            <p className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-3">Time Tracker</p>
+            <div className={`flex items-center ${isCreator ? 'justify-between' : 'justify-center'} bg-gray-50 dark:bg-slate-800/20 p-3 rounded-sm border border-gray-200/50 dark:border-slate-800/80 relative overflow-hidden`}>
+                <div className="flex flex-col items-start pl-1">
+                    <span className={`text-xl font-mono font-bold transition-colors ${getTimeStyle()}`}>
                         {formatDisplayTime(seconds)}
                     </span>
-                    {isPaused && <span className="text-[10px] uppercase font-bold text-amber-500 tracking-widest mt-0.5">Paused</span>}
-                    {isRunning && <span className="text-[10px] uppercase font-bold text-green-500 tracking-widest mt-0.5">Running</span>}
+                    {isPaused && <span className="text-[9px] uppercase font-bold text-amber-500 tracking-widest mt-0.5">Paused</span>}
+                    {isRunning && <span className="text-[9px] uppercase font-bold text-green-500 tracking-widest mt-0.5">Running</span>}
                 </div>
 
                 {isCreator && (
@@ -119,20 +119,20 @@ const TaskTimer = ({ task, onUpdate, isCreator }) => {
                                     type="button"
                                     onClick={handleStart}
                                     disabled={loading || hasIncompleteDependencies}
-                                    className={`p-2 rounded-full text-white transition shadow-sm ${loading || hasIncompleteDependencies ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"}`}
+                                    className={`p-2 rounded-sm text-white transition shadow-none ${loading || hasIncompleteDependencies ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}`}
                                     title={hasIncompleteDependencies ? "Cannot start: unresolved dependencies" : (isPaused ? "Resume Timer" : "Start Timer")}
                                 >
-                                    <IoPlay className="w-5 h-5 pl-0.5" />
+                                    <IoPlay className="w-4 h-4 pl-0.5" />
                                 </button>
                                 {isPaused && (
                                     <button
                                         type="button"
                                         onClick={handleStop}
                                         disabled={loading}
-                                        className="p-2 bg-red-500 rounded-full text-white hover:bg-red-600 transition shadow-sm"
+                                        className="p-2 bg-red-600 rounded-sm text-white hover:bg-red-700 transition shadow-none"
                                         title="Stop Timer (Reset)"
                                     >
-                                        <IoStop className="w-5 h-5" />
+                                        <IoStop className="w-4 h-4" />
                                     </button>
                                 )}
                             </>
@@ -142,19 +142,19 @@ const TaskTimer = ({ task, onUpdate, isCreator }) => {
                                     type="button"
                                     onClick={handlePause}
                                     disabled={loading}
-                                    className="p-2 bg-amber-500 rounded-full text-white hover:bg-amber-600 transition shadow-sm"
+                                    className="p-2 bg-amber-500 rounded-sm text-white hover:bg-amber-600 transition shadow-none"
                                     title="Pause Timer"
                                 >
-                                    <IoPause className="w-5 h-5" />
+                                    <IoPause className="w-4 h-4" />
                                 </button>
                                 <button
                                     type="button"
                                     onClick={handleStop}
                                     disabled={loading}
-                                    className="p-2 bg-red-500 rounded-full text-white hover:bg-red-600 transition shadow-sm"
+                                    className="p-2 bg-red-650 rounded-sm text-white hover:bg-red-705 transition shadow-none"
                                     title="Stop Timer (Reset)"
                                 >
-                                    <IoStop className="w-5 h-5" />
+                                    <IoStop className="w-4 h-4" />
                                 </button>
                             </>
                         )}

@@ -61,23 +61,23 @@ const AddSubtaskModal = ({ taskId, creator, assignees = [], onClose, onUpdated }
 
     return (
         <div
-            className={`fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 transition-opacity duration-200 ${isVisible ? 'opacity-100' : 'opacity-0'
+            className={`fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity duration-200 ${isVisible ? 'opacity-100' : 'opacity-0'
                 }`}
             onClick={handleClose}
         >
             <div
-                className={`bg-white rounded-xl w-full max-w-2xl shadow-2xl relative transform transition-all duration-200 ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+                className={`bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-sm w-full max-w-xl shadow-none relative transform transition-all duration-200 ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
                     }`}
                 onClick={(e) => e.stopPropagation()}
             >
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     <div className="space-y-2">
-                        <label className="flex items-center justify-between text-sm font-semibold text-gray-700">
+                        <label className="flex items-center justify-between text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">
                             <span className="flex items-center">
-                                <MdOutlineTask className="w-4 h-4 mr-2 text-blue-600" />
+                                <MdOutlineTask className="w-4 h-4 mr-1.5 text-blue-600" />
                                 Subtask Description
                             </span>
-                            <span className={`text-xs font-medium ${text.length > 200 ? 'text-red-600' : 'text-gray-500'}`}>
+                            <span className={`text-[10px] font-bold ${text.length > 200 ? 'text-red-650' : 'text-gray-400 dark:text-slate-500'}`}>
                                 {text.length}/200
                             </span>
                         </label>
@@ -85,39 +85,39 @@ const AddSubtaskModal = ({ taskId, creator, assignees = [], onClose, onUpdated }
                             value={text}
                             onChange={(e) => setText(e.target.value)}
                             placeholder="What needs to be done?"
-                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none bg-gray-50 hover:bg-white"
+                            className="w-full px-3 py-2 border border-gray-200 dark:border-slate-800 rounded-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent transition-all duration-150 resize-none bg-gray-50/50 dark:bg-slate-950 text-gray-900 dark:text-white text-xs leading-relaxed"
                             rows={4}
                             required
                             disabled={isSubmitting}
                         />
-                        <p className="text-xs text-gray-500 flex items-center">
+                        <p className="text-[10px] text-gray-400 dark:text-slate-500 font-semibold flex items-center">
                             <FaCircleInfo className="w-3 h-3 mr-1" />
                             Be specific about what needs to be accomplished
                         </p>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="flex items-center text-sm font-semibold text-gray-700">
-                            <FaRegUser className="w-4 h-4 mr-2 text-blue-600" />
+                        <label className="flex items-center text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">
+                            <FaRegUser className="w-4 h-4 mr-1.5 text-blue-600" />
                             Assign To
                         </label>
 
                         {selectedAssignee && (
-                            <div className="flex items-center p-3 bg-blue-50 border-2 border-blue-200 rounded-xl mb-2">
+                            <div className="flex items-center p-3 bg-blue-50/40 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/80 rounded-sm mb-2">
                                 {selectedAssignee.avatar ? (
                                     <img
                                         src={selectedAssignee.avatar}
                                         alt={selectedAssignee.display_name}
-                                        className="w-8 h-8 rounded-full mr-3"
+                                        className="w-7 h-7 rounded-sm mr-2.5 object-cover"
                                     />
                                 ) : (
                                     <Avatar
                                         name={selectedAssignee.display_name}
-                                        size={6}
-                                        className="mr-3"
+                                        size={7}
+                                        className="mr-2.5 rounded-sm"
                                     />
                                 )}
-                                <span className="font-medium text-blue-900">{selectedAssignee.display_name}</span>
+                                <span className="font-bold text-xs text-blue-800 dark:text-blue-300">{selectedAssignee.display_name}</span>
                             </div>
                         )}
 
@@ -134,33 +134,33 @@ const AddSubtaskModal = ({ taskId, creator, assignees = [], onClose, onUpdated }
                                 const user = allUsers.find(u => String(u.id) === val);
                                 setAssigneeId(user ? user.id : val);
                             }}
-                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white cursor-pointer"
+                            className="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-800 rounded-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent transition-all duration-150 bg-gray-50/50 dark:bg-slate-950 text-gray-900 dark:text-white cursor-pointer text-xs font-medium"
                             disabled={isSubmitting || (!creator && filteredAssignees.length === 0)}
                         >
-                            <option value="">Unassigned</option>
+                            <option value="" className="dark:bg-slate-900">Unassigned</option>
                             {creator && (
-                                <option key={creator.id} value={creator.id}>
+                                <option key={creator.id} value={creator.id} className="dark:bg-slate-900">
                                     {creator.display_name} (Creator)
                                 </option>
                             )}
                             {filteredAssignees.map((user) => (
-                                <option key={user.id} value={user.id}>
+                                <option key={user.id} value={user.id} className="dark:bg-slate-900">
                                     {user.display_name}
                                 </option>
                             ))}
                         </select>
 
                         {!creator && filteredAssignees.length === 0 && (
-                            <p className="text-xs text-amber-600 flex items-center">
+                            <p className="text-[10px] text-amber-600 dark:text-amber-500 font-bold uppercase tracking-wider flex items-center">
                                 No assignees available for this task
                             </p>
                         )}
                     </div>
-                    <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100">
+                    <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-slate-800">
                         <button
                             type="button"
                             onClick={handleClose}
-                            className="px-5 py-2.5 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-200 font-medium"
+                            className="px-5 py-2 rounded-sm border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider transition-colors"
                             disabled={isSubmitting}
                         >
                             Cancel
@@ -168,16 +168,16 @@ const AddSubtaskModal = ({ taskId, creator, assignees = [], onClose, onUpdated }
                         <button
                             type="submit"
                             disabled={isSubmitting || !text.trim() || text.length > 200}
-                            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transform hover:scale-105 flex items-center space-x-2"
+                            className="px-5 py-2 bg-blue-600 hover:bg-blue-755 text-white rounded-sm text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1.5 border border-transparent shadow-none"
                         >
                             {isSubmitting ? (
                                 <>
-                                    <ClipLoader size={20} color="#ffffff" className="mr-2" />
+                                    <ClipLoader size={12} color="#ffffff" />
                                     <span>Adding...</span>
                                 </>
                             ) : (
                                 <>
-                                    <FaPlus className="w-5 h-5" />
+                                    <FaPlus size={10} />
                                     <span>Add Subtask</span>
                                 </>
                             )}

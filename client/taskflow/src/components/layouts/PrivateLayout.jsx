@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import useAuthStore from "../../stores/useAuthStore";
+import { useUIStore } from "../../stores/useUIStore";
 import Sidebar from "../sidebar/Sidebar";
 import Navbar from "../navbar/Navbar";
 import { UserProvider } from "../../contexts/UserContext";
 
 const PrivateLayout = () => {
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
-    const [collapsed, setCollapsed] = useState(false);
+    const collapsed = useUIStore((s) => s.isSidebarCollapsed);
+    const setCollapsed = useUIStore((s) => s.setSidebarCollapsed);
     const [isMobile, setIsMobile] = useState(false);
 
     if (!isAuthenticated) {
@@ -28,7 +30,7 @@ const PrivateLayout = () => {
 
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
-    }, []);
+    }, [setCollapsed]);
 
     return (
         <UserProvider>
@@ -48,7 +50,7 @@ const PrivateLayout = () => {
                         aria-label="Close sidebar"
                     />
                 )}
-                <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} isMobile={isMobile} />
+                <Sidebar isMobile={isMobile} />
                 <div
                     className={`flex-1 transition-all duration-300 ${isMobile ? "ml-20" : (collapsed ? "ml-20" : "ml-64")}`}
                 >

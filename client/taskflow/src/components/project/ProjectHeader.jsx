@@ -42,35 +42,37 @@ const ProjectHeader = ({ project, activeTab, setActiveTab, tasks, assets, onEdit
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-10">
-            <div className="max-w-7xl mx-auto px-6 pt-4">
+        <div className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800/80 sticky top-0 z-10 shadow-none">
+            <div className="max-w-7xl mx-auto px-6 pt-5">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100 tracking-tight">
                                 {project.name}
                             </h1>
-                            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400 mt-1">
-                                <FaCalendarAlt className="text-gray-400" />
+                            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-400 mt-1.5">
+                                <FaCalendarAlt className="text-gray-400 dark:text-slate-500" />
                                 <span>Created {formatDate(project.created_at)}</span>
                             </div>
                         </div>
                     </div>
                     {isProjectAdmin && (
-                        <div className="flex items-center">
+                        <div className="flex items-center shadow-none">
                             <button
                                 onClick={onEditClick}
-                                className={`flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:text-blue-700 dark:hover:text-blue-400 dark:hover:bg-slate-800 transition-colors shadow-sm ${isProjectCreator ? "rounded-l-full" : "rounded-full"
+                                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:text-blue-700 dark:hover:text-blue-400 dark:hover:bg-slate-800 transition-colors ${isProjectCreator ? "rounded-l-sm" : "rounded-sm"
                                     }`}
                             >
-                                <FaEdit />
+                                <FaEdit className="w-3.5 h-3.5" />
+                                <span>Edit</span>
                             </button>
                             {isProjectCreator && (
                                 <button
                                     onClick={() => setIsDeleteModalOpen(true)}
-                                    className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 rounded-r-full hover:text-red-700 dark:hover:text-red-400 dark:hover:bg-slate-800 transition-colors shadow-sm -ml-px"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-700 rounded-r-sm hover:text-red-700 dark:hover:text-red-400 dark:hover:bg-slate-800 transition-colors -ml-px"
                                 >
-                                    <FaTrash />
+                                    <FaTrash className="w-3.5 h-3.5" />
+                                    <span>Delete</span>
                                 </button>
                             )}
                         </div>
@@ -78,48 +80,48 @@ const ProjectHeader = ({ project, activeTab, setActiveTab, tasks, assets, onEdit
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-6 mt-6">
+                <div className="flex gap-2 mt-6 border-b border-transparent">
                     <button
                         onClick={() => setActiveTab("overview")}
-                        className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeTab === "overview"
-                            ? "border-blue-600 text-blue-600 dark:text-blue-400"
-                            : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
+                        className={`pb-2.5 px-3 border-b-2 text-sm font-medium transition-colors -mb-px ${activeTab === "overview"
+                            ? "border-blue-600 text-blue-600 dark:text-blue-400 font-semibold"
+                            : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 hover:border-gray-300 dark:hover:border-slate-700"
                             }`}
                     >
                         Overview
                     </button>
                     <button
                         onClick={() => setActiveTab("members")}
-                        className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeTab === "members"
-                            ? "border-blue-600 text-blue-600 dark:text-blue-400"
-                            : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
+                        className={`pb-2.5 px-3 border-b-2 text-sm font-medium transition-colors -mb-px ${activeTab === "members"
+                            ? "border-blue-600 text-blue-600 dark:text-blue-400 font-semibold"
+                            : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 hover:border-gray-300 dark:hover:border-slate-700"
                             }`}
                     >
                         Members ({project.members.length})
                     </button>
                     <button
                         onClick={() => setActiveTab("tasks")}
-                        className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeTab === "tasks"
-                            ? "border-blue-600 text-blue-600 dark:text-blue-400"
-                            : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
+                        className={`pb-2.5 px-3 border-b-2 text-sm font-medium transition-colors -mb-px ${activeTab === "tasks"
+                            ? "border-blue-600 text-blue-600 dark:text-blue-400 font-semibold"
+                            : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 hover:border-gray-300 dark:hover:border-slate-700"
                             }`}
                     >
                         Tasks ({tasks?.length || 0})
                     </button>
                     <button
                         onClick={() => setActiveTab("assets")}
-                        className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeTab === "assets"
-                            ? "border-blue-600 text-blue-600 dark:text-blue-400"
-                            : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
+                        className={`pb-2.5 px-3 border-b-2 text-sm font-medium transition-colors -mb-px ${activeTab === "assets"
+                            ? "border-blue-600 text-blue-600 dark:text-blue-400 font-semibold"
+                            : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 hover:border-gray-300 dark:hover:border-slate-700"
                             }`}
                     >
                         Assets ({assets?.length || 0})
                     </button>
                     <button
                         onClick={() => setActiveTab("dependencyMap")}
-                        className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeTab === "dependencyMap"
-                            ? "border-blue-600 text-blue-600 dark:text-blue-400"
-                            : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
+                        className={`pb-2.5 px-3 border-b-2 text-sm font-medium transition-colors -mb-px ${activeTab === "dependencyMap"
+                            ? "border-blue-600 text-blue-600 dark:text-blue-400 font-semibold"
+                            : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 hover:border-gray-300 dark:hover:border-slate-700"
                             }`}
                     >
                         Dependency Map

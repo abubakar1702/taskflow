@@ -55,11 +55,11 @@ const TaskDetail = () => {
     if (error) {
         return (
             <div className="p-6">
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                    <p>Error loading task: {error.message}</p>
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-sm">
+                    <p className="text-xs font-semibold">Error loading task: {error.message}</p>
                     <button
                         onClick={refetch}
-                        className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                        className="mt-2 px-4 py-2 bg-red-600 text-white rounded-sm hover:bg-red-700 text-xs font-bold uppercase tracking-wider"
                     >
                         Retry
                     </button>
@@ -71,7 +71,7 @@ const TaskDetail = () => {
     if (!task) {
         return (
             <div className="p-6">
-                <p className="text-gray-500">No task found</p>
+                <p className="text-xs text-gray-500 font-medium">No task found</p>
             </div>
         );
     }
@@ -82,9 +82,9 @@ const TaskDetail = () => {
                 <div className="mb-6 flex items-center justify-between">
                     <button
                         onClick={() => window.history.back()}
-                        className="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                        className="flex items-center text-xs font-bold uppercase tracking-wider text-blue-650 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
                     >
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                         Back
@@ -92,17 +92,17 @@ const TaskDetail = () => {
 
                     <button
                         onClick={() => setShowActivityModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 hover:border-gray-300 dark:hover:border-slate-700 transition-all shadow-sm"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-sm hover:bg-gray-50 dark:hover:bg-slate-800 hover:border-gray-300 dark:hover:border-slate-700 transition-all shadow-none"
                     >
-                        <FiActivity className="w-5 h-5 text-gray-600 dark:text-slate-300" />
-                        <span className="font-medium text-gray-700 dark:text-slate-200">Activity</span>
+                        <FiActivity className="w-4 h-4 text-gray-605 dark:text-slate-400" />
+                        <span className="font-bold text-[10px] uppercase tracking-wider text-gray-700 dark:text-slate-300">Activity</span>
                     </button>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-6">
                         <TaskInfo task={task} onUpdate={refetch} />
-                        <div className="mb-6 shadow-sm border border-gray-200 dark:border-slate-800 rounded-lg p-6 bg-white dark:bg-slate-900">
+                        <div className="mb-6 shadow-none border border-gray-200 dark:border-slate-800/80 rounded-sm p-6 bg-white dark:bg-slate-900">
                             <Subtasks task={task} taskId={task.id} creator={task.creator} assignees={task.assignees} refetch={refetch} />
                         </div>
                         <TaskComments taskId={task.id} task={task} />
@@ -110,7 +110,7 @@ const TaskDetail = () => {
 
                     <div className="space-y-6">
                         <DueDate task={task} onUpdate={refetch} isCreator={isCreator} />
-                        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm p-6 space-y-6 border border-gray-100 dark:border-slate-800">
+                        <div className="bg-white dark:bg-slate-900 rounded-sm shadow-none p-6 space-y-6 border border-gray-200 dark:border-slate-800/80">
                             <TaskCreator task={task} />
                             <div className="h-px bg-gray-200 dark:bg-slate-800" />
                             <Assignee

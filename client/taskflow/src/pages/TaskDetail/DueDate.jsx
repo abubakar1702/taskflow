@@ -24,13 +24,13 @@ const DueDate = ({ task, onUpdate, isCreator }) => {
     let label = null;
 
     if (isOverdue) {
-        textColor = "text-red-600 dark:text-red-400";
+        textColor = "text-red-650 dark:text-red-400";
         iconColor = "text-red-500 dark:text-red-400";
-        label = <span className="ml-2 text-sm font-semibold text-red-600 dark:text-red-400">(Overdue)</span>;
+        label = <span className="ml-2 px-1.5 py-0.5 rounded-sm bg-red-50 dark:bg-red-950/20 text-[10px] font-bold uppercase tracking-wider border border-red-200 dark:border-red-900">(Overdue)</span>;
     } else if (isDueToday) {
         textColor = "text-purple-600 dark:text-purple-400";
         iconColor = "text-purple-500 dark:text-purple-400";
-        label = <span className="ml-2 text-sm font-semibold text-purple-600 dark:text-purple-400">(Today)</span>;
+        label = <span className="ml-2 px-1.5 py-0.5 rounded-sm bg-purple-50 dark:bg-purple-950/20 text-[10px] font-bold uppercase tracking-wider border border-purple-200 dark:border-purple-900">(Today)</span>;
     }
 
     const formatDateTime = () => {
@@ -41,11 +41,11 @@ const DueDate = ({ task, onUpdate, isCreator }) => {
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-lg shadow border border-transparent dark:border-slate-800 p-4">
-            <p className="text-lg py-2 font-semibold text-gray-900 dark:text-white">Due Date</p>
+        <div className="bg-white dark:bg-slate-900 rounded-sm shadow-none border border-gray-200 dark:border-slate-800/80 p-5">
+            <p className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-3">Due Date</p>
             <div className={`flex items-center ${textColor}`}>
-                <IoCalendarOutline className={`w-5 h-5 mr-3 ${iconColor}`} />
-                <span className="font-medium text-base">{formatDateTime()}</span>
+                <IoCalendarOutline className={`w-4 h-4 mr-2 ${iconColor}`} />
+                <span className="font-semibold text-sm">{formatDateTime()}</span>
                 {label}
             </div>
 

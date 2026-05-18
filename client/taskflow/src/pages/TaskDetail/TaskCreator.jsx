@@ -3,8 +3,8 @@ import Avatar from "../../components/common/Avatar";
 const TaskCreator = ({ task }) => {
     return (
         <div>
-            <div className="space-y-3">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+            <div className="space-y-2.5">
+                <p className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">
                     Created by
                 </p>
 
@@ -13,20 +13,21 @@ const TaskCreator = ({ task }) => {
                         <img
                             src={task.creator.avatar}
                             alt={task.creator.display_name}
-                            className="w-10 h-10 rounded-full object-cover"
+                            className="w-8 h-8 rounded-sm object-cover"
                         />
                     ) : (
                         <Avatar
                             name={task.creator.display_name}
-                            size={10}
+                            size={8}
+                            className="rounded-sm"
                         />
                     )}
 
                     <div className="flex flex-col">
-                        <span className="font-medium text-gray-900 dark:text-white text-base">
+                        <span className="font-bold text-gray-900 dark:text-white text-xs">
                             {task.creator?.display_name}
                         </span>
-                        <span className="text-sm text-gray-500 dark:text-slate-400">
+                        <span className="text-[10px] font-semibold text-gray-400 dark:text-slate-500 mt-0.5">
                             {task.creator?.email}
                         </span>
                     </div>

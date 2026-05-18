@@ -79,9 +79,9 @@ const TaskInfo = ({ task, onUpdate }) => {
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-lg shadow border border-transparent dark:border-slate-800 p-6">
+        <div className="bg-white dark:bg-slate-900 rounded-sm shadow-none border border-gray-200 dark:border-slate-800/80 p-6">
             <div className="flex justify-between items-start mb-4">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{task.title}</h1>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{task.title}</h1>
 
                 {(isCreator || isAssignee) && (
                     <div className="relative">
@@ -90,9 +90,9 @@ const TaskInfo = ({ task, onUpdate }) => {
                                 e.stopPropagation();
                                 setShowActionMenu(!showActionMenu);
                             }}
-                            className="text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800"
+                            className="text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 p-2 rounded-sm hover:bg-gray-100 dark:hover:bg-slate-800 border border-transparent hover:border-gray-200 dark:hover:border-slate-700 transition-colors"
                         >
-                            <BsThreeDotsVertical className="w-5 h-5" />
+                            <BsThreeDotsVertical className="w-4 h-4" />
                         </button>
 
                         <TaskInfoAction
@@ -109,31 +109,31 @@ const TaskInfo = ({ task, onUpdate }) => {
                 )}
             </div>
 
-            <div className="flex flex-wrap gap-3 mb-6">
-                <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${PRIORITY_COLORS[task.priority]}`}>
+            <div className="flex flex-wrap gap-2 mb-6">
+                <span className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider border ${PRIORITY_COLORS[task.priority]}`}>
                     {task.priority}
                 </span>
-                <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${STATUS_COLORS[task.status]}`}>
+                <span className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider border ${STATUS_COLORS[task.status]}`}>
                     {task.status}
                 </span>
                 {task.project && (
-                    <span className="px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-800 flex items-center gap-2">
-                        <FaProjectDiagram className="w-4 h-4" />
+                    <span className="px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-purple-100 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-800 flex items-center gap-1.5">
+                        <FaProjectDiagram className="w-3.5 h-3.5" />
                         {task.project.name}
                     </span>
                 )}
             </div>
 
-            <div className="mb-8">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Description</h2>
-                <div className="bg-gray-50 dark:bg-slate-800/50 rounded-lg p-4 border border-transparent dark:border-slate-800">
-                    <p className="text-gray-700 dark:text-slate-300 whitespace-pre-wrap">
+            <div className="mb-6">
+                <h2 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2.5">Description</h2>
+                <div className="bg-gray-50 dark:bg-slate-800/30 rounded-sm p-4 border border-gray-200/50 dark:border-slate-800/80">
+                    <p className="text-sm text-gray-750 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
                         {task.description || "No description provided"}
                     </p>
                 </div>
             </div>
 
-            <div className="flex justify-between items-center text-sm text-gray-500 dark:text-slate-400">
+            <div className="flex justify-between items-center text-xs text-gray-400 dark:text-slate-500 border-t border-gray-200 dark:border-slate-800 pt-4 mt-6">
                 <div>Created at: {safeFormatDate(task.created_at)}</div>
                 <div>Updated at: {safeFormatDate(task.updated_at)}</div>
             </div>

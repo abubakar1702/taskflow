@@ -14,7 +14,11 @@ import { FaRegStar, FaPlus, FaRegCalendar, FaRegFolder, FaRegMessage } from "rea
 import { GrNotes } from "react-icons/gr";
 import { GoSidebarExpand, GoSidebarCollapse } from "react-icons/go";
 
-const Sidebar = ({ collapsed, setCollapsed, isMobile }) => {
+import { useUIStore } from "../../stores/useUIStore";
+
+const Sidebar = ({ isMobile }) => {
+    const collapsed = useUIStore((s) => s.isSidebarCollapsed);
+    const setCollapsed = useUIStore((s) => s.setSidebarCollapsed);
     const navigate = useNavigate();
 
     return (

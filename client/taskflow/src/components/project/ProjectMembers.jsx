@@ -95,17 +95,17 @@ const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCr
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800">
+        <div className="bg-white dark:bg-slate-900 rounded-sm shadow-none border border-gray-200 dark:border-slate-800/80">
             <div className="p-6 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
+                <h2 className="text-sm font-bold text-gray-900 dark:text-slate-100 uppercase tracking-wider">
                     Project Members
                 </h2>
                 {isProjectAdmin && (
                     <button
                         onClick={() => setIsAddMemberModalOpen(true)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                        className="px-3 py-1.5 bg-blue-600 text-white rounded-sm hover:bg-blue-700 transition-colors text-xs font-semibold"
                     >
-                        <span className="flex items-center gap-2"><FiUserPlus className="w-4 h-4 mr-2" /> Add Member</span>
+                        <span className="flex items-center gap-1.5"><FiUserPlus className="w-3.5 h-3.5" /> Add Member</span>
                     </button>
                 )}
             </div>
@@ -124,11 +124,11 @@ const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCr
                                     <Avatar
                                         name={member.user.display_name}
                                         url={member.user.avatar}
-                                        size={12}
+                                        size={10}
                                     />
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <p className="font-medium text-gray-900 dark:text-slate-100">
+                                            <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">
                                                 {member.user.display_name}
                                             </p>
                                             {project.creator.id === member.user.id && (
@@ -136,10 +136,10 @@ const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCr
                                             )}
                                             {getRoleIcon(member.role)}
                                         </div>
-                                        <p className="text-sm text-gray-500 dark:text-slate-400">
+                                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
                                             {member.user.email}
                                         </p>
-                                        <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
+                                        <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-1">
                                             Joined {formatDate(member.created_at)}
                                         </p>
                                     </div>
@@ -149,7 +149,7 @@ const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCr
                                         <select
                                             value={member.role}
                                             onChange={(e) => handleChangeRole(member.id, e.target.value)}
-                                            className={`px-3 py-1 rounded-full text-xs font-medium border cursor-pointer outline-none focus:ring-2 focus:ring-blue-500 ${getRoleBadgeColor(member.role)}`}
+                                            className={`px-2 py-0.5 rounded-sm text-xs font-semibold border cursor-pointer outline-none focus:ring-1 focus:ring-blue-500 ${getRoleBadgeColor(member.role)}`}
                                             disabled={isRoleChangeLoading}
                                         >
                                             <option value="Member">Member</option>
@@ -157,7 +157,7 @@ const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCr
                                         </select>
                                     ) : (
                                         <span
-                                            className={`px-3 py-1 rounded-full text-xs font-medium border ${getRoleBadgeColor(
+                                            className={`px-2 py-0.5 rounded-sm text-xs font-semibold border ${getRoleBadgeColor(
                                                 member.role
                                             )}`}
                                         >
@@ -171,7 +171,7 @@ const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCr
                                     ) && (
                                             <button
                                                 onClick={() => handleDeleteClick(member)}
-                                                className="text-sm text-gray-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 px-3 py-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
+                                                className="text-xs text-gray-500 dark:text-slate-400 hover:text-red-650 dark:hover:text-red-400 px-2.5 py-1 hover:bg-red-50 dark:hover:bg-red-950/20 border border-transparent hover:border-red-200 dark:hover:border-red-900 rounded-sm transition-colors font-medium"
                                             >
                                                 Remove
                                             </button>
