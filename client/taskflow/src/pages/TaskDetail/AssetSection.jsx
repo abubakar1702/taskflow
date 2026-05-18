@@ -96,7 +96,7 @@ const AssetSection = ({ task, taskId, projectId, total_assets }) => {
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-sm p-6 shadow-none border border-gray-200 dark:border-slate-800/80">
+      <div className="bg-white dark:bg-slate-900 rounded-lg p-6 shadow-none border border-gray-200 dark:border-slate-800/80">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">Assets ({total_assets || 0})</h2>
         </div>
@@ -112,7 +112,7 @@ const AssetSection = ({ task, taskId, projectId, total_assets }) => {
 
   return (
     <>
-      <div className="bg-white dark:bg-slate-900 rounded-sm p-6 shadow-none border border-gray-200 dark:border-slate-800/80">
+      <div className="bg-white dark:bg-slate-900 rounded-lg p-6 shadow-none border border-gray-200 dark:border-slate-800/80">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">Assets ({total_assets})</h2>
           {canUpload && (

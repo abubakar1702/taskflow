@@ -80,7 +80,7 @@ const SubtaskAction = ({ task, subtask, onClose, onUpdated, onEdit, onDelete }) 
     return (
         <div
             ref={dropdownRef}
-            className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 py-2 z-50"
+            className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-2xl border border-gray-200 dark:border-slate-700 py-2 z-50"
         >
             {/* Edit Option - only if user can modify */}
             {canEdit && (

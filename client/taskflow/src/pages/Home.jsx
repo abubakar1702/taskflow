@@ -90,7 +90,7 @@ const ProgressGraph = ({ tasks }) => {
     const [activeIdx, setActiveIdx] = useState(6);
 
     return (
-        <div className="bg-white dark:bg-slate-900 border border-gray-250 dark:border-slate-800 rounded-md shadow-sm p-6 space-y-4">
+        <div className="bg-white dark:bg-slate-900 border border-gray-250 dark:border-slate-800 rounded-lg shadow-sm p-6 space-y-4">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <FaChartLine className="text-blue-500" />
@@ -312,7 +312,7 @@ const Home = () => {
                     {/* Right Info Column */}
                     <div className="space-y-8">
                         {/* Weekly Productivity progress ring card */}
-                        <div className="bg-white dark:bg-slate-900 border border-gray-250 dark:border-slate-800 rounded-md shadow-sm p-6 space-y-4">
+                        <div className="bg-white dark:bg-slate-900 border border-gray-250 dark:border-slate-800 rounded-lg shadow-sm p-6 space-y-4">
                             <div className="flex items-center gap-2">
                                 <FaChartPie className="text-blue-500" />
                                 <h3 className="text-xs font-bold text-gray-900 dark:text-slate-100 uppercase tracking-wider">Weekly Productivity</h3>

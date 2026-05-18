@@ -41,7 +41,7 @@ const DueDate = ({ task, onUpdate, isCreator }) => {
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-sm shadow-none border border-gray-200 dark:border-slate-800/80 p-5">
+        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-none border border-gray-200 dark:border-slate-800/80 p-5">
             <p className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-3">Due Date</p>
             <div className={`flex items-center ${textColor}`}>
                 <IoCalendarOutline className={`w-4 h-4 mr-2 ${iconColor}`} />

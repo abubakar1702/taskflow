@@ -54,7 +54,7 @@ const CreateNoteModal = ({ isOpen, onClose, onCreated }) => {
             onClick={onClose} 
         >
             <div 
-                className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-4xl h-[65vh] overflow-hidden flex flex-col animate-fadeIn transform transition-all duration-300"
+                className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl w-full max-w-4xl h-[65vh] overflow-hidden flex flex-col animate-fadeIn transform transition-all duration-300"
                 onClick={(e) => e.stopPropagation()} 
             >
                 <div className="flex justify-between items-center p-5 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50 shrink-0">

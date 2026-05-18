@@ -29,7 +29,7 @@ const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, onDelete, o
     return (
         <div
             ref={menuRef}
-            className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 overflow-hidden z-20 transform origin-top-right transition-all animate-fade-in-up"
+            className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-100 dark:border-slate-700 overflow-hidden z-20 transform origin-top-right transition-all animate-fade-in-up"
         >
             <div className="py-1">
                 <button

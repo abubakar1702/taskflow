@@ -242,7 +242,7 @@ const NewTask = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-8">
+    <div className="max-w-7xl mx-auto py-8">
       <div className="rounded-xl">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">

@@ -53,7 +53,7 @@ const TaskCard = ({
 
     return (
         <Link to={`/tasks/${id}`}>
-            <div className="bg-white dark:bg-slate-900 rounded-sm shadow-none border border-gray-200 dark:border-slate-800/80 hover:border-gray-300 dark:hover:border-slate-700 transition-colors px-4 py-3 cursor-pointer h-full flex flex-col">
+            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-none border border-gray-200 dark:border-slate-800/80 hover:border-gray-300 dark:hover:border-slate-700 transition-colors px-4 py-3 cursor-pointer h-full flex flex-col">
                 {/* Header with Priority and Status */}
                 <div className="space-x-2 mb-2">
                     <span

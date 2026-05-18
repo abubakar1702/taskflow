@@ -102,7 +102,7 @@ const TaskDetail = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-6">
                         <TaskInfo task={task} onUpdate={refetch} />
-                        <div className="mb-6 shadow-none border border-gray-200 dark:border-slate-800/80 rounded-sm p-6 bg-white dark:bg-slate-900">
+                        <div className="mb-6 shadow-none border border-gray-200 dark:border-slate-800/80 rounded-lg p-6 bg-white dark:bg-slate-900">
                             <Subtasks task={task} taskId={task.id} creator={task.creator} assignees={task.assignees} refetch={refetch} />
                         </div>
                         <TaskComments taskId={task.id} task={task} />
@@ -110,7 +110,7 @@ const TaskDetail = () => {
 
                     <div className="space-y-6">
                         <DueDate task={task} onUpdate={refetch} isCreator={isCreator} />
-                        <div className="bg-white dark:bg-slate-900 rounded-sm shadow-none p-6 space-y-6 border border-gray-200 dark:border-slate-800/80">
+                        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-none p-6 space-y-6 border border-gray-200 dark:border-slate-800/80">
                             <TaskCreator task={task} />
                             <div className="h-px bg-gray-200 dark:bg-slate-800" />
                             <Assignee

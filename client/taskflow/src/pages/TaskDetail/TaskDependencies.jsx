@@ -37,7 +37,7 @@ const TaskDependencies = ({ task }) => {
     if (dependencies.length === 0 && blocking.length === 0) return null;
 
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-sm shadow-none border border-gray-200 dark:border-slate-800/80 p-5">
+        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-none border border-gray-200 dark:border-slate-800/80 p-5">
             <div className="flex items-center gap-2 mb-4">
                 <TbArrowsExchange className="w-4 h-4 text-blue-500" />
                 <h3 className="text-xs font-bold text-gray-900 dark:text-slate-100 uppercase tracking-wider">Dependencies</h3>

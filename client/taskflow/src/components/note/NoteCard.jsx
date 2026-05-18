@@ -5,7 +5,7 @@ const NoteCard = ({ note, onPin, onDelete, onClick }) => {
     return (
         <div
             onClick={() => onClick(note.id)}
-            className="group bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm hover:shadow-md border border-gray-200 dark:border-slate-700 transition-all cursor-pointer relative flex flex-col h-60"
+            className="group bg-white dark:bg-slate-800 p-5 rounded-lg shadow-sm hover:shadow-md border border-gray-200 dark:border-slate-700 transition-all cursor-pointer relative flex flex-col h-60"
         >
             <div className="flex justify-between items-start mb-3">
                 <h3 className="font-semibold text-lg text-gray-800 dark:text-slate-100 line-clamp-1 pr-8">

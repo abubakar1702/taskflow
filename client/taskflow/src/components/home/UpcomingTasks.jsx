@@ -15,7 +15,7 @@ const UpcomingTasks = ({ tasks, onViewAll }) => (
                 </button>
             )}
         </div>
-        <div className="bg-white dark:bg-slate-800 rounded-md shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
             {tasks.length > 0 ? (
                 <div className="divide-y divide-gray-50 dark:divide-slate-700">
                     {tasks.slice(0, 5).map(task => <TaskRow key={task.id} task={task} />)}

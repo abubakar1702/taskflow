@@ -37,7 +37,7 @@ const RunningTasks = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-950/50 px-4 py-8 md:px-8">
-            <div className="max-w-6xl mx-auto">
+            <div className="max-w-7xl mx-auto">
                 <div className="flex items-center gap-4 mb-8">
                     <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
                         <FaClock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -58,7 +58,7 @@ const RunningTasks = () => {
                         <p className="text-gray-500 dark:text-slate-400">Nothing is running right now.</p>
                     </div>
                 ) : (
-                    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm divide-y divide-gray-100 dark:divide-slate-700/50">
+                    <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm divide-y divide-gray-100 dark:divide-slate-700/50">
                         {tasks.map((task) => (
                             <div key={task.id} className="p-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between hover:bg-gray-50 dark:hover:bg-slate-700/50 transition">
                                 <div className="flex-1 min-w-0">

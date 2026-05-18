@@ -103,7 +103,7 @@ const CommentItem = ({
     // Outer styling: top-level comments are premium cards; nested replies are transparent stream items
     const containerClasses = depth > 0
         ? "bg-transparent p-0 border-none mt-4 transition-colors relative"
-        : "bg-white dark:bg-slate-900 rounded-sm border border-gray-200 dark:border-slate-800 p-5 shadow-none my-4 transition-colors hover:border-gray-300 dark:hover:border-slate-700 relative";
+        : "bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-800 p-5 shadow-none my-4 transition-colors hover:border-gray-300 dark:hover:border-slate-700 relative";
 
     const avatarSize = depth > 0 ? 8 : 10;
     const contentPadding = depth > 0 ? "pl-11" : "pl-13";
@@ -345,7 +345,7 @@ const TaskComments = ({ taskId, task }) => {
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-sm border border-gray-200 dark:border-slate-800 p-6 mt-6">
+        <div className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-800 p-6 mt-6">
             <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2">
                 Comments <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-sm border border-blue-200 dark:border-blue-900">{comments.length}</span>
             </h3>

@@ -79,7 +79,7 @@ const TaskInfo = ({ task, onUpdate }) => {
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-sm shadow-none border border-gray-200 dark:border-slate-800/80 p-6">
+        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-none border border-gray-200 dark:border-slate-800/80 p-6">
             <div className="flex justify-between items-start mb-4">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{task.title}</h1>
 

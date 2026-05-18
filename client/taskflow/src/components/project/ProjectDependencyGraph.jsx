@@ -205,7 +205,7 @@ const ProjectDependencyGraph = ({ tasks, projectId }) => {
   );
 
   return (
-    <div style={{ width: '100%', height: '600px' }} className="bg-white dark:bg-slate-900 rounded-sm border border-gray-200 dark:border-slate-800/80 overflow-hidden shadow-none relative">
+    <div style={{ width: '100%', height: '600px' }} className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-800/80 overflow-hidden shadow-none relative">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -237,7 +237,7 @@ const ProjectDependencyGraph = ({ tasks, projectId }) => {
         />
         <Background color="#aaa" gap={16} />
       </ReactFlow>
-      <div className="absolute top-4 left-4 bg-white/95 dark:bg-slate-900/95 p-3 rounded-sm shadow-none border border-gray-200 dark:border-slate-700 text-xs text-gray-700 dark:text-slate-300 z-10 pointer-events-none backdrop-blur-sm">
+      <div className="absolute top-4 left-4 bg-white/95 dark:bg-slate-900/95 p-3 rounded-lg shadow-none border border-gray-200 dark:border-slate-700 text-xs text-gray-700 dark:text-slate-300 z-10 pointer-events-none backdrop-blur-sm">
         <h4 className="font-bold mb-1 dark:text-slate-100 uppercase tracking-wider text-[10px]">Task Dependency Map</h4>
         <p className="text-[10px] text-gray-500 dark:text-slate-400">Drag from a node's bottom handle to another's top handle to make it a blocker.</p>
         <p className="text-[9px] text-gray-400 dark:text-slate-500 mt-1">Select an edge and press Backspace or Delete to remove a blocker.</p>
