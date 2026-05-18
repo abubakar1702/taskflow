@@ -221,11 +221,41 @@ class ImportantTaskSerializer(serializers.ModelSerializer):
 class TaskCommentSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     replies = serializers.SerializerMethodField()
+    likes_count = serializers.SerializerMethodField()
+    dislikes_count = serializers.SerializerMethodField()
+    user_has_liked = serializers.SerializerMethodField()
+    user_has_disliked = serializers.SerializerMethodField()
 
     class Meta:
         model = TaskComment
-        fields = ['id', 'task', 'author', 'content', 'parent', 'replies', 'is_edited', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'task', 'author', 'replies', 'is_edited', 'created_at', 'updated_at']
+        fields = [
+            'id', 'task', 'author', 'content', 'parent', 'replies', 
+            'is_edited', 'likes_count', 'dislikes_count', 
+            'user_has_liked', 'user_has_disliked', 'created_at', 'updated_at'
+        ]
+        read_only_fields = [
+            'id', 'task', 'author', 'replies', 'is_edited', 
+            'likes_count', 'dislikes_count', 'user_has_liked', 
+            'user_has_disliked', 'created_at', 'updated_at'
+        ]
+
+    def get_likes_count(self, obj):
+        return obj.likes.count()
+
+    def get_dislikes_count(self, obj):
+        return obj.dislikes.count()
+
+    def get_user_has_liked(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.likes.filter(id=request.user.id).exists()
+        return False
+
+    def get_user_has_disliked(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.dislikes.filter(id=request.user.id).exists()
+        return False
 
     def validate(self, attrs):
         parent = attrs.get('parent')

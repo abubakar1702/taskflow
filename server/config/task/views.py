@@ -512,6 +512,42 @@ class TaskCommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
             raise PermissionDenied("You do not have permission to delete this comment.")
         instance.delete()
 
+class TaskCommentLikeDislikeAPIView(generics.UpdateAPIView):
+    serializer_class = TaskCommentSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "id"
+    lookup_url_kwarg = "pk"
+
+    def get_queryset(self):
+        return TaskComment.objects.filter(
+            Q(task__creator=self.request.user) |
+            Q(task__assignees=self.request.user) |
+            Q(task__project__members=self.request.user)
+        ).distinct()
+
+    def patch(self, request, *args, **kwargs):
+        comment = self.get_object()
+        user = request.user
+        action = request.data.get("action")
+
+        if action == "like":
+            if comment.likes.filter(id=user.id).exists():
+                comment.likes.remove(user)
+            else:
+                comment.likes.add(user)
+                comment.dislikes.remove(user)
+        elif action == "dislike":
+            if comment.dislikes.filter(id=user.id).exists():
+                comment.dislikes.remove(user)
+            else:
+                comment.dislikes.add(user)
+                comment.likes.remove(user)
+        else:
+            return Response({"detail": "Invalid action. Use 'like' or 'dislike'."}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.get_serializer(comment)
+        return Response(serializer.data)
+
 class TaskActivityAPIView(generics.ListAPIView):
     serializer_class = TaskActivitySerializer
     permission_classes = [IsAuthenticated]

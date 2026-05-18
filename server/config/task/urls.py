@@ -4,7 +4,8 @@ from .views import (
     AddAssigneeAPIView, RemoveAssigneeAPIView, SearchForAssigneeAPIView,
     LeaveTaskAPIView, UserTasksAPIView, ImportantTaskAPIView,
     UnmarkImportantAPIView, RunningTasksAPIView,
-    TaskCommentAPIView, TaskCommentDetailAPIView, TaskActivityAPIView
+    TaskCommentAPIView, TaskCommentDetailAPIView, TaskActivityAPIView,
+    TaskCommentLikeDislikeAPIView
 )
 
 urlpatterns = [
@@ -22,5 +23,6 @@ urlpatterns = [
     path('important-tasks/<uuid:pk>/', UnmarkImportantAPIView.as_view(), name='important-task-detail'),
     path('tasks/<uuid:task_id>/comments/', TaskCommentAPIView.as_view(), name='task-comments'),
     path('comments/<uuid:pk>/', TaskCommentDetailAPIView.as_view(), name='task-comment-detail'),
+    path('comments/<uuid:pk>/like-dislike/', TaskCommentLikeDislikeAPIView.as_view(), name='task-comment-like-dislike'),
     path('tasks/<uuid:task_id>/activities/', TaskActivityAPIView.as_view(), name='task-activities'),
 ]

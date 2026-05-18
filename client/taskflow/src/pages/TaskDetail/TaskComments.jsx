@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../utils/apiClient';
 import { QUERY_KEYS } from '../../utils/queryKeys';
@@ -11,7 +12,10 @@ import {
     FaTimes,
     FaCheck,
     FaChevronDown,
-    FaChevronRight
+    FaChevronRight,
+    FaThumbsUp,
+    FaThumbsDown,
+    FaEllipsisH
 } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { useUser } from '../../contexts/UserContext';
@@ -33,6 +37,7 @@ const CommentItem = ({
     const [isEditing, setIsEditing] = useState(false);
     const [editText, setEditText] = useState(comment.content);
     const [expandedReplies, setExpandedReplies] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
 
     const queryClient = useQueryClient();
 
@@ -76,6 +81,22 @@ const CommentItem = ({
         onError: () => toast.error('Failed to update comment')
     });
 
+    const { mutate: toggleLikeDislike, isPending: toggling } = useMutation({
+        mutationFn: async (action) => {
+            const response = await apiClient.patch(
+                `/api/comments/${comment.id}/like-dislike/`,
+                { action }
+            );
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: QUERY_KEYS.taskComments(taskId)
+            });
+        },
+        onError: () => toast.error('Failed to update reaction')
+    });
+
     const handleReplySubmit = (e) => {
         e.preventDefault();
         if (!replyText.trim()) return;
@@ -102,79 +123,40 @@ const CommentItem = ({
 
     const containerClasses = depth > 0
         ? "bg-transparent p-0 border-none mt-4 transition-colors relative"
-        : "bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-800 p-5 shadow-none my-4 transition-colors hover:border-gray-300 dark:hover:border-slate-700 relative";
+        : "bg-transparent p-0 border-none pt-6 first:pt-0 transition-colors relative";
 
-    const avatarSize = depth > 0 ? 8 : 10;
-    const contentPadding = depth > 0 ? "pl-11" : "pl-13";
+    const avatarSize = 8;
+    const contentPadding = "pl-11";
 
     return (
         <div className={containerClasses}>
-            <div className="flex items-start justify-between gap-3 mb-2">
-                <div className="flex items-center gap-3">
-                    <Avatar
-                        name={comment.author?.display_name || comment.author?.email}
-                        url={comment.author?.avatar}
-                        size={avatarSize}
-                        className="rounded-full"
-                    />
+            <div className="flex items-center gap-3 mb-2">
+                <Avatar
+                    name={comment.author?.display_name || comment.author?.email}
+                    url={comment.author?.avatar}
+                    size={avatarSize}
+                    className="rounded-full shrink-0"
+                />
 
-                    <div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-bold text-sm text-gray-900 dark:text-white">
-                                {comment.author?.display_name || comment.author?.email}
-                            </h4>
-                            
-                            {depth >= MAX_VISUAL_DEPTH && parentAuthor && (
-                                <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/30 px-2 py-0.5 rounded-sm border border-blue-100 dark:border-blue-900/50">
-                                    to @{parentAuthor}
-                                </span>
-                            )}
+                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                    <h4 className="font-bold text-sm text-gray-900 dark:text-white truncate">
+                        {comment.author?.display_name || comment.author?.email}
+                    </h4>
+                    
+                    <span className="text-[11px] text-gray-400 dark:text-slate-500 font-medium">
+                        {new Date(comment.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
 
-                            {comment.is_edited && (
-                                <span className="text-[9px] px-1.5 py-0.5 rounded-sm bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 uppercase font-bold">
-                                    edited
-                                </span>
-                            )}
-                        </div>
-
-                        <span className="text-[10px] text-gray-400 dark:text-slate-500 font-semibold">
-                            {new Date(comment.created_at).toLocaleString()}
+                    {depth >= MAX_VISUAL_DEPTH && parentAuthor && (
+                        <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-950/30 px-2 py-0.5 rounded-sm border border-blue-100 dark:border-blue-900/50">
+                            to @{parentAuthor}
                         </span>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    {canComment && !isEditing && (
-                        <button
-                            onClick={() => setShowReplyInput(!showReplyInput)}
-                            className="text-[10px] flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-bold uppercase tracking-wider px-2 py-1 rounded-sm bg-blue-50 dark:bg-blue-950/20 border border-transparent hover:border-blue-100 dark:hover:border-blue-900 transition-colors"
-                        >
-                            <FaReply size={9} /> Reply
-                        </button>
                     )}
 
-                    {isAuthor && !isEditing && (
-                        <>
-                            <button
-                                onClick={() => {
-                                    setIsEditing(true);
-                                    setShowReplyInput(false);
-                                    setEditText(comment.content);
-                                }}
-                                className="text-xs text-gray-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 p-1.5 transition-colors rounded-sm hover:bg-gray-100 dark:hover:bg-slate-800"
-                                title="Edit comment"
-                            >
-                                <FaEdit size={12} />
-                            </button>
-
-                            <button
-                                onClick={() => onDelete(comment.id)}
-                                className="text-xs text-gray-400 dark:text-slate-500 hover:text-red-650 dark:hover:text-red-400 p-1.5 transition-colors rounded-sm hover:bg-gray-100 dark:hover:bg-slate-800"
-                                title="Delete comment"
-                            >
-                                <FaTrash size={12} />
-                            </button>
-                        </>
+                    {comment.is_edited && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-sm bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 uppercase font-bold">
+                            edited
+                        </span>
                     )}
                 </div>
             </div>
@@ -212,9 +194,84 @@ const CommentItem = ({
                     </button>
                 </form>
             ) : (
-                <p className={`text-gray-750 dark:text-slate-300 text-sm ${contentPadding} pr-2 whitespace-pre-wrap leading-relaxed`}>
-                    {comment.content}
-                </p>
+                <div className={`${contentPadding} pr-2`}>
+                    <p className="text-gray-800 dark:text-slate-200 text-sm whitespace-pre-wrap leading-relaxed mb-3 font-normal">
+                        {comment.content}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-slate-400 font-medium select-none relative">
+                        <button
+                            onClick={() => toggleLikeDislike('like')}
+                            disabled={toggling}
+                            className={`flex items-center gap-1.5 py-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors ${
+                                comment.user_has_liked ? 'text-blue-600 dark:text-blue-400 font-bold' : ''
+                            }`}
+                            title="Like"
+                        >
+                            <FaThumbsUp size={12} className={comment.user_has_liked ? 'scale-110 transition-transform' : ''} />
+                            <span>{comment.likes_count || 0}</span>
+                        </button>
+                        <button
+                            onClick={() => toggleLikeDislike('dislike')}
+                            disabled={toggling}
+                            className={`flex items-center gap-1.5 py-1 hover:text-red-600 dark:hover:text-red-400 transition-colors ${
+                                comment.user_has_disliked ? 'text-red-600 dark:text-red-400 font-bold' : ''
+                            }`}
+                            title="Dislike"
+                        >
+                            <FaThumbsDown size={12} className={comment.user_has_disliked ? 'scale-110 transition-transform' : ''} />
+                            <span>{comment.dislikes_count || 0}</span>
+                        </button>
+
+                        {canComment && (
+                            <button
+                                onClick={() => setShowReplyInput(!showReplyInput)}
+                                className="flex items-center gap-1.5 py-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-semibold"
+                            >
+                                <FaReply size={11} /> Reply
+                            </button>
+                        )}
+
+                        {isAuthor && (
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowDropdown(!showDropdown)}
+                                    className="p-1 hover:text-gray-800 dark:hover:text-slate-200 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-slate-800"
+                                    title="More options"
+                                >
+                                    <FaEllipsisH size={13} />
+                                </button>
+
+                                {showDropdown && (
+                                    <>
+                                        <div className="fixed inset-0 z-10" onClick={() => setShowDropdown(false)} />
+                                        <div className="absolute left-0 mt-1 w-28 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 py-1 z-20 overflow-hidden animate-fadeIn">
+                                            <button
+                                                onClick={() => {
+                                                    setIsEditing(true);
+                                                    setShowReplyInput(false);
+                                                    setShowDropdown(false);
+                                                    setEditText(comment.content);
+                                                }}
+                                                className="w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors"
+                                            >
+                                                <FaEdit size={11} className="text-blue-500" /> Edit
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setShowDropdown(false);
+                                                    onDelete(comment.id);
+                                                }}
+                                                className="w-full text-left px-3 py-1.5 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2 transition-colors"
+                                            >
+                                                <FaTrash size={11} /> Delete
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
             )}
 
             {showReplyInput && (
