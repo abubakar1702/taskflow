@@ -124,7 +124,36 @@ class TaskDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
                 action=f"changed status from {old_status} to {updated_task.status}",
                 details={"from": old_status, "to": updated_task.status}
             )
+            from django.utils import timezone
             
+            if updated_task.status == 'Done' and old_status != 'Done':
+                updated_task.completed_at = timezone.now()
+                updated_task.save(update_fields=['completed_at'])
+
+                # Credit record for creator
+                if updated_task.creator:
+                    TaskActivity.objects.create(
+                        task=updated_task,
+                        user=updated_task.creator,
+                        type="credit",
+                        action="completed this task",
+                        details={}
+                    )
+                # Credit record for assignees
+                for assignee in updated_task.assignees.all():
+                    if assignee != updated_task.creator:
+                        TaskActivity.objects.create(
+                            task=updated_task,
+                            user=assignee,
+                            type="credit",
+                            action="completed this task",
+                            details={}
+                        )
+            elif old_status == 'Done' and updated_task.status != 'Done':
+                updated_task.completed_at = None
+                updated_task.save(update_fields=['completed_at'])
+                TaskActivity.objects.filter(task=updated_task, type="credit").delete()
+
             # --- Approval Workflow Notifications ---
             from notification.models import Notification
             

@@ -129,7 +129,7 @@ class TaskSerializer(serializers.ModelSerializer):
             'subtasks', 'subtasks_data', 'total_assets',
             'dependencies', 'dependencies_ids', 'blocking',
             'due_date', 'due_time', 'time_taken', 'timer_start_time',
-            'created_at', 'updated_at'
+            'completed_at', 'created_at', 'updated_at'
         ]
 
     def create(self, validated_data):

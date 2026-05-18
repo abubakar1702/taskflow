@@ -27,6 +27,7 @@ class Task(models.Model):
     due_time = models.TimeField(null=True, blank=True)
     time_taken = models.DurationField(null=True, blank=True)
     timer_start_time = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

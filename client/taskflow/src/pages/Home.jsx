@@ -13,7 +13,6 @@ import UpcomingTasks from '../components/home/UpcomingTasks';
 import RunningProjects from '../components/home/RunningProjects';
 
 const ProgressGraph = ({ tasks }) => {
-    // Generate last 7 days of labels and real stats
     const last7Days = Array.from({ length: 7 }, (_, i) => {
         const d = new Date();
         d.setDate(d.getDate() - (6 - i));
@@ -22,32 +21,30 @@ const ProgressGraph = ({ tasks }) => {
 
     const chartData = last7Days.map((day, idx) => {
         const dayStr = day.toDateString();
-        // Count real tasks completed on this day
-        const realCompleted = (tasks || []).filter(t => 
+        const dayCompletedTasks = (tasks || []).filter(t => 
             t.status === 'Done' && 
-            t.updated_at && 
-            new Date(t.updated_at).toDateString() === dayStr
-        ).length;
+            t.completed_at && 
+            new Date(t.completed_at).toDateString() === dayStr
+        );
 
-        // Count real tasks created on this day
-        const realCreated = (tasks || []).filter(t => 
-            t.created_at && 
-            new Date(t.created_at).toDateString() === dayStr
+        const timely = dayCompletedTasks.filter(t => !t.due_date || new Date(t.completed_at).setHours(0,0,0,0) <= new Date(t.due_date).setHours(0,0,0,0)).length;
+        
+        const completedLate = dayCompletedTasks.filter(t => t.due_date && new Date(t.completed_at).setHours(0,0,0,0) > new Date(t.due_date).setHours(0,0,0,0)).length;
+        const missedDeadline = (tasks || []).filter(t => 
+            t.status !== 'Done' && 
+            t.due_date && 
+            new Date(t.due_date).toDateString() === dayStr && 
+            new Date(t.due_date).setHours(0,0,0,0) < new Date().setHours(0,0,0,0)
         ).length;
-
-        // Fallback polished data: we blend real data with a beautiful SaaS baseline trend 
-        // to ensure the chart looks premium and active from day one!
-        const baseCompleted = [2, 4, 3, 5, 8, 6, 9];
-        const baseCreated = [3, 5, 4, 7, 9, 8, 10];
 
         return {
             label: day.toLocaleDateString('en-US', { weekday: 'short' }),
-            completed: realCompleted || baseCompleted[idx],
-            created: realCreated || baseCreated[idx],
+            timely: timely,
+            overdue: completedLate + missedDeadline,
         };
     });
 
-    const maxVal = Math.max(...chartData.map(d => Math.max(d.completed, d.created, 5)));
+    const maxVal = Math.max(...chartData.map(d => Math.max(d.timely, d.overdue, 5)));
     
     // SVG chart dimensions
     const width = 500;
@@ -65,26 +62,27 @@ const ProgressGraph = ({ tasks }) => {
     };
 
     // Build SVG path points
-    const points = chartData.map((d, i) => getCoords(i, d.completed));
+    const timelyPoints = chartData.map((d, i) => getCoords(i, d.timely));
+    const overduePoints = chartData.map((d, i) => getCoords(i, d.overdue));
     
-    // Create a smooth cubic bezier path string
-    let pathD = "";
-    if (points.length > 0) {
-        pathD = `M ${points[0].x} ${points[0].y}`;
-        for (let i = 0; i < points.length - 1; i++) {
-            const curr = points[i];
-            const next = points[i + 1];
-            const cpX1 = curr.x + (next.x - curr.x) / 2;
-            const cpY1 = curr.y;
-            const cpX2 = curr.x + (next.x - curr.x) / 2;
-            const cpY2 = next.y;
-            pathD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${next.x} ${next.y}`;
+    const buildPath = (pts) => {
+        if (pts.length === 0) return "";
+        let d = `M ${pts[0].x} ${pts[0].y}`;
+        for (let i = 0; i < pts.length - 1; i++) {
+            const curr = pts[i];
+            const next = pts[i + 1];
+            const cpX = curr.x + (next.x - curr.x) / 2;
+            d += ` C ${cpX} ${curr.y}, ${cpX} ${next.y}, ${next.x} ${next.y}`;
         }
-    }
+        return d;
+    };
+
+    const timelyPathD = buildPath(timelyPoints);
+    const overduePathD = buildPath(overduePoints);
 
     // Path for fill area under the line
-    const fillD = points.length > 0 
-        ? `${pathD} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`
+    const fillD = timelyPoints.length > 0 
+        ? `${timelyPathD} L ${timelyPoints[timelyPoints.length - 1].x} ${height - padding} L ${timelyPoints[0].x} ${height - padding} Z`
         : "";
 
     const [activeIdx, setActiveIdx] = useState(6);
@@ -136,12 +134,24 @@ const ProgressGraph = ({ tasks }) => {
                     {/* Fill Path */}
                     {fillD && <path d={fillD} fill="url(#area-grad)" />}
 
-                    {/* Stroke Path */}
-                    {pathD && (
+                    {/* Stroke Path - Timely */}
+                    {timelyPathD && (
                         <path
-                            d={pathD}
+                            d={timelyPathD}
                             fill="none"
-                            className="stroke-blue-600 dark:stroke-blue-500"
+                            className="stroke-emerald-500 dark:stroke-emerald-400"
+                            strokeWidth="3.5"
+                            strokeLinecap="round"
+                            filter="url(#shadow)"
+                        />
+                    )}
+
+                    {/* Stroke Path - Overdue */}
+                    {overduePathD && (
+                        <path
+                            d={overduePathD}
+                            fill="none"
+                            className="stroke-red-500 dark:stroke-red-400"
                             strokeWidth="3.5"
                             strokeLinecap="round"
                             filter="url(#shadow)"
@@ -149,20 +159,32 @@ const ProgressGraph = ({ tasks }) => {
                     )}
 
                     {/* Hover highlights and interactive nodes */}
-                    {points.map((pt, idx) => (
+                    {chartData.map((_, idx) => (
                         <g key={idx} className="cursor-pointer" onClick={() => setActiveIdx(idx)}>
                             {/* Interactive broad zone */}
-                            <circle cx={pt.x} cy={pt.y} r="14" fill="transparent" />
-                            {/* Rendered node */}
+                            <circle cx={timelyPoints[idx].x} cy={height/2} r="100" fill="transparent" />
+                            {/* Rendered node Timely */}
                             <circle
-                                cx={pt.x}
-                                cy={pt.y}
+                                cx={timelyPoints[idx].x}
+                                cy={timelyPoints[idx].y}
                                 r={idx === activeIdx ? "6" : "4"}
                                 className={`
                                     transition-all duration-150
                                     ${idx === activeIdx 
-                                        ? "fill-blue-600 dark:fill-blue-500 stroke-white dark:stroke-slate-900 stroke-2" 
-                                        : "fill-blue-500 dark:fill-blue-400 opacity-60 hover:opacity-100"}
+                                        ? "fill-emerald-500 dark:fill-emerald-400 stroke-white dark:stroke-slate-900 stroke-2" 
+                                        : "fill-emerald-400 dark:fill-emerald-300 opacity-60 hover:opacity-100"}
+                                `}
+                            />
+                            {/* Rendered node Overdue */}
+                            <circle
+                                cx={overduePoints[idx].x}
+                                cy={overduePoints[idx].y}
+                                r={idx === activeIdx ? "6" : "4"}
+                                className={`
+                                    transition-all duration-150
+                                    ${idx === activeIdx 
+                                        ? "fill-red-500 dark:fill-red-400 stroke-white dark:stroke-slate-900 stroke-2" 
+                                        : "fill-red-400 dark:fill-red-300 opacity-60 hover:opacity-100"}
                                 `}
                             />
                         </g>
@@ -200,13 +222,23 @@ const ProgressGraph = ({ tasks }) => {
                             {last7Days[activeIdx].toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                         </span>
                     </div>
-                    <div className="text-right">
-                        <span className="text-[10px] text-gray-400 dark:text-slate-500 font-semibold uppercase tracking-wider block">
-                            Tasks Completed
-                        </span>
-                        <span className="text-xs font-extrabold text-blue-600 dark:text-blue-400">
-                            {chartData[activeIdx].completed} Completed
-                        </span>
+                    <div className="flex gap-6 text-right">
+                        <div>
+                            <span className="text-[10px] text-gray-400 dark:text-slate-500 font-semibold uppercase tracking-wider block">
+                                Timely Done
+                            </span>
+                            <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
+                                {chartData[activeIdx].timely}
+                            </span>
+                        </div>
+                        <div>
+                            <span className="text-[10px] text-gray-400 dark:text-slate-500 font-semibold uppercase tracking-wider block">
+                                Overdue
+                            </span>
+                            <span className="text-xs font-extrabold text-red-500 dark:text-red-400">
+                                {chartData[activeIdx].overdue}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -251,6 +283,35 @@ const Home = () => {
         }, { pending: 0, completed: 0, overdue: 0 });
     }, [tasks]);
 
+    const weeklyStats = useMemo(() => {
+        if (!tasks) return { completed: 0, total: 0 };
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        const endOfWeek = new Date();
+        endOfWeek.setDate(endOfWeek.getDate() + 7);
+
+        let completed = 0;
+        let pending = 0;
+
+        tasks.forEach(task => {
+            if (task.status === 'Done') {
+                if (task.completed_at && new Date(task.completed_at) >= oneWeekAgo) {
+                    completed++;
+                }
+            } else {
+                if (task.due_date) {
+                    const due = new Date(task.due_date);
+                    if (due >= oneWeekAgo && due <= endOfWeek) {
+                        pending++;
+                    }
+                } else {
+                    pending++;
+                }
+            }
+        });
+        return { completed, total: completed + pending };
+    }, [tasks]);
+
     const todayTasks = useMemo(() =>
         (tasks || []).filter(t => t.status !== 'Done' && t.due_date && new Date(t.due_date).toDateString() === new Date().toDateString())
         , [tasks]);
@@ -259,8 +320,7 @@ const Home = () => {
         (tasks || []).filter(t => t.status !== 'Done' && (!t.due_date || new Date(t.due_date).toDateString() !== new Date().toDateString()))
         , [tasks]);
 
-    const totalTasks = stats.completed + stats.pending;
-    const completionRate = totalTasks > 0 ? Math.round((stats.completed / totalTasks) * 100) : 0;
+    const completionRate = weeklyStats.total > 0 ? Math.round((weeklyStats.completed / weeklyStats.total) * 100) : 0;
 
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -346,7 +406,7 @@ const Home = () => {
                                 </div>
                                 <div className="space-y-1.5 min-w-0 flex-1">
                                     <p className="text-xs text-gray-500 dark:text-slate-400">
-                                        You've completed <span className="font-semibold text-gray-950 dark:text-slate-100">{stats.completed}</span> tasks out of <span className="font-semibold text-gray-950 dark:text-slate-100">{totalTasks}</span> assigned.
+                                        You've completed <span className="font-semibold text-gray-950 dark:text-slate-100">{weeklyStats.completed}</span> tasks out of <span className="font-semibold text-gray-950 dark:text-slate-100">{weeklyStats.total}</span> assigned this week.
                                     </p>
                                     <div className="text-[10px] font-bold py-0.5 px-2 bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 rounded-md inline-block">
                                         {completionRate >= 75 ? "Excellent Pace! ⚡" : completionRate >= 40 ? "Keep making progress! 🚀" : "Power through! 💪"}
