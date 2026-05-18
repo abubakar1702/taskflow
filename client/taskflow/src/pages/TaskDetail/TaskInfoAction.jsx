@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 
 const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, onDelete, onLeave, task, isImportant, onToggleImportant }) => {
     const menuRef = useRef(null);
-    const { isCreator } = useTaskPermissions(task);
+    const { isCreator, isAssignee } = useTaskPermissions(task);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -52,7 +52,7 @@ const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, onDelete, o
                     )}
                 </button>
 
-                {isCreator && (<button
+                {(isCreator || isAssignee) && (<button
                     onClick={() => {
                         onEdit();
                         setShowActionMenu(false);

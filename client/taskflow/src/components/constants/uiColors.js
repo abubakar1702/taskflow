@@ -8,6 +8,7 @@ export const PRIORITY_COLORS = {
 export const STATUS_COLORS = {
     "To Do": "bg-blue-100 text-blue-800 border-blue-200",
     "In Progress": "bg-purple-100 text-purple-800 border-purple-200",
+    "Submitted": "bg-cyan-100 text-cyan-800 border-cyan-200",
     "Done": "bg-green-100 text-green-800 border-green-200",
 };
 

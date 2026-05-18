@@ -146,6 +146,7 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
                                             >
                                                 <option value="To Do">To Do</option>
                                                 <option value="In Progress" disabled={hasIncompleteDependencies}>In Progress</option>
+                                                <option value="Submitted" disabled={hasIncompleteDependencies}>Submitted (For Review)</option>
                                                 <option value="Done" disabled={hasIncompleteDependencies}>Done</option>
                                             </select>
                                             {hasIncompleteDependencies && (

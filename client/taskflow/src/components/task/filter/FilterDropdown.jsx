@@ -98,6 +98,7 @@ const FilterDropdown = ({ filters, onFilterChange, sortBy, onSortChange, setFilt
               <option value="">All Statuses</option>
               <option value="To Do">To Do</option>
               <option value="In Progress">In Progress</option>
+              <option value="Submitted">Submitted (For Review)</option>
               <option value="Done">Done</option>
             </select>
           </div>

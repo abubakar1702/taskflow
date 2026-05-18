@@ -7,6 +7,7 @@ class Task(models.Model):
     class Status(models.TextChoices):
         TODO = 'To Do'
         IN_PROGRESS = 'In Progress'
+        SUBMITTED = 'Submitted'
         DONE = 'Done'
     class Priority(models.TextChoices):
         LOW = 'Low'
@@ -81,9 +82,9 @@ class TaskActivity(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='activities')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    type = models.CharField(max_length=50) # 'created', 'status_change', 'priority_change', 'due_date', 'assignee_added', 'assignee_removed', 'comment', 'asset_added', 'asset_removed'
+    type = models.CharField(max_length=50)
     action = models.CharField(max_length=255)
-    details = models.JSONField(default=dict, blank=True) # stores from/to, comment text, assignee info, etc.
+    details = models.JSONField(default=dict, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -124,6 +124,41 @@ class TaskDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
                 action=f"changed status from {old_status} to {updated_task.status}",
                 details={"from": old_status, "to": updated_task.status}
             )
+            
+            # --- Approval Workflow Notifications ---
+            from notification.models import Notification
+            
+            # Workflow: Submitted -> Notify Creator
+            if updated_task.status == 'Submitted' and updated_task.creator and updated_task.creator != self.request.user:
+                Notification.objects.create(
+                    recipient=updated_task.creator,
+                    type="task_submitted",
+                    message=f"{self.request.user.first_name} submitted task '{updated_task.title}' for review.",
+                    data={"task_id": str(updated_task.id), "link": f"/tasks/{updated_task.id}"}
+                )
+
+            # Workflow: Approved (Submitted -> Done) -> Notify Assignees
+            elif old_status == 'Submitted' and updated_task.status == 'Done':
+                for assignee in updated_task.assignees.all():
+                    if assignee != self.request.user:
+                        Notification.objects.create(
+                            recipient=assignee,
+                            type="task_approved",
+                            message=f"{self.request.user.first_name} approved task '{updated_task.title}'.",
+                            data={"task_id": str(updated_task.id), "link": f"/tasks/{updated_task.id}"}
+                        )
+
+            # Workflow: Changes Requested (Submitted -> In Progress) -> Notify Assignees
+            elif old_status == 'Submitted' and updated_task.status == 'In Progress':
+                for assignee in updated_task.assignees.all():
+                    if assignee != self.request.user:
+                        Notification.objects.create(
+                            recipient=assignee,
+                            type="task_changes_requested",
+                            message=f"{self.request.user.first_name} requested changes on '{updated_task.title}'.",
+                            data={"task_id": str(updated_task.id), "link": f"/tasks/{updated_task.id}"}
+                        )
+                        
         if old_priority != updated_task.priority:
             TaskActivity.objects.create(
                 task=updated_task,
