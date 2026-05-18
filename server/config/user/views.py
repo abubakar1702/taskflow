@@ -129,7 +129,9 @@ class GoogleAuthAPIView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
 
         email = serializer.validated_data['email']
-        name = serializer.validated_data['name']
+        first_name = serializer.validated_data.get('first_name', '')
+        last_name = serializer.validated_data.get('last_name', '')
+        picture = serializer.validated_data.get('picture', '')
 
         user = User.objects.filter(email=email).first()
 
@@ -154,9 +156,19 @@ class GoogleAuthAPIView(generics.GenericAPIView):
             user = User.objects.create_user(
                 email=email,
                 username=username,
-                first_name=name,
+                first_name=first_name,
+                last_name=last_name,
                 is_active=True
             )
+
+            if picture:
+                import urllib.request
+                from django.core.files.base import ContentFile
+                try:
+                    response = urllib.request.urlopen(picture)
+                    user.avatar.save(f"{username}_avatar.jpg", ContentFile(response.read()), save=True)
+                except Exception:
+                    pass
 
             refresh = RefreshToken.for_user(user)
             return Response({

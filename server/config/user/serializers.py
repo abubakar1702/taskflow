@@ -98,10 +98,14 @@ class GoogleAuthSerializer(serializers.Serializer):
             raise serializers.ValidationError("Invalid Google token")
 
         email = idinfo['email']
-        name = idinfo.get('name', '')
+        first_name = idinfo.get('given_name', '')
+        last_name = idinfo.get('family_name', '')
+        picture = idinfo.get('picture', '')
 
         attrs['email'] = email
-        attrs['name'] = name
+        attrs['first_name'] = first_name
+        attrs['last_name'] = last_name
+        attrs['picture'] = picture
         return attrs
 
 
