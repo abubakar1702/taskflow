@@ -160,7 +160,7 @@ const TaskActivity = ({ isOpen, onClose, taskId, taskTitle }) => {
                                                     name={activity.user?.display_name || activity.user?.email || "System"}
                                                     url={activity.user?.avatar}
                                                     size={6}
-                                                    className="rounded-sm"
+                                                    className="rounded-full"
                                                 />
                                                 <span className="text-xs font-bold text-slate-900 dark:text-white">
                                                     {activity.user?.display_name || activity.user?.email || "System"}

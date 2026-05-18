@@ -13,13 +13,13 @@ const TaskCreator = ({ task }) => {
                         <img
                             src={task.creator.avatar}
                             alt={task.creator.display_name}
-                            className="w-8 h-8 rounded-sm object-cover"
+                            className="w-8 h-8 rounded-full object-cover"
                         />
                     ) : (
                         <Avatar
                             name={task.creator.display_name}
                             size={8}
-                            className="rounded-sm"
+                            className="rounded-full"
                         />
                     )}
 

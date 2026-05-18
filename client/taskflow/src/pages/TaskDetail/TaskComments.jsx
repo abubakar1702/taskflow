@@ -116,7 +116,7 @@ const CommentItem = ({
                         name={comment.author?.display_name || comment.author?.email}
                         url={comment.author?.avatar}
                         size={avatarSize}
-                        className="rounded-sm"
+                        className="rounded-full"
                     />
 
                     <div>
@@ -353,7 +353,7 @@ const TaskComments = ({ taskId, task }) => {
             {canComment ? (
                 <form onSubmit={handleSubmit} className="mb-6">
                     <div className="flex gap-4">
-                        <Avatar name={currentUser?.display_name || currentUser?.email} url={currentUser?.avatar} size={11} className="rounded-sm" />
+                        <Avatar name={currentUser?.display_name || currentUser?.email} url={currentUser?.avatar} size={11} className="rounded-full" />
                         <div className="flex-grow flex flex-col gap-3">
                             <textarea
                                 value={newComment}

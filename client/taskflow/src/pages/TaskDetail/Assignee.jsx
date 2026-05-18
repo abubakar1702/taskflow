@@ -69,9 +69,9 @@ const Assignee = ({ assignees = [], taskId, refetch, project, isCreator }) => {
                         >
                             <div className="flex items-center gap-3">
                                 {a.avatar ? (
-                                    <img src={a.avatar} alt={a.display_name} className="w-8 h-8 rounded-sm object-cover" />
+                                    <img src={a.avatar} alt={a.display_name} className="w-8 h-8 rounded-full object-cover" />
                                 ) : (
-                                    <Avatar name={a.display_name} size={8} className="rounded-sm" />
+                                    <Avatar name={a.display_name} size={8} className="rounded-full" />
                                 )}
                                 <div>
                                     <p className="font-bold text-xs text-gray-800 dark:text-slate-100">{a.display_name}</p>

@@ -53,16 +53,16 @@ const TaskCard = ({
 
     return (
         <Link to={`/tasks/${id}`}>
-            <div className="bg-white dark:bg-slate-900 rounded-sm shadow-none border border-gray-200 dark:border-slate-800/80 hover:border-gray-300 dark:hover:border-slate-700 transition-colors p-5 cursor-pointer h-full flex flex-col">
+            <div className="bg-white dark:bg-slate-900 rounded-sm shadow-none border border-gray-200 dark:border-slate-800/80 hover:border-gray-300 dark:hover:border-slate-700 transition-colors px-6 py-4 cursor-pointer h-full flex flex-col">
                 {/* Header with Priority and Status */}
                 <div className="space-x-2 mb-3">
                     <span
-                        className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider border ${PRIORITY_COLORS[priority]}`}
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${PRIORITY_COLORS[priority]}`}
                     >
                         {priority}
                     </span>
                     <span
-                        className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider ${STATUS_COLORS[status]}`}
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${STATUS_COLORS[status]}`}
                     >
                         {status}
                     </span>
@@ -142,7 +142,7 @@ const TaskCard = ({
                                             name={assignee.display_name}
                                             url={assignee.avatar}
                                             size={7}
-                                            className="border border-white dark:border-slate-900 rounded-sm"
+                                            className="border border-white dark:border-slate-900 rounded-full"
                                         />
                                         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                                             {assignee.display_name}
@@ -150,7 +150,7 @@ const TaskCard = ({
                                     </div>
                                 ))}
                                 {assignees.length > 4 && (
-                                    <div className="w-7 h-7 rounded-sm border border-white dark:border-slate-900 bg-gray-200 dark:bg-slate-800 flex items-center justify-center text-gray-700 dark:text-slate-300 text-[10px] font-bold">
+                                    <div className="w-7 h-7 rounded-full border border-white dark:border-slate-900 bg-gray-200 dark:bg-slate-800 flex items-center justify-center text-gray-700 dark:text-slate-300 text-[10px] font-bold">
                                         +{assignees.length - 4}
                                     </div>
                                 )}

@@ -131,9 +131,9 @@ const Subtasks = ({ task }) => {
                     {subtask.assignee && (
                         <div className="flex items-center mt-1">
                             {subtask.assignee.avatar ? (
-                                <img src={subtask.assignee.avatar} alt={subtask.assignee.display_name} className="w-4.5 h-4.5 rounded-sm mr-1.5" />
+                                <img src={subtask.assignee.avatar} alt={subtask.assignee.display_name} className="w-4.5 h-4.5 rounded-full mr-1.5" />
                             ) : (
-                                <Avatar name={subtask.assignee.display_name} size={4.5} className="mr-1.5 rounded-sm" />
+                                <Avatar name={subtask.assignee.display_name} size={4} className="mr-1.5 rounded-full" />
                             )}
                             <span className="text-[10px] text-gray-500 dark:text-slate-400 font-medium">{subtask.assignee.display_name}</span>
                         </div>

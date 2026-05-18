@@ -10,7 +10,7 @@ const ProjectTasks = ({ tasks, tasksLoading }) => {
                     <p className="text-sm text-gray-650 dark:text-slate-400 font-medium">Loading tasks...</p>
                 </div>
             ) : tasks && tasks.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                     {tasks.map((task) => (
                         <TaskCard
                             key={task.id}

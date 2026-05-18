@@ -65,7 +65,7 @@ const CustomNode = ({ data, isConnectable }) => {
     }`}>
       <Handle type="target" position={Position.Top} isConnectable={isConnectable} className="w-16 !bg-blue-400 dark:!bg-blue-600" />
       <div className="flex items-center justify-between mb-2">
-        <span className={`text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase tracking-wider border ${PRIORITY_COLORS[data.priority] || 'bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-slate-200'}`}>
+        <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider border ${PRIORITY_COLORS[data.priority] || 'bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-slate-200'}`}>
           {data.priority}
         </span>
         <div className="flex items-center gap-1.5">
@@ -74,7 +74,7 @@ const CustomNode = ({ data, isConnectable }) => {
               <FiLock size={11} className="inline animate-pulse" />
             </span>
           )}
-          <span className={`text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase tracking-wider ${STATUS_COLORS[data.status] || 'bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-slate-200'}`}>
+          <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${STATUS_COLORS[data.status] || 'bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-slate-200'}`}>
             {data.status}
           </span>
         </div>

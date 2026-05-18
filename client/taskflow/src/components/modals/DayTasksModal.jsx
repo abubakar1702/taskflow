@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { format } from 'date-fns';
 import { FaTimes, FaExternalLinkAlt } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { STATUS_COLORS } from '../constants/uiColors';
 
 const DayTasksModal = ({ isOpen, onClose, date, tasks, currentUser }) => {
     if (!isOpen || !date) return null;
@@ -63,7 +64,7 @@ const DayTasksModal = ({ isOpen, onClose, date, tasks, currentUser }) => {
                                                     <span className={`text-xs px-2 py-1 rounded-full border font-medium ${getPriorityColor(task.priority)}`}>
                                                         {task.priority || 'No Priority'}
                                                     </span>
-                                                    <span className="text-xs text-gray-400 dark:text-slate-500 font-medium uppercase tracking-wide">
+                                                    <span className={`text-xs px-2 py-1 rounded-full font-medium uppercase tracking-wide ${STATUS_COLORS[task.status] || 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-slate-300'}`}>
                                                         {task.status || 'No Status'}
                                                     </span>
                                                     {task.subtasks?.some(st => st.assignee?.id === currentUser?.id) && (

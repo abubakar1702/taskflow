@@ -131,7 +131,7 @@ const Tasks = () => {
                     ) : (
                         <>
                             {viewMode === "grid" ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                                     {tasks.map((task) => <TaskCard key={task.id} {...task} />)}
                                 </div>
                             ) : (
@@ -170,12 +170,12 @@ const Tasks = () => {
                                                         </div>
                                                     </div>
                                                     <div className="col-span-1">
-                                                        <span className={`px-2.5 py-1 rounded text-xs font-semibold whitespace-nowrap ${STATUS_COLORS[task.status]}`}>
+                                                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${STATUS_COLORS[task.status]}`}>
                                                             {task.status}
                                                         </span>
                                                     </div>
                                                     <div className="col-span-1">
-                                                        <span className={`px-2.5 py-1 rounded text-xs font-semibold border whitespace-nowrap ${PRIORITY_COLORS[task.priority]}`}>
+                                                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border whitespace-nowrap ${PRIORITY_COLORS[task.priority]}`}>
                                                             {task.priority}
                                                         </span>
                                                     </div>
