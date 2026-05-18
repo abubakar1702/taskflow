@@ -15,23 +15,23 @@ const ProjectOverview = ({ project }) => {
     return (
         <div className="space-y-6">
             {/* Description Section */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">
                     Description
                 </h2>
-                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                <p className="text-gray-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
                     {project.description || "No description provided."}
                 </p>
             </div>
 
             {/* Project Info */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">
                     Project Information
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <p className="text-sm text-gray-500 mb-2">Created By</p>
+                        <p className="text-sm text-gray-500 dark:text-slate-400 mb-2">Created By</p>
                         <div className="flex items-center gap-3">
                             <Avatar
                                 name={project.creator.display_name}
@@ -39,30 +39,30 @@ const ProjectOverview = ({ project }) => {
                                 size={10}
                             />
                             <div>
-                                <p className="font-medium text-gray-900">
+                                <p className="font-medium text-gray-900 dark:text-slate-100">
                                     {project.creator.display_name}
                                 </p>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-gray-500 dark:text-slate-400">
                                     {project.creator.email}
                                 </p>
                             </div>
                         </div>
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500 mb-2">Created On</p>
-                        <p className="font-medium text-gray-900">
+                        <p className="text-sm text-gray-500 dark:text-slate-400 mb-2">Created On</p>
+                        <p className="font-medium text-gray-900 dark:text-slate-100">
                             {formatDate(project.created_at)}
                         </p>
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500 mb-2">Last Updated</p>
-                        <p className="font-medium text-gray-900">
+                        <p className="text-sm text-gray-500 dark:text-slate-400 mb-2">Last Updated</p>
+                        <p className="font-medium text-gray-900 dark:text-slate-100">
                             {formatDate(project.updated_at)}
                         </p>
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500 mb-2">Total Members</p>
-                        <p className="font-medium text-gray-900 flex items-center gap-2">
+                        <p className="text-sm text-gray-500 dark:text-slate-400 mb-2">Total Members</p>
+                        <p className="font-medium text-gray-900 dark:text-slate-100 flex items-center gap-2">
                             <FaUsers className="text-gray-400" />
                             {project.members.length}
                         </p>

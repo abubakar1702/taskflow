@@ -76,11 +76,11 @@ const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCr
     const getRoleBadgeColor = (role) => {
         switch (role) {
             case "Admin":
-                return "bg-yellow-100 text-yellow-800 border-yellow-200";
+                return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-200 dark:border-yellow-800";
             case "Member":
-                return "bg-blue-100 text-blue-800 border-blue-200";
+                return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-200 dark:border-blue-800";
             default:
-                return "bg-gray-100 text-gray-800 border-gray-200";
+                return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700";
         }
     };
 
@@ -95,9 +95,9 @@ const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCr
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">
+        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800">
+            <div className="p-6 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
                     Project Members
                 </h2>
                 {isProjectAdmin && (
@@ -109,7 +109,7 @@ const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCr
                     </button>
                 )}
             </div>
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-gray-200 dark:divide-slate-800">
                 {project.members.map((member) => {
                     const canChangeRole = (isProjectCreator && member.user.id !== project.creator.id) ||
                         (isProjectAdmin && member.role !== "Admin" && member.user.id !== project.creator.id);
@@ -117,7 +117,7 @@ const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCr
                     return (
                         <div
                             key={member.id}
-                            className="p-6 hover:bg-gray-50 transition-colors"
+                            className="p-6 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors"
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
@@ -128,7 +128,7 @@ const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCr
                                     />
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <p className="font-medium text-gray-900">
+                                            <p className="font-medium text-gray-900 dark:text-slate-100">
                                                 {member.user.display_name}
                                             </p>
                                             {project.creator.id === member.user.id && (
@@ -136,10 +136,10 @@ const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCr
                                             )}
                                             {getRoleIcon(member.role)}
                                         </div>
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-gray-500 dark:text-slate-400">
                                             {member.user.email}
                                         </p>
-                                        <p className="text-xs text-gray-400 mt-1">
+                                        <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
                                             Joined {formatDate(member.created_at)}
                                         </p>
                                     </div>
@@ -171,7 +171,7 @@ const ProjectMembers = ({ project, onProjectUpdated, isProjectAdmin, isProjectCr
                                     ) && (
                                             <button
                                                 onClick={() => handleDeleteClick(member)}
-                                                className="text-sm text-gray-500 hover:text-red-600 px-3 py-1 hover:bg-red-50 rounded transition-colors"
+                                                className="text-sm text-gray-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 px-3 py-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
                                             >
                                                 Remove
                                             </button>

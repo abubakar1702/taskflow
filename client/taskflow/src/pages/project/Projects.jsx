@@ -22,12 +22,12 @@ const Projects = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-950/50">
             <div className="max-w-7xl mx-auto py-8">
                 <div className="mb-8 flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Projects</h1>
-                        <p className="text-gray-600">Manage and collaborate on your projects</p>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-2">Projects</h1>
+                        <p className="text-gray-600 dark:text-slate-400">Manage and collaborate on your projects</p>
                     </div>
                     <button
                         onClick={() => setIsModalOpen(true)}
@@ -44,8 +44,8 @@ const Projects = () => {
                     ) : error ? (
                         <div className="text-center py-16">
                             <FaExclamationTriangle className="text-red-500 text-4xl mx-auto mb-4" />
-                            <h2 className="text-xl font-semibold text-gray-800 mb-2">Error Loading Projects</h2>
-                            <p className="text-gray-600 mb-4">{error.message}</p>
+                            <h2 className="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-2">Error Loading Projects</h2>
+                            <p className="text-gray-600 dark:text-slate-400 mb-4">{error.message}</p>
                             <button onClick={refetch} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                                 Try Again
                             </button>
@@ -58,9 +58,9 @@ const Projects = () => {
                         </div>
                     ) : (
                         <div className="text-center py-16">
-                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 max-w-md mx-auto">
-                                <h3 className="text-xl font-semibold text-gray-800 mb-2">No Projects Yet</h3>
-                                <p className="text-gray-600 mb-6">Get started by creating your first project</p>
+                            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-12 max-w-md mx-auto">
+                                <h3 className="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-2">No Projects Yet</h3>
+                                <p className="text-gray-600 dark:text-slate-400 mb-6">Get started by creating your first project</p>
                                 <button
                                     onClick={() => setIsModalOpen(true)}
                                     className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm mx-auto"

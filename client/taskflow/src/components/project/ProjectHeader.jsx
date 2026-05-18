@@ -42,15 +42,15 @@ const ProjectHeader = ({ project, activeTab, setActiveTab, tasks, assets, onEdit
     };
 
     return (
-        <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-10">
             <div className="max-w-7xl mx-auto px-6 pt-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">
                                 {project.name}
                             </h1>
-                            <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400 mt-1">
                                 <FaCalendarAlt className="text-gray-400" />
                                 <span>Created {formatDate(project.created_at)}</span>
                             </div>
@@ -60,7 +60,7 @@ const ProjectHeader = ({ project, activeTab, setActiveTab, tasks, assets, onEdit
                         <div className="flex items-center">
                             <button
                                 onClick={onEditClick}
-                                className={`flex items-center gap-2 px-4 py-2 text-gray-600 border border-gray-200 hover:text-blue-700 transition-colors shadow-sm ${isProjectCreator ? "rounded-l-full" : "rounded-full"
+                                className={`flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:text-blue-700 dark:hover:text-blue-400 dark:hover:bg-slate-800 transition-colors shadow-sm ${isProjectCreator ? "rounded-l-full" : "rounded-full"
                                     }`}
                             >
                                 <FaEdit />
@@ -68,7 +68,7 @@ const ProjectHeader = ({ project, activeTab, setActiveTab, tasks, assets, onEdit
                             {isProjectCreator && (
                                 <button
                                     onClick={() => setIsDeleteModalOpen(true)}
-                                    className="flex items-center gap-2 px-4 py-2 text-gray-600 border border-gray-200 rounded-r-full hover:text-red-700 transition-colors shadow-sm -ml-px"
+                                    className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 rounded-r-full hover:text-red-700 dark:hover:text-red-400 dark:hover:bg-slate-800 transition-colors shadow-sm -ml-px"
                                 >
                                     <FaTrash />
                                 </button>
@@ -82,8 +82,8 @@ const ProjectHeader = ({ project, activeTab, setActiveTab, tasks, assets, onEdit
                     <button
                         onClick={() => setActiveTab("overview")}
                         className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeTab === "overview"
-                            ? "border-blue-600 text-blue-600"
-                            : "border-transparent text-gray-500 hover:text-gray-700"
+                            ? "border-blue-600 text-blue-600 dark:text-blue-400"
+                            : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
                             }`}
                     >
                         Overview
@@ -91,8 +91,8 @@ const ProjectHeader = ({ project, activeTab, setActiveTab, tasks, assets, onEdit
                     <button
                         onClick={() => setActiveTab("members")}
                         className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeTab === "members"
-                            ? "border-blue-600 text-blue-600"
-                            : "border-transparent text-gray-500 hover:text-gray-700"
+                            ? "border-blue-600 text-blue-600 dark:text-blue-400"
+                            : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
                             }`}
                     >
                         Members ({project.members.length})
@@ -100,8 +100,8 @@ const ProjectHeader = ({ project, activeTab, setActiveTab, tasks, assets, onEdit
                     <button
                         onClick={() => setActiveTab("tasks")}
                         className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeTab === "tasks"
-                            ? "border-blue-600 text-blue-600"
-                            : "border-transparent text-gray-500 hover:text-gray-700"
+                            ? "border-blue-600 text-blue-600 dark:text-blue-400"
+                            : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
                             }`}
                     >
                         Tasks ({tasks?.length || 0})
@@ -109,8 +109,8 @@ const ProjectHeader = ({ project, activeTab, setActiveTab, tasks, assets, onEdit
                     <button
                         onClick={() => setActiveTab("assets")}
                         className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeTab === "assets"
-                            ? "border-blue-600 text-blue-600"
-                            : "border-transparent text-gray-500 hover:text-gray-700"
+                            ? "border-blue-600 text-blue-600 dark:text-blue-400"
+                            : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
                             }`}
                     >
                         Assets ({assets?.length || 0})
@@ -118,8 +118,8 @@ const ProjectHeader = ({ project, activeTab, setActiveTab, tasks, assets, onEdit
                     <button
                         onClick={() => setActiveTab("dependencyMap")}
                         className={`pb-3 px-1 border-b-2 font-medium transition-colors ${activeTab === "dependencyMap"
-                            ? "border-blue-600 text-blue-600"
-                            : "border-transparent text-gray-500 hover:text-gray-700"
+                            ? "border-blue-600 text-blue-600 dark:text-blue-400"
+                            : "border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
                             }`}
                     >
                         Dependency Map

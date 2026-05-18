@@ -49,14 +49,14 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
 
     return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 transition-opacity duration-200">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh] animate-fadeIn">
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh] animate-fadeIn">
 
                 {/* Header */}
-                <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50">
-                    <span className="font-semibold uppercase text-gray-700 tracking-wider">Create New Project</span>
+                <div className="flex justify-between items-center p-5 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50">
+                    <span className="font-semibold uppercase text-gray-700 dark:text-slate-200 tracking-wider">Create New Project</span>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-200"
+                        className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200 transition-colors p-1 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700"
                     >
                         <FaXmark className="w-5 h-5" />
                     </button>
@@ -65,7 +65,7 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
                 {/* Body */}
                 <div className="p-6 overflow-y-auto">
                     {error && (
-                        <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">
+                        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm rounded-lg border border-red-200 dark:border-red-800">
                             {error}
                         </div>
                     )}
@@ -74,14 +74,14 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
                         {/* Project Name */}
                         <div>
                             <div className="flex items-center justify-between mb-1">
-                                <label className="flex items-center text-sm font-medium text-gray-700">
+                                <label className="flex items-center text-sm font-medium text-gray-700 dark:text-slate-300">
                                     <FaLayerGroup className="w-4 h-4 mr-2 text-indigo-500" />
                                     Project Name
                                 </label>
                                 <span
                                     className={`text-xs font-medium ${name.length >= 100
-                                        ? 'text-red-600'
-                                        : 'text-gray-500'
+                                        ? 'text-red-600 dark:text-red-400'
+                                        : 'text-gray-500 dark:text-slate-400'
                                         }`}
                                 >
                                     {name.length}/100
@@ -92,7 +92,7 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 maxLength={100}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-gray-400"
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 bg-transparent dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-gray-400 dark:placeholder-slate-500"
                                 placeholder="Enter project name"
                                 required
                             />
@@ -100,7 +100,7 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
 
                         {/* Description */}
                         <div>
-                            <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
+                            <label className="flex items-center text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                                 <FaAlignLeft className="w-4 h-4 mr-2 text-indigo-500" />
                                 Description
                             </label>
@@ -108,7 +108,7 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 rows="8"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none placeholder-gray-400"
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 bg-transparent dark:text-slate-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none placeholder-gray-400 dark:placeholder-slate-500"
                                 placeholder="Enter project description..."
                             />
                         </div>
@@ -116,11 +116,11 @@ const NewProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="p-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                <div className="p-5 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50 flex justify-end gap-3">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-5 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors font-medium shadow-sm"
+                        className="px-5 py-2 text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors font-medium shadow-sm"
                         disabled={isLoading}
                     >
                         Cancel

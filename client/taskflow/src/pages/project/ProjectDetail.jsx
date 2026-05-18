@@ -61,8 +61,8 @@ const ProjectDetail = () => {
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <FaExclamationTriangle className="text-4xl text-red-600 mx-auto mb-4" />
-                    <h2 className="text-xl font-semibold text-gray-800 mb-2">Error Loading Project</h2>
-                    <p className="text-gray-600 mb-4">{error.message}</p>
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-slate-100 mb-2">Error Loading Project</h2>
+                    <p className="text-gray-600 dark:text-slate-400 mb-4">{error.message}</p>
                     <button onClick={refetch} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                         Try Again
                     </button>
@@ -74,7 +74,7 @@ const ProjectDetail = () => {
     if (!project) return null;
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-950/50">
             <ProjectHeader
                 project={project}
                 activeTab={activeTab}

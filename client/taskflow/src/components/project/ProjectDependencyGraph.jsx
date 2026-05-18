@@ -57,18 +57,18 @@ const getLayoutedElements = (nodes, edges, direction = 'TB') => {
 
 const CustomNode = ({ data, targetPosition, sourcePosition }) => {
   return (
-    <div className={`px-4 py-2 shadow-md rounded-md bg-white border-2 w-[220px] ${data.isDone ? 'border-green-400 opacity-70' : 'border-blue-500'}`}>
+    <div className={`px-4 py-2 shadow-md rounded-md bg-white dark:bg-slate-800 border-2 w-[220px] ${data.isDone ? 'border-green-400 opacity-70' : 'border-blue-500'}`}>
       <Handle type="target" position={Position.Top} className="w-16 !bg-blue-400" />
       <div className="flex items-center justify-between mb-2">
-        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PRIORITY_COLORS[data.priority] || 'bg-gray-100 text-gray-800'}`}>
+        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PRIORITY_COLORS[data.priority] || 'bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-slate-200'}`}>
           {data.priority}
         </span>
-        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[data.status] || 'bg-gray-100 text-gray-800'}`}>
+        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[data.status] || 'bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-slate-200'}`}>
           {data.status}
         </span>
       </div>
-      <div className="font-bold text-sm text-gray-800 truncate" title={data.title}>{data.title}</div>
-      <div className="text-xs text-gray-500 mt-1">
+      <div className="font-bold text-sm text-gray-800 dark:text-slate-100 truncate" title={data.title}>{data.title}</div>
+      <div className="text-xs text-gray-500 dark:text-slate-400 mt-1">
         {data.assignees && data.assignees.length > 0 ? data.assignees.map(a => a.display_name).join(', ') : 'Unassigned'}
       </div>
       <Handle type="source" position={Position.Bottom} className="w-16 !bg-blue-400" />
@@ -162,7 +162,7 @@ const ProjectDependencyGraph = ({ tasks, projectId }) => {
   );
 
   return (
-    <div style={{ width: '100%', height: '600px' }} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+    <div style={{ width: '100%', height: '600px' }} className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 overflow-hidden shadow-sm relative">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -177,9 +177,9 @@ const ProjectDependencyGraph = ({ tasks, projectId }) => {
         <MiniMap zoomable pannable nodeClassName={(node) => (node.data.isDone ? 'bg-green-200' : 'bg-blue-200')} />
         <Background color="#aaa" gap={16} />
       </ReactFlow>
-      <div className="absolute top-4 left-4 bg-white/90 p-3 rounded-lg shadow-sm border text-sm text-gray-700 z-10 pointer-events-none backdrop-blur-sm">
-        <h4 className="font-bold mb-1">Task Dependency Map</h4>
-        <p className="text-xs text-gray-500">Drag from a node's bottom handle to another's top handle to make it a blocker.</p>
+      <div className="absolute top-4 left-4 bg-white/90 dark:bg-slate-800/90 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 text-sm text-gray-700 dark:text-slate-300 z-10 pointer-events-none backdrop-blur-sm">
+        <h4 className="font-bold mb-1 dark:text-slate-100">Task Dependency Map</h4>
+        <p className="text-xs text-gray-500 dark:text-slate-400">Drag from a node's bottom handle to another's top handle to make it a blocker.</p>
       </div>
     </div>
   );

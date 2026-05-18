@@ -26,13 +26,13 @@ const ProjectCard = ({ project }) => {
 
     return (
         <Link to={`/projects/${id}`}>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow p-6 cursor-pointer h-full flex flex-col">
+            <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 hover:shadow-md dark:hover:shadow-slate-800/50 transition-shadow p-6 cursor-pointer h-full flex flex-col">
                 {/* Header with Project Name */}
                 <div className="mb-3">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-slate-100 mb-2 line-clamp-1">
                         {name}
                     </h3>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400">
                         <FaCalendarAlt className="text-gray-400" />
                         <span>Created {formatDate(created_at)}</span>
                     </div>
@@ -40,21 +40,21 @@ const ProjectCard = ({ project }) => {
 
                 {/* Description */}
                 {description && (
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-3 flex-grow">
+                    <p className="text-sm text-gray-600 dark:text-slate-400 mb-4 line-clamp-3 flex-grow">
                         {truncatedDescription}
                     </p>
                 )}
 
                 {/* Creator */}
-                <div className="mb-4 pb-4 border-b border-gray-100">
-                    <p className="text-xs text-gray-500 mb-2">Created by</p>
+                <div className="mb-4 pb-4 border-b border-gray-100 dark:border-slate-800">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">Created by</p>
                     <div className="flex items-center gap-2">
                         <Avatar
                             name={creator.display_name}
                             url={creator.avatar}
                             size={8}
                         />
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-sm font-medium text-gray-700 dark:text-slate-300">
                             {creator.display_name}
                         </span>
                     </div>
@@ -65,7 +65,7 @@ const ProjectCard = ({ project }) => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <FaUsers className="text-gray-400" />
-                            <span className="text-sm text-gray-600">
+                            <span className="text-sm text-gray-600 dark:text-slate-400">
                                 {totalMembers} {totalMembers === 1 ? "Member" : "Members"}
                             </span>
                         </div>
@@ -82,7 +82,7 @@ const ProjectCard = ({ project }) => {
                                         name={member.user.display_name}
                                         url={member.user.avatar}
                                         size={8}
-                                        className="border-2 border-white ring-1 ring-gray-200"
+                                        className="border-2 border-white dark:border-slate-800 ring-1 ring-gray-200 dark:ring-slate-700"
                                     />
                                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                                         {member.user.display_name} ({member.role})
@@ -90,7 +90,7 @@ const ProjectCard = ({ project }) => {
                                 </div>
                             ))}
                             {totalMembers > 5 && (
-                                <div className="w-8 h-8 rounded-full border-2 border-white bg-gray-300 flex items-center justify-center text-gray-700 text-xs font-semibold ring-1 ring-gray-200">
+                                <div className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 bg-gray-300 dark:bg-slate-700 flex items-center justify-center text-gray-700 dark:text-slate-300 text-xs font-semibold ring-1 ring-gray-200 dark:ring-slate-700">
                                     +{totalMembers - 5}
                                 </div>
                             )}

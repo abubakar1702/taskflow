@@ -5,7 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 export const useAvatar = (name = "User", url = null) => {
     const avatarUrl = useMemo(() => {
         if (!url) return null;
-        return url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
+        return url.startsWith("http") || url.startsWith("data:") ? url : `${API_BASE_URL}${url}`;
     }, [url]);
 
     const initials = useMemo(() => {

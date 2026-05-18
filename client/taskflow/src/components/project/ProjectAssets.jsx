@@ -116,9 +116,9 @@ const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isPr
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">
+        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800">
+            <div className="p-6 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
                     Project Assets
                 </h2>
                 <button
@@ -132,7 +132,7 @@ const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isPr
             {assetsLoading ? (
                 <div className="p-12 text-center">
                     <FaSpinner className="animate-spin text-3xl text-blue-600 mx-auto mb-3" />
-                    <p className="text-gray-600">Loading assets...</p>
+                    <p className="text-gray-600 dark:text-slate-400">Loading assets...</p>
                 </div>
             ) : assets && assets.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 p-6">
@@ -161,10 +161,10 @@ const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isPr
                         return (
                             <div
                                 key={asset.id}
-                                className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow group relative"
+                                className="border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow group relative"
                             >
                                 {/* File Preview/Icon */}
-                                <div className="bg-gray-50 h-32 flex items-center justify-center relative overflow-hidden">
+                                <div className="bg-gray-50 dark:bg-slate-800 h-32 flex items-center justify-center relative overflow-hidden">
                                     {isImage ? (
                                         <img
                                             src={asset.file}
@@ -181,7 +181,7 @@ const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isPr
 
                                 {/* File Info */}
                                 <div className="p-3">
-                                    <h3 className="font-medium text-gray-900 text-xs truncate mb-2" title={fileName}>
+                                    <h3 className="font-medium text-gray-900 dark:text-slate-100 text-xs truncate mb-2" title={fileName}>
                                         {fileName}
                                     </h3>
 
@@ -193,10 +193,10 @@ const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isPr
                                             size={6}
                                         />
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs text-gray-600 truncate">
+                                            <p className="text-xs text-gray-600 dark:text-slate-300 truncate">
                                                 {asset.uploaded_by.display_name}
                                             </p>
-                                            <p className="text-xs text-gray-400">
+                                            <p className="text-xs text-gray-400 dark:text-slate-500">
                                                 {formatDate(asset.uploaded_at)}
                                             </p>
                                         </div>
@@ -208,7 +208,7 @@ const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isPr
                                             href={asset.file}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-blue-50 text-blue-600 text-xs rounded hover:bg-blue-100 transition-colors font-medium"
+                                            className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors font-medium"
                                         >
                                             <FaDownload size={12} />
                                             <span>Download</span>
@@ -217,7 +217,7 @@ const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isPr
                                         {canDelete && (
                                             <button
                                                 onClick={() => openDeleteModal(asset)}
-                                                className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-red-50 text-red-600 text-xs rounded hover:bg-red-100 transition-colors font-medium"
+                                                className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs rounded hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors font-medium"
                                             >
                                                 <FaTrash size={12} />
                                                 <span>Delete</span>
@@ -231,11 +231,11 @@ const ProjectAssets = ({ assets, assetsLoading, projectId, onAssetsUpdated, isPr
                 </div>
             ) : (
                 <div className="p-12 text-center">
-                    <FaFileAlt className="text-4xl text-gray-300 mx-auto mb-3" />
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    <FaFileAlt className="text-4xl text-gray-300 dark:text-slate-600 mx-auto mb-3" />
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-slate-100 mb-2">
                         No Assets Yet
                     </h3>
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-gray-600 dark:text-slate-400 mb-4">
                         Upload files to share with your project team
                     </p>
                 </div>
