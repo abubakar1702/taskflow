@@ -4,10 +4,11 @@ import { apiClient } from "../utils/apiClient";
 import { QUERY_KEYS } from "../utils/queryKeys";
 import Avatar from "../components/common/Avatar";
 import LoadingScreen from "../components/common/LoadingScreen";
-import { FaLock } from "react-icons/fa";
+import { FaLock, FaUser, FaBell } from "react-icons/fa";
 import { toast } from "react-toastify";
 import Profile from "../components/settings/Profile";
 import PasswordReset from "../components/settings/PasswordReset";
+import NotificationSettings from "../components/settings/NotificationSettings";
 
 const Settings = () => {
     const queryClient = useQueryClient();
@@ -52,34 +53,61 @@ const Settings = () => {
     return (
         <div className="min-h-screen bg-gray-50/50 dark:bg-slate-950/50 p-6 md:p-8">
             <div className="max-w-3xl mx-auto space-y-6">
-                <div className="flex border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-md px-2 shadow-sm pt-2">
-                    <button
-                        onClick={() => setActiveTab("profile")}
-                        className={`px-6 py-3 font-medium text-sm transition-all border-b-2 ${activeTab === "profile"
-                            ? "border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-500"
-                            : "border-transparent text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300"
-                            }`}
-                    >
-                        Profile & Account
-                    </button>
-                    <button
-                        onClick={() => setActiveTab("security")}
-                        className={`px-6 py-3 font-medium text-sm transition-all border-b-2 ${activeTab === "security"
-                            ? "border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-500"
-                            : "border-transparent text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300"
-                            }`}
-                    >
-                        Security & Password
-                    </button>
+                <div>
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Settings</h2>
+                    <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Manage your profile, account preferences, and security settings.</p>
                 </div>
 
-                <div className="bg-white dark:bg-slate-900 rounded-b-2xl rounded-t-none shadow-sm border border-gray-100 dark:border-slate-800 border-t-0 p-8">
-                    {activeTab === "profile" && (
-                        <Profile user={user} makeRequest={makeRequestAdapter} refetch={refetch} />
-                    )}
-                    {activeTab === "security" && (
-                        <PasswordReset user={user} makeRequest={makeRequestAdapter} />
-                    )}
+                <div className="bg-white dark:bg-slate-900 rounded-md shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
+                    {/* Tab Header Row */}
+                    <div className="flex border-b border-gray-200 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50 px-4 pt-2 overflow-x-auto custom-scrollbar whitespace-nowrap">
+                        <button
+                            onClick={() => setActiveTab("profile")}
+                            className={`px-5 py-3 font-semibold text-sm transition-all border-b-2 flex items-center gap-2 shrink-0 ${
+                                activeTab === "profile"
+                                    ? "border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-500"
+                                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300"
+                            }`}
+                        >
+                            <FaUser size={14} className={activeTab === "profile" ? "text-blue-600 dark:text-blue-500" : "text-gray-400 dark:text-slate-500"} />
+                            <span>Profile & Account</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("security")}
+                            className={`px-5 py-3 font-semibold text-sm transition-all border-b-2 flex items-center gap-2 shrink-0 ${
+                                activeTab === "security"
+                                    ? "border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-500"
+                                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300"
+                            }`}
+                        >
+                            <FaLock size={14} className={activeTab === "security" ? "text-blue-600 dark:text-blue-500" : "text-gray-400 dark:text-slate-500"} />
+                            <span>Security & Password</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("notifications")}
+                            className={`px-5 py-3 font-semibold text-sm transition-all border-b-2 flex items-center gap-2 shrink-0 ${
+                                activeTab === "notifications"
+                                    ? "border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-500"
+                                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300"
+                            }`}
+                        >
+                            <FaBell size={14} className={activeTab === "notifications" ? "text-blue-600 dark:text-blue-500" : "text-gray-400 dark:text-slate-500"} />
+                            <span>Notification Settings</span>
+                        </button>
+                    </div>
+
+                    {/* Active Content Body */}
+                    <div className="p-8">
+                        {activeTab === "profile" && (
+                            <Profile user={user} makeRequest={makeRequestAdapter} refetch={refetch} />
+                        )}
+                        {activeTab === "security" && (
+                            <PasswordReset user={user} makeRequest={makeRequestAdapter} />
+                        )}
+                        {activeTab === "notifications" && (
+                            <NotificationSettings />
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

@@ -21,8 +21,10 @@ class TaskFilter(django_filters.FilterSet):
         fields = ['priority', 'status', 'creator', 'assigned_to_me', 'created_by_me', 'due_today', 'overdue', 'project_id']
         
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
+        request = kwargs.get('request', None)
         super().__init__(*args, **kwargs)
+        if request is not None:
+            self.request = request
 
     def filter_assigned_to_me(self, queryset, name, value):
         user = getattr(self.request, "user", None) if self.request else None

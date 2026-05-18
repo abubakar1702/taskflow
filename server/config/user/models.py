@@ -88,6 +88,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     def full_name(self):
         return f"{self.first_name} {self.last_name}".strip()
 
+    @property
+    def display_name(self):
+        full = f"{self.first_name} {self.last_name}".strip()
+        return full or self.username or self.email
+
 
 class OneTimePassword(models.Model):
     TYPE_CHOICES = (

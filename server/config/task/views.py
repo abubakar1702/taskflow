@@ -33,7 +33,13 @@ def _task_queryset_for_user(user):
         )
         .distinct()
         .select_related('project', 'creator')
-        .prefetch_related('assignees', 'subtasks', 'subtasks__assignee')
+        .prefetch_related(
+            'assignees',
+            'subtasks',
+            'subtasks__assignee',
+            'dependencies',
+            'blocking'
+        )
         .annotate(total_assets_annotated=Count('assets', distinct=True))
     )
 
@@ -150,12 +156,15 @@ class SubtasksApiView(generics.ListCreateAPIView):
     def _get_parent_task(self):
         """Fetch parent task once and cache on self."""
         if not hasattr(self, '_parent_task_cache'):
-            self._parent_task_cache = get_object_or_404(Task, id=self.kwargs['parent_task_id'])
+            queryset = _task_queryset_for_user(self.request.user)
+            self._parent_task_cache = get_object_or_404(queryset, id=self.kwargs['parent_task_id'])
         return self._parent_task_cache
 
     def get_queryset(self):
+        queryset = _task_queryset_for_user(self.request.user)
+        parent_task = get_object_or_404(queryset, id=self.kwargs['parent_task_id'])
         return (
-            Subtask.objects.filter(task_id=self.kwargs['parent_task_id'])
+            Subtask.objects.filter(task=parent_task)
             .select_related('task', 'assignee')
         )
 
@@ -169,7 +178,6 @@ class SubtasksApiView(generics.ListCreateAPIView):
 
 
 class SubtaskActionAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Subtask.objects.all()
     serializer_class = SubtaskSerializer
     permission_classes = [IsAuthenticated]
 
@@ -184,13 +192,52 @@ class SubtaskActionAPIView(generics.RetrieveUpdateDestroyAPIView):
             .select_related('task', 'assignee')
         )
 
+    def perform_update(self, serializer):
+        subtask = self.get_object()
+        task = subtask.task
+        user = self.request.user
+        is_creator = (task.creator == user)
+
+        # 1. Text Update Rule: Only task creator can edit subtask text
+        new_text = serializer.validated_data.get('text')
+        if new_text is not None and new_text != subtask.text:
+            if not is_creator:
+                raise PermissionDenied("Only the task creator can edit the subtask text.")
+
+        # 2. Assignment Update Rule: Only task creator or current subtask assignee can modify assignee
+        if 'assignee' in serializer.validated_data:
+            new_assignee = serializer.validated_data.get('assignee')
+            if new_assignee != subtask.assignee:
+                is_subtask_assignee = (subtask.assignee == user)
+                if not is_creator and not is_subtask_assignee:
+                    raise PermissionDenied("Only the task creator or the current subtask assignee can modify the assignment.")
+
+        # 3. Toggle Completion Rule: task creator, subtask assignee, or task assignee/member
+        new_is_completed = serializer.validated_data.get('is_completed')
+        if new_is_completed is not None and new_is_completed != subtask.is_completed:
+            is_task_assignee = task.assignees.filter(id=user.id).exists()
+            is_subtask_assignee = (subtask.assignee == user)
+            is_project_member = task.project.members.filter(id=user.id).exists() if task.project else False
+            if not is_creator and not is_subtask_assignee and not is_task_assignee and not is_project_member:
+                raise PermissionDenied("You do not have permission to toggle completion of this subtask.")
+
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        # 4. Deleting a Subtask: Only the task creator can delete
+        if instance.task.creator != self.request.user:
+            raise PermissionDenied("Only the task creator can delete this subtask.")
+        instance.delete()
+
 
 class AddAssigneeAPIView(generics.UpdateAPIView):
-    queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "id"
     lookup_url_kwarg = "task_id"
+
+    def get_queryset(self):
+        return _task_queryset_for_user(self.request.user)
 
     def patch(self, request, *args, **kwargs):
         task = self.get_object()
@@ -243,11 +290,13 @@ class AddAssigneeAPIView(generics.UpdateAPIView):
 
 
 class RemoveAssigneeAPIView(generics.DestroyAPIView):
-    queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "id"
     lookup_url_kwarg = "task_id"
+
+    def get_queryset(self):
+        return _task_queryset_for_user(self.request.user)
 
     def delete(self, request, *args, **kwargs):
         task = self.get_object()
@@ -279,27 +328,29 @@ class SearchForAssigneeAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        search = self.request.query_params.get('user')
+        search = self.request.query_params.get('user', '').strip()
         project = self.request.query_params.get('project')
 
-        if not search:
-            raise ValidationError({"error": "Missing 'user' query parameter"})
-
         if project:
-            return ProjectMember.objects.filter(
-                project_id=project,
-                user__email__icontains=search
-            ).select_related("user")
+            queryset = ProjectMember.objects.filter(project_id=project).select_related("user")
+            if search:
+                queryset = queryset.filter(user__email__icontains=search)
+            return queryset
 
-        return User.objects.filter(email__icontains=search)
+        queryset = User.objects.all()
+        if search:
+            queryset = queryset.filter(email__icontains=search)
+        return queryset
 
 
 class LeaveTaskAPIView(generics.UpdateAPIView):
-    queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "id"
     lookup_url_kwarg = "task_id"
+
+    def get_queryset(self):
+        return _task_queryset_for_user(self.request.user)
 
     def patch(self, request, *args, **kwargs):
         task = self.get_object()
@@ -337,7 +388,13 @@ class UserTasksAPIView(generics.ListAPIView):
             Task.objects.filter(Q(creator=user) | Q(assignees=user))
             .distinct()
             .select_related('project', 'creator')
-            .prefetch_related('assignees', 'subtasks', 'subtasks__assignee')
+            .prefetch_related(
+                'assignees',
+                'subtasks',
+                'subtasks__assignee',
+                'dependencies',
+                'blocking'
+            )
             .annotate(total_assets_annotated=Count('assets', distinct=True))
         )
 
@@ -381,10 +438,13 @@ class TaskCommentAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return TaskComment.objects.filter(task_id=self.kwargs['task_id']).select_related('author')
+        queryset = _task_queryset_for_user(self.request.user)
+        task = get_object_or_404(queryset, id=self.kwargs['task_id'])
+        return TaskComment.objects.filter(task=task).select_related('author')
 
     def perform_create(self, serializer):
-        task = get_object_or_404(Task, id=self.kwargs['task_id'])
+        queryset = _task_queryset_for_user(self.request.user)
+        task = get_object_or_404(queryset, id=self.kwargs['task_id'])
         if task.creator != self.request.user and not task.assignees.filter(id=self.request.user.id).exists():
             raise PermissionDenied("Only the task creator and assignees can add comments to this task.")
         comment = serializer.save(author=self.request.user, task=task)
@@ -399,7 +459,13 @@ class TaskCommentAPIView(generics.ListCreateAPIView):
 class TaskCommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TaskCommentSerializer
     permission_classes = [IsAuthenticated]
-    queryset = TaskComment.objects.all()
+
+    def get_queryset(self):
+        return TaskComment.objects.filter(
+            Q(task__creator=self.request.user) |
+            Q(task__assignees=self.request.user) |
+            Q(task__project__members=self.request.user)
+        ).distinct()
 
     def perform_update(self, serializer):
         if serializer.instance.author != self.request.user:
@@ -416,4 +482,6 @@ class TaskActivityAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return TaskActivity.objects.filter(task_id=self.kwargs['task_id']).select_related('user')
+        queryset = _task_queryset_for_user(self.request.user)
+        task = get_object_or_404(queryset, id=self.kwargs['task_id'])
+        return TaskActivity.objects.filter(task=task).select_related('user')

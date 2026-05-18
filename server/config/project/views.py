@@ -79,8 +79,9 @@ class ProjectMembersAPIView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         project_id = self.kwargs['project_id']
+        project = get_object_or_404(_user_projects(self.request.user), id=project_id)
         return ProjectMember.objects.filter(
-            project_id=project_id
+            project=project
         ).select_related('user', 'project')
 
     def get_serializer(self, *args, **kwargs):
@@ -90,23 +91,63 @@ class ProjectMembersAPIView(generics.ListCreateAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        project = get_object_or_404(Project, id=self.kwargs['project_id'])
+        project = get_object_or_404(_user_projects(self.request.user), id=self.kwargs['project_id'])
         context['project'] = project
         return context
 
+    def perform_create(self, serializer):
+        project = get_object_or_404(_user_projects(self.request.user), id=self.kwargs['project_id'])
+        _require_project_admin(project, self.request.user)
+
+        # Validate that none of the members being added are already in the project
+        member_list = serializer.validated_data
+        for item in member_list:
+            member_id = item.get('member_id')
+            if ProjectMember.objects.filter(project=project, user_id=member_id).exists():
+                from rest_framework.serializers import ValidationError
+                raise ValidationError({
+                    "member_id": "This user is already a member of the project."
+                })
+
+        serializer.save()
+
 
 class ProjectMemberActionAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = ProjectMember.objects.select_related('user', 'project')
     serializer_class = ProjectMemberSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "id"
     lookup_url_kwarg = "member_id"
+
+    def get_queryset(self):
+        return ProjectMember.objects.filter(
+            Q(project__creator=self.request.user) | Q(project__members=self.request.user)
+        ).distinct().select_related('user', 'project')
+
+    def perform_update(self, serializer):
+        project_member = self.get_object()
+        project = project_member.project
+
+        _require_project_admin(project, self.request.user)
+
+        # The project creator's role cannot be downgraded/modified
+        if project_member.user == project.creator:
+            raise PermissionDenied("The role of the project creator cannot be modified.")
+
+        serializer.save()
 
     @transaction.atomic
     def destroy(self, request, *args, **kwargs):
         project_member = self.get_object()
         user = project_member.user
         project = project_member.project
+
+        # Only project admins can remove members, unless a user is removing themselves (leaving)
+        if request.user != user:
+            _require_project_admin(project, request.user)
+
+        # The project creator cannot leave or be removed from the project
+        if user == project.creator:
+            raise PermissionDenied("The project creator cannot be removed or leave the project.")
 
         Task.objects.filter(project=project, creator=user).delete()
 

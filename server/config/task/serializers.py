@@ -227,6 +227,21 @@ class TaskCommentSerializer(serializers.ModelSerializer):
         fields = ['id', 'task', 'author', 'content', 'parent', 'replies', 'is_edited', 'created_at', 'updated_at']
         read_only_fields = ['id', 'task', 'author', 'replies', 'is_edited', 'created_at', 'updated_at']
 
+    def validate(self, attrs):
+        parent = attrs.get('parent')
+        view = self.context.get('view')
+        task_id = view.kwargs.get('task_id') if view else None
+
+        if not task_id and self.instance:
+            task_id = self.instance.task_id
+
+        if parent and task_id:
+            if str(parent.task_id) != str(task_id):
+                raise serializers.ValidationError({
+                    "parent": "The parent comment must belong to the same task."
+                })
+        return attrs
+
     def get_replies(self, obj):
         if obj.replies.exists():
             return TaskCommentSerializer(obj.replies.all(), many=True, context=self.context).data

@@ -6,6 +6,7 @@ import Avatar from "../../components/common/Avatar";
 import { FiSearch, FiX, FiCheck, FiUsers } from "react-icons/fi";
 import { toast } from "react-toastify";
 import { useUser } from "../../contexts/UserContext";
+import { ClipLoader } from "react-spinners";
 
 const getPlainUser = (result) => (result ? result.user || result : {});
 
@@ -87,36 +88,35 @@ const AddAssigneeModal = ({ isOpen, onClose, taskId, currentAssignees = [], proj
             return;
         }
 
-        const query = value.replace(/@/g, "").trim();
-
-        if (!query) {
-            setShowResults(false);
-            setSearchResults([]);
-            return;
-        }
+        const query = value.trim();
 
         searchTimeoutRef.current = setTimeout(async () => {
             try {
                 const url = `/api/search-assignees/?user=${encodeURIComponent(query)}`;
-                const results = (await apiClient.get(url)).data;
+                const responseData = (await apiClient.get(url)).data;
 
-                const filteredResults = Array.isArray(results)
-                    ? results.filter(result => {
-                        const u = getPlainUser(result);
-                        if (!u || !u.id || !u.email) return false;
-                        if (u.id === currentUser?.id) return false;
-                        if (currentAssignees.some(a => a.id === u.id)) return false;
-                        return !selectedUsers.some(s => s.id === u.id);
-                    })
-                    : [];
+                const resultsArray = Array.isArray(responseData)
+                    ? responseData
+                    : (responseData && Array.isArray(responseData.results) ? responseData.results : []);
+
+                const filteredResults = resultsArray.filter(result => {
+                    const u = getPlainUser(result);
+                    if (!u || !u.id || !u.email) return false;
+                    if (u.id === currentUser?.id) return false;
+                    if (currentAssignees.some(a => a.id === u.id)) return false;
+                    return !selectedUsers.some(s => s.id === u.id);
+                });
 
                 setSearchResults(filteredResults);
                 if (filteredResults.length > 0) {
                     setShowResults(true);
+                } else {
+                    setShowResults(false);
                 }
             } catch (err) {
                 console.error("Search failed:", err);
                 setSearchResults([]);
+                setShowResults(false);
             }
         }, 300);
     };
@@ -207,8 +207,8 @@ const AddAssigneeModal = ({ isOpen, onClose, taskId, currentAssignees = [], proj
                                         key={user.id}
                                         className="flex items-center gap-2 pl-1 pr-2.5 py-1 bg-blue-50/40 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/80 text-blue-700 dark:text-blue-400 rounded-sm"
                                     >
-                                        <div className="w-5.5 h-5.5">
-                                            <Avatar name={user.display_name} url={user.avatar} size={5.5} className="rounded-sm" />
+                                        <div className="w-6 h-6">
+                                            <Avatar name={user.display_name} url={user.avatar} size={6} className="rounded-sm" />
                                         </div>
                                         <span className="text-xs font-bold">{user.display_name}</span>
                                         <button

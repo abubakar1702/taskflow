@@ -28,14 +28,14 @@ const NotificationCard = ({ notification, onUpdate }) => {
     const getBgColor = () => {
         switch (type) {
             case 'comment':
-            case 'new_comment': return 'bg-blue-50';
+            case 'new_comment': return 'bg-blue-50 dark:bg-blue-950/20';
             case 'task_assigned':
-            case 'assign': return 'bg-purple-50';
+            case 'assign': return 'bg-purple-50 dark:bg-purple-950/20';
             case 'deadline':
-            case 'task_deadline': return 'bg-red-50';
+            case 'task_deadline': return 'bg-red-50 dark:bg-red-950/20';
             case 'status_change':
-            case 'status': return 'bg-green-50';
-            default: return 'bg-gray-50';
+            case 'status': return 'bg-green-50 dark:bg-green-950/20';
+            default: return 'bg-gray-50 dark:bg-slate-800/40';
         }
     };
 
@@ -63,7 +63,7 @@ const NotificationCard = ({ notification, onUpdate }) => {
     return (
         <div
             onClick={handleMarkAsRead}
-            className={`group p-4 flex gap-4 hover:bg-gray-50 transition-all cursor-pointer border-b border-gray-100 last:border-0 ${!is_read ? 'bg-blue-50/30' : ''}`}
+            className={`group p-4 flex gap-4 hover:bg-gray-50 dark:hover:bg-slate-800/40 transition-all cursor-pointer border-b border-gray-100 dark:border-slate-800 last:border-0 ${!is_read ? 'bg-blue-50/30 dark:bg-blue-950/10' : ''}`}
         >
             <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${getBgColor()}`}>
                 {getIcon()}
@@ -71,7 +71,7 @@ const NotificationCard = ({ notification, onUpdate }) => {
 
             <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start mb-1">
-                    <h4 className={`text-sm font-semibold truncate ${!is_read ? 'text-gray-900' : 'text-gray-700'}`}>
+                    <h4 className={`text-sm font-semibold truncate ${!is_read ? 'text-gray-900 dark:text-slate-100' : 'text-gray-700 dark:text-slate-300'}`}>
                         {type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                     </h4>
                     <div className="flex items-center gap-2">
@@ -80,22 +80,22 @@ const NotificationCard = ({ notification, onUpdate }) => {
                         )}
                         <button
                             onClick={handleDelete}
-                            className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all rounded-md hover:bg-red-50"
+                            className="p-1 text-gray-400 dark:text-slate-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all rounded-md hover:bg-red-50 dark:hover:bg-red-950/20"
                             title="Delete notification"
                         >
                             <FiTrash2 size={14} />
                         </button>
                     </div>
                 </div>
-                <p className="text-xs text-gray-600 line-clamp-2 mb-2">
+                <p className="text-xs text-gray-600 dark:text-slate-300 line-clamp-2 mb-2">
                     {message}
                 </p>
                 <div className="flex justify-between items-center">
-                    <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+                    <span className="text-[10px] text-gray-400 dark:text-slate-500 font-medium uppercase tracking-wider">
                         {formatDistanceToNow(new Date(created_at), { addSuffix: true })}
                     </span>
                     {data?.assigned_by && (
-                        <span className="text-[10px] text-gray-500 italic">
+                        <span className="text-[10px] text-gray-500 dark:text-slate-400 italic">
                             by {data.assigned_by}
                         </span>
                     )}
