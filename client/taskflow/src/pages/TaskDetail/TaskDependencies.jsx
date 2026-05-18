@@ -8,17 +8,17 @@ const DependencyItem = ({ task }) => {
     return (
         <button
             onClick={() => navigate(`/tasks/${task.id}`)}
-            className="w-full text-left flex items-start gap-3 p-3 rounded-sm border border-gray-200/50 dark:border-slate-800 hover:bg-gray-50/70 dark:hover:bg-slate-800 hover:border-gray-300 dark:hover:border-slate-700 transition-colors group"
+            className="w-full text-left flex items-start gap-3 p-3 rounded-lg border border-gray-200/50 dark:border-slate-800 hover:bg-gray-50/70 dark:hover:bg-slate-800 hover:border-gray-300 dark:hover:border-slate-700 transition-colors group"
         >
             <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-gray-800 dark:text-slate-100 truncate group-hover:text-blue-605 dark:group-hover:text-blue-400 transition-colors">
                     {task.title}
                 </p>
                 <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                    <span className={`text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase tracking-wider border ${getStatusColor(task.status)}`}>
+                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border ${getStatusColor(task.status)}`}>
                         {task.status}
                     </span>
-                    <span className={`text-[9px] px-1.5 py-0.5 rounded-sm font-bold uppercase tracking-wider border ${getPriorityColor(task.priority)}`}>
+                    <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border ${getPriorityColor(task.priority)}`}>
                         {task.priority}
                     </span>
                 </div>

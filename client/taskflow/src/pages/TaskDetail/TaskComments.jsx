@@ -100,7 +100,6 @@ const CommentItem = ({
     const hasHiddenReplies =
         (comment.replies?.length || 0) > COLLAPSE_AFTER;
 
-    // Outer styling: top-level comments are premium cards; nested replies are transparent stream items
     const containerClasses = depth > 0
         ? "bg-transparent p-0 border-none mt-4 transition-colors relative"
         : "bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-800 p-5 shadow-none my-4 transition-colors hover:border-gray-300 dark:hover:border-slate-700 relative";
@@ -244,7 +243,6 @@ const CommentItem = ({
 
             {comment.replies?.length > 0 && (
                 <div className="mt-4">
-                    {/* Visual nesting is offset by a vertical thread line if within max visual depth limit */}
                     <div className={depth < MAX_VISUAL_DEPTH ? "pl-5 ml-5 border-l-2 border-gray-200 dark:border-slate-800/80 space-y-4" : "space-y-4"}>
                         {visibleReplies.map((reply) => (
                             <CommentItem
@@ -352,31 +350,32 @@ const TaskComments = ({ taskId, task }) => {
 
             {canComment ? (
                 <form onSubmit={handleSubmit} className="mb-6">
-                    <div className="flex gap-4">
-                        <Avatar name={currentUser?.display_name || currentUser?.email} url={currentUser?.avatar} size={11} className="rounded-full" />
-                        <div className="flex-grow flex flex-col gap-3">
-                            <textarea
-                                value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                                placeholder="Add a comment or ask a question..."
-                                rows="3"
-                                disabled={submitting}
-                                className="w-full border border-gray-200 dark:border-slate-800 rounded-sm p-4 text-xs focus:outline-none focus:border-blue-500 bg-gray-50/50 dark:bg-slate-950 dark:text-white resize-none leading-relaxed"
-                            />
-                            <div className="flex justify-end">
-                                <button
-                                    type="submit"
-                                    disabled={submitting || !newComment.trim()}
-                                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-5 py-2 rounded-sm text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 shadow-none border border-transparent"
-                                >
-                                    <FaPaperPlane size={11} /> {submitting ? 'Posting...' : 'Post Comment'}
-                                </button>
+                    <div className="border border-gray-200 dark:border-slate-800 rounded-md p-4 bg-gray-50/50 dark:bg-slate-950 focus-within:border-blue-500 dark:focus-within:border-blue-500 transition-colors flex flex-col gap-3 shadow-none">
+                        <textarea
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            placeholder="Add a comment or ask a question..."
+                            rows="3"
+                            disabled={submitting}
+                            className="w-full text-xs focus:outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 resize-none leading-relaxed border-none p-0"
+                        />
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-200/60 dark:border-slate-800/60">
+                            <div className="flex items-center gap-2">
+                                <Avatar name={currentUser?.display_name || currentUser?.email} url={currentUser?.avatar} size={7} className="rounded-full" />
+                                <span className="text-[11px] font-bold text-gray-600 dark:text-slate-400">{currentUser?.display_name || currentUser?.first_name || 'You'}</span>
                             </div>
+                            <button
+                                type="submit"
+                                disabled={submitting || !newComment.trim()}
+                                className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 shadow-none border border-transparent"
+                            >
+                                {submitting ? 'Submitting...' : 'Submit'}
+                            </button>
                         </div>
                     </div>
                 </form>
             ) : (
-                <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-955/20 border border-amber-250 dark:border-amber-900 rounded-sm text-amber-800 dark:text-amber-300 text-xs flex items-center justify-center font-medium">
+                <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-955/20 border border-amber-250 dark:border-amber-900 rounded-lg text-amber-800 dark:text-amber-300 text-xs flex items-center justify-center font-medium">
                     Only the task creator and assigned members can post comments or replies to this task.
                 </div>
             )}
@@ -386,7 +385,7 @@ const TaskComments = ({ taskId, task }) => {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
             ) : topLevelComments.length === 0 ? (
-                <div className="text-center py-12 border border-dashed border-gray-200 dark:border-slate-800/80 rounded-sm">
+                <div className="text-center py-12 border border-dashed border-gray-200 dark:border-slate-800/80 rounded-lg">
                     <p className="text-gray-400 dark:text-slate-500 text-xs font-medium">No comments yet. Be the first to start the discussion!</p>
                 </div>
             ) : (
