@@ -43,8 +43,6 @@ const getLayoutedElements = (nodes, edges, direction = 'TB') => {
     node.targetPosition = direction === 'TB' ? 'top' : 'left';
     node.sourcePosition = direction === 'TB' ? 'bottom' : 'right';
 
-    // We are shifting the dagre node position (anchor=center center) to the top left
-    // so it matches the React Flow node anchor point (top left).
     node.position = {
       x: nodeWithPosition.x - nodeWidth / 2,
       y: nodeWithPosition.y - nodeHeight / 2,
@@ -55,10 +53,10 @@ const getLayoutedElements = (nodes, edges, direction = 'TB') => {
   return { nodes, edges };
 };
 
-const CustomNode = ({ data, targetPosition, sourcePosition }) => {
+const CustomNode = ({ data, isConnectable }) => {
   return (
     <div className={`px-4 py-2 shadow-md rounded-md bg-white dark:bg-slate-800 border-2 w-[220px] ${data.isDone ? 'border-green-400 opacity-70' : 'border-blue-500'}`}>
-      <Handle type="target" position={Position.Top} className="w-16 !bg-blue-400" />
+      <Handle type="target" position={Position.Top} isConnectable={isConnectable} className="w-16 !bg-blue-400" />
       <div className="flex items-center justify-between mb-2">
         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PRIORITY_COLORS[data.priority] || 'bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-slate-200'}`}>
           {data.priority}
@@ -71,7 +69,7 @@ const CustomNode = ({ data, targetPosition, sourcePosition }) => {
       <div className="text-xs text-gray-500 dark:text-slate-400 mt-1">
         {data.assignees && data.assignees.length > 0 ? data.assignees.map(a => a.display_name).join(', ') : 'Unassigned'}
       </div>
-      <Handle type="source" position={Position.Bottom} className="w-16 !bg-blue-400" />
+      <Handle type="source" position={Position.Bottom} isConnectable={isConnectable} className="w-16 !bg-blue-400" />
     </div>
   );
 };
@@ -85,7 +83,6 @@ const ProjectDependencyGraph = ({ tasks, projectId }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  // Mutation to update task dependencies in backend
   const { mutate: updateDependencies } = useMutation({
     mutationFn: async ({ taskId, dependencies }) => {
       return apiClient.patch(`/api/tasks/${taskId}/`, { dependencies_ids: dependencies });
@@ -101,7 +98,7 @@ const ProjectDependencyGraph = ({ tasks, projectId }) => {
     if (!tasks) return;
 
     const initialNodes = tasks.map((task) => ({
-      id: task.id,
+      id: task.id.toString(),
       type: 'custom',
       data: {
         title: task.title,
@@ -116,12 +113,12 @@ const ProjectDependencyGraph = ({ tasks, projectId }) => {
     const initialEdges = [];
     tasks.forEach((task) => {
       if (task.dependencies && task.dependencies.length > 0) {
-        task.dependencies.forEach((depId) => {
-          // If task depends on depId, edge goes from depId -> task
+        task.dependencies.forEach((dep) => {
+          const depId = dep?.id ? dep.id.toString() : dep.toString();
           initialEdges.push({
             id: `e${depId}-${task.id}`,
             source: depId,
-            target: task.id,
+            target: task.id.toString(),
             markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' },
             animated: task.status !== 'Done',
             style: { stroke: '#3b82f6', strokeWidth: 2 }
@@ -129,6 +126,7 @@ const ProjectDependencyGraph = ({ tasks, projectId }) => {
         });
       }
     });
+
 
     const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
       initialNodes,
@@ -141,22 +139,27 @@ const ProjectDependencyGraph = ({ tasks, projectId }) => {
 
   const onConnect = useCallback(
     (params) => {
-      // Connect: source blocks target (target depends on source)
-      const targetTask = tasks.find(t => t.id === params.target);
+      setEdges((eds) => addEdge({
+        ...params,
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' },
+        animated: true,
+        style: { stroke: '#3b82f6', strokeWidth: 2 }
+      }, eds));
+
+      const targetId = params.target;
+      const sourceId = params.source;
+
+      const targetTask = tasks.find(t => t.id.toString() === targetId);
       if (!targetTask) return;
 
-      const currentDeps = targetTask.dependencies || [];
-      if (!currentDeps.includes(params.source)) {
-        const newDeps = [...currentDeps, params.source];
-        updateDependencies({ taskId: params.target, dependencies: newDeps });
-      }
+      const currentDeps = (targetTask.dependencies || []).map(d =>
+        d?.id ? d.id.toString() : d.toString()
+      );
 
-      setEdges((eds) => addEdge({
-          ...params,
-          markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' },
-          animated: true,
-          style: { stroke: '#3b82f6', strokeWidth: 2 }
-      }, eds));
+      if (!currentDeps.includes(sourceId)) {
+        const newDeps = [...currentDeps, sourceId];
+        updateDependencies({ taskId: targetId, dependencies: newDeps });
+      }
     },
     [setEdges, tasks, updateDependencies]
   );
@@ -170,6 +173,7 @@ const ProjectDependencyGraph = ({ tasks, projectId }) => {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
+        connectionLineStyle={{ stroke: '#3b82f6', strokeWidth: 2 }}
         fitView
         attributionPosition="bottom-right"
       >

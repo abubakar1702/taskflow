@@ -75,6 +75,13 @@ class SubtaskSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class DependencyTaskSerializer(serializers.ModelSerializer):
+    """Minimal task info used when listing dependencies or blockers."""
+    class Meta:
+        model = Task
+        fields = ['id', 'title', 'status', 'priority']
+
+
 class TaskSerializer(serializers.ModelSerializer):
     creator = UserSerializer(read_only=True)
     project = ProjectSerializer(read_only=True)
@@ -109,10 +116,8 @@ class TaskSerializer(serializers.ModelSerializer):
     assignees = UserSerializer(many=True, read_only=True)
     subtasks = SubtaskSerializer(many=True, read_only=True)
     
-    dependencies = serializers.PrimaryKeyRelatedField(
-        many=True, 
-        read_only=True
-    )
+    dependencies = DependencyTaskSerializer(many=True, read_only=True)
+    blocking = DependencyTaskSerializer(many=True, read_only=True)
 
     total_assets = serializers.SerializerMethodField()
 
@@ -122,7 +127,7 @@ class TaskSerializer(serializers.ModelSerializer):
             'id', 'title', 'description', 'creator', 'project_id', 'project',
             'assignees_ids', 'assignees', 'status', 'priority',
             'subtasks', 'subtasks_data', 'total_assets',
-            'dependencies', 'dependencies_ids',
+            'dependencies', 'dependencies_ids', 'blocking',
             'due_date', 'due_time', 'time_taken', 'timer_start_time',
             'created_at', 'updated_at'
         ]

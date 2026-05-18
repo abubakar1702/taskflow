@@ -16,6 +16,7 @@ import { toast } from "react-toastify";
 import { FiActivity } from "react-icons/fi";
 import TaskActivity from "./TaskActivity";
 import TaskComments from "./TaskComments";
+import TaskDependencies from "./TaskDependencies";
 
 const TaskDetail = () => {
     const { id } = useParams();
@@ -121,6 +122,7 @@ const TaskDetail = () => {
                             />
                         </div>
                         <AssetSection total_assets={task.total_assets} task={task} taskId={task.id} projectId={task.project?.id || null} />
+                        <TaskDependencies task={task} />
                     </div>
                 </div>
             </div>

@@ -28,7 +28,6 @@
     "react-router-dom": "^7.9.6",
     "react-spinners": "^0.17.0",
     "react-toastify": "^11.0.5",
-    "reactflow": "^11.11.4",
     "rsuite": "^6.1.0",
     "tailwindcss": "^4.1.17"
   },
