@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../utils/apiClient";
 import { QUERY_KEYS } from "../utils/queryKeys";
@@ -12,9 +12,15 @@ import { PRIORITY_COLORS, STATUS_COLORS } from "../components/constants/uiColors
 
 const Tasks = () => {
     const [activeTab, setActiveTab] = useState("All");
-    const [viewMode, setViewMode] = useState("grid");
+    const [viewMode, setViewMode] = useState(() => {
+        return localStorage.getItem("tasks_view_mode") || "grid";
+    });
     const [filters, setFilters] = useState({ priority: "", status: "", due_today: false, overdue: false, project_id: "" });
     const [sortBy, setSortBy] = useState("Date Created (Desc)");
+
+    useEffect(() => {
+        localStorage.setItem("tasks_view_mode", viewMode);
+    }, [viewMode]);
 
     const mapSortToApi = (sortLabel) => {
         const sortMapping = {
@@ -43,7 +49,7 @@ const Tasks = () => {
     const { data: tasksData = [], isLoading: loading, error } = useQuery({
         queryKey: QUERY_KEYS.tasks(queryString),
         queryFn: async () => (await apiClient.get(`/api/tasks/?${queryString}`)).data,
-        placeholderData: (prev) => prev, // Keep previous data while filters change
+        placeholderData: (prev) => prev,
     });
     const tasks = Array.isArray(tasksData) ? tasksData : (tasksData?.results || []);
 

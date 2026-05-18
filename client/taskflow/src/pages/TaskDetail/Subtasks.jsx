@@ -208,7 +208,7 @@ const Subtasks = ({ task }) => {
             {totalSubtasks > 0 && (
                 <div className="mb-6">
                     <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-semibold text-gray-650 dark:text-slate-350">
+                        <span className="text-xs font-semibold text-gray-600 dark:text-slate-400">
                             {completedSubtasks} of {totalSubtasks} completed
                         </span>
                         <span className="text-xs font-bold text-blue-600 dark:text-blue-400">

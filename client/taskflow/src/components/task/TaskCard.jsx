@@ -89,10 +89,10 @@ const TaskCard = ({
                 {totalSubtasks > 0 && (
                     <div className="mb-4 mt-1.5">
                         <div className="flex justify-between items-center mb-1">
-                            <span className="text-[10px] text-gray-550 dark:text-slate-450 font-bold uppercase tracking-wider">
+                            <span className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider">
                                 Subtasks
                             </span>
-                            <span className="text-xs text-gray-500 dark:text-slate-450 font-semibold">
+                            <span className="text-xs text-gray-500 dark:text-slate-400 font-semibold">
                                 {completedSubtasks}/{totalSubtasks}
                             </span>
                         </div>
@@ -108,7 +108,7 @@ const TaskCard = ({
                 {/* Due Date & Time */}
                 {due_date && (
                     <div
-                        className={`flex items-center gap-4 text-xs mb-4 mt-auto pt-2.5 ${isOverdue() ? "text-red-650 dark:text-red-400" : "text-gray-550 dark:text-slate-400"
+                        className={`flex items-center gap-4 text-xs mb-4 mt-auto pt-2.5 ${isOverdue() ? "text-red-600 dark:text-red-400" : "text-gray-500 dark:text-slate-400"
                             }`}
                     >
                         <div className="flex items-center gap-1.5">
@@ -122,7 +122,7 @@ const TaskCard = ({
                             </div>
                         )}
                         {isOverdue() && (
-                            <span className="font-bold text-red-650 uppercase tracking-wider text-[10px]">Overdue</span>
+                            <span className="font-bold text-red-600 uppercase tracking-wider text-[10px]">Overdue</span>
                         )}
                     </div>
                 )}
@@ -157,7 +157,7 @@ const TaskCard = ({
                             </div>
                         </div>
                         <div>
-                            {total_assets > 0 && (<span className="flex items-center gap-1.5 text-gray-400 dark:text-slate-550 text-xs font-semibold"><FaPaperclip size={12} />{total_assets}</span>)}
+                            {total_assets > 0 && (<span className="flex items-center gap-1.5 text-gray-400 dark:text-slate-500 text-xs font-semibold"><FaPaperclip size={12} />{total_assets}</span>)}
                         </div>
                     </div>
                 )}

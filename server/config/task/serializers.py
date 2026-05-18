@@ -208,12 +208,15 @@ class ImportantTaskSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'task', 'task_id', 'marked_at']
 
     def create(self, validated_data):
+        user = self.context['request'].user
         task_id = validated_data.pop('task_id')
         task = get_object_or_404(Task, id=task_id)
 
-        return ImportantTask.objects.create(
+        important_task, created = ImportantTask.objects.get_or_create(
+            user=user,
             task=task
         )
+        return important_task
 
 class TaskCommentSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)

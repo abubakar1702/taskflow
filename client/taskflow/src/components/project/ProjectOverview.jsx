@@ -19,7 +19,7 @@ const ProjectOverview = ({ project }) => {
                 <h2 className="text-sm font-bold text-gray-900 dark:text-slate-100 uppercase tracking-wider mb-4">
                     Description
                 </h2>
-                <p className="text-sm text-gray-700 dark:text-slate-350 whitespace-pre-wrap leading-relaxed">
+                <p className="text-sm text-gray-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
                     {project.description || "No description provided."}
                 </p>
             </div>

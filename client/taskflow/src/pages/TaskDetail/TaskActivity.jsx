@@ -62,14 +62,14 @@ const TaskActivity = ({ isOpen, onClose, taskId, taskTitle }) => {
         switch (type) {
             case "status_change":
                 return (
-                    <p className="text-xs text-slate-700 dark:text-slate-350 leading-relaxed mt-0.5">
+                    <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed mt-0.5">
                         {action}{" "}
                         <span className="font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded-sm text-[10px] uppercase tracking-wider border border-transparent dark:border-slate-700">{details?.to || ''}</span>
                     </p>
                 );
             case "priority_change":
                 return (
-                    <p className="text-xs text-slate-700 dark:text-slate-355 leading-relaxed mt-0.5">
+                    <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed mt-0.5">
                         {action}{" "}
                         <span className="font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded-sm text-[10px] uppercase tracking-wider border border-transparent dark:border-slate-700">{details?.to || ''}</span>
                     </p>
@@ -77,13 +77,13 @@ const TaskActivity = ({ isOpen, onClose, taskId, taskTitle }) => {
             case "assignee_added":
             case "assignee_removed":
                 return (
-                    <p className="text-xs text-slate-750 dark:text-slate-350 leading-relaxed mt-0.5">
+                    <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed mt-0.5">
                         {action}
                     </p>
                 );
             case "due_date":
                 return (
-                    <p className="text-xs text-slate-750 dark:text-slate-350 leading-relaxed mt-0.5">
+                    <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed mt-0.5">
                         {action}
                     </p>
                 );
@@ -97,9 +97,9 @@ const TaskActivity = ({ isOpen, onClose, taskId, taskTitle }) => {
                     </div>
                 );
             case "created":
-                return <p className="text-xs text-slate-750 dark:text-slate-350 leading-relaxed mt-0.5">{action}</p>;
+                return <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed mt-0.5">{action}</p>;
             default:
-                return <p className="text-xs text-slate-750 dark:text-slate-350 leading-relaxed mt-0.5">{action}</p>;
+                return <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed mt-0.5">{action}</p>;
         }
     };
 
@@ -107,7 +107,7 @@ const TaskActivity = ({ isOpen, onClose, taskId, taskTitle }) => {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex justify-end z-50 transition-opacity duration-300">
             <div className="bg-white dark:bg-slate-900 w-full max-w-md h-full shadow-none flex flex-col animate-slide-in-right border-l border-slate-200 dark:border-slate-800">
                 {/* Header */}
-                <div className="p-6 border-b border-slate-150 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/50">
+                <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/50">
                     <div>
                         <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                             <LuSquareActivity size={14} className="text-blue-600 dark:text-blue-400" /> Activity Log
@@ -118,7 +118,7 @@ const TaskActivity = ({ isOpen, onClose, taskId, taskTitle }) => {
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-1.5 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-sm text-slate-450 hover:text-slate-700 dark:hover:text-slate-200 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                        className="p-1.5 hover:bg-slate-200/60 dark:hover:bg-slate-800 rounded-sm text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
                         title="Close"
                     >
                         <FaTimes className="w-3.5 h-3.5" />
@@ -141,7 +141,7 @@ const TaskActivity = ({ isOpen, onClose, taskId, taskTitle }) => {
                         <div className="text-center py-16 border border-dashed border-slate-200 dark:border-slate-800 rounded-sm p-6">
                             <LuSquareActivity className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
                             <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">No Activity Recorded</p>
-                            <p className="text-[10px] text-slate-450 dark:text-slate-500 mt-1 font-medium">Actions taken on this task will appear here.</p>
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-medium">Actions taken on this task will appear here.</p>
                         </div>
                     ) : (
                         <div className="relative pl-6 border-l border-slate-200 dark:border-slate-800 space-y-6 before:absolute before:top-0 before:bottom-0 before:left-[-1px]">
@@ -166,7 +166,7 @@ const TaskActivity = ({ isOpen, onClose, taskId, taskTitle }) => {
                                                     {activity.user?.display_name || activity.user?.email || "System"}
                                                 </span>
                                             </div>
-                                            <span className="text-[9px] font-bold text-slate-450 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded-sm border border-transparent dark:border-slate-705 uppercase tracking-wider">
+                                            <span className="text-[9px] font-bold text-slate-450 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded-sm border border-transparent dark:border-slate-800 uppercase tracking-wider">
                                                 {formatTimestamp(activity.timestamp)}
                                             </span>
                                         </div>

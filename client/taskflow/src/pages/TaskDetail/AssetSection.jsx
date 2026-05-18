@@ -123,7 +123,7 @@ const AssetSection = ({ task, taskId, projectId, total_assets }) => {
         </div>
 
         {assets.length === 0 ? (
-          <p className="text-xs text-gray-450 dark:text-slate-450 text-center py-8">No assets found</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 text-center py-8">No assets found</p>
         ) : (
           <ul className="space-y-2">
             {assets.map((asset) => (
