@@ -29,7 +29,7 @@ const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, onDelete, o
     return (
         <div
             ref={menuRef}
-            className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-20 transform origin-top-right transition-all animate-fade-in-up"
+            className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 overflow-hidden z-20 transform origin-top-right transition-all animate-fade-in-up"
         >
             <div className="py-1">
                 <button
@@ -37,7 +37,7 @@ const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, onDelete, o
                         onToggleImportant();
                         setShowActionMenu(false);
                     }}
-                    className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-yellow-500 flex items-center transition-colors duration-150"
+                    className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700/60 hover:text-yellow-500 dark:hover:text-yellow-400 flex items-center transition-colors duration-150"
                 >
                     {isImportant ? (
                         <>
@@ -57,7 +57,7 @@ const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, onDelete, o
                         onEdit();
                         setShowActionMenu(false);
                     }}
-                    className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 flex items-center transition-colors duration-150"
+                    className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700/60 hover:text-blue-600 dark:hover:text-blue-400 flex items-center transition-colors duration-150"
                 >
                     <FaEdit className="mr-3 w-4 h-4" />
                     Edit Task
@@ -69,7 +69,7 @@ const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, onDelete, o
                             onLeave();
                             setShowActionMenu(false);
                         }}
-                        className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 flex items-center transition-colors duration-150"
+                        className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700/60 hover:text-blue-600 dark:hover:text-blue-400 flex items-center transition-colors duration-150"
                     >
                         <LuSquareArrowOutDownRight className="mr-3 w-4 h-4" />
                         Leave Task
@@ -82,7 +82,7 @@ const TaskInfoAction = ({ showActionMenu, setShowActionMenu, onEdit, onDelete, o
                         onDelete();
                         setShowActionMenu(false);
                     }}
-                    className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 flex items-center transition-colors duration-150"
+                    className="w-full text-left px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 flex items-center transition-colors duration-150"
                 >
                     <FaTrash className="mr-3 w-4 h-4" />
                     Delete Task

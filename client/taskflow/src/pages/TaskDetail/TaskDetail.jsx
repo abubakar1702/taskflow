@@ -78,7 +78,7 @@ const TaskDetail = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-950 py-8 transition-colors duration-200">
-            <div className="max-w-6xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-4">
                 <div className="mb-6 flex items-center justify-between">
                     <button
                         onClick={() => window.history.back()}

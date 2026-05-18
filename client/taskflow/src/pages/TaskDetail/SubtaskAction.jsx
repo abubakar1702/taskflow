@@ -80,7 +80,7 @@ const SubtaskAction = ({ task, subtask, onClose, onUpdated, onEdit, onDelete }) 
     return (
         <div
             ref={dropdownRef}
-            className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50"
+            className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 py-2 z-50"
         >
             {/* Edit Option - only if user can modify */}
             {canEdit && (
@@ -88,10 +88,10 @@ const SubtaskAction = ({ task, subtask, onClose, onUpdated, onEdit, onDelete }) 
                     type="button"
                     onClick={handleEditClick}
                     disabled={isSubmitting}
-                    className="w-full px-4 py-2.5 text-left flex items-center space-x-3 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
+                    className="w-full px-4 py-2.5 text-left flex items-center space-x-3 hover:bg-blue-50 dark:hover:bg-slate-700/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
                     <svg
-                        className="w-4 h-4 text-gray-500 group-hover:text-blue-600"
+                        className="w-4 h-4 text-gray-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -103,7 +103,7 @@ const SubtaskAction = ({ task, subtask, onClose, onUpdated, onEdit, onDelete }) 
                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                         />
                     </svg>
-                    <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">Edit</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">Edit</span>
                 </button>
             )}
 
@@ -113,10 +113,10 @@ const SubtaskAction = ({ task, subtask, onClose, onUpdated, onEdit, onDelete }) 
                     type="button"
                     onClick={handleAssignToMe}
                     disabled={isSubmitting}
-                    className="w-full px-4 py-2.5 text-left flex items-center space-x-3 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
+                    className="w-full px-4 py-2.5 text-left flex items-center space-x-3 hover:bg-blue-50 dark:hover:bg-slate-700/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
-                    <LuUserPlus className="w-4 h-4 text-gray-500 group-hover:text-blue-600" />
-                    <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">Assign to me</span>
+                    <LuUserPlus className="w-4 h-4 text-gray-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">Assign to me</span>
                 </button>
             )}
 
@@ -126,16 +126,16 @@ const SubtaskAction = ({ task, subtask, onClose, onUpdated, onEdit, onDelete }) 
                     type="button"
                     onClick={handleUnassign}
                     disabled={isSubmitting}
-                    className="w-full px-4 py-2.5 text-left flex items-center space-x-3 hover:bg-orange-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
+                    className="w-full px-4 py-2.5 text-left flex items-center space-x-3 hover:bg-orange-50 dark:hover:bg-slate-700/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
-                    <LuUserMinus className="w-4 h-4 text-gray-500 group-hover:text-orange-600" />
-                    <span className="text-sm font-medium text-gray-700 group-hover:text-orange-600">Unassign</span>
+                    <LuUserMinus className="w-4 h-4 text-gray-500 dark:text-slate-400 group-hover:text-orange-650 dark:group-hover:text-orange-400" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-slate-200 group-hover:text-orange-600 dark:group-hover:text-orange-400">Unassign</span>
                 </button>
             )}
 
             {/* Divider - only show if delete option will appear */}
             {canDelete && (
-                <div className="my-1 border-t border-gray-200"></div>
+                <div className="my-1 border-t border-gray-200 dark:border-slate-700"></div>
             )}
 
             {/* Delete Option - only if user can delete */}
@@ -144,10 +144,10 @@ const SubtaskAction = ({ task, subtask, onClose, onUpdated, onEdit, onDelete }) 
                     type="button"
                     onClick={handleDelete}
                     disabled={isSubmitting}
-                    className="w-full px-4 py-2.5 text-left flex items-center space-x-3 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
+                    className="w-full px-4 py-2.5 text-left flex items-center space-x-3 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
-                    <LuTrash className="w-4 h-4 text-gray-500 group-hover:text-red-600" />
-                    <span className="text-sm font-medium text-gray-700 group-hover:text-red-600">Delete</span>
+                    <LuTrash className="w-4 h-4 text-gray-500 dark:text-slate-400 group-hover:text-red-600 dark:group-hover:text-red-400" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-slate-200 group-hover:text-red-600 dark:group-hover:text-red-400">Delete</span>
                 </button>
             )}
         </div>

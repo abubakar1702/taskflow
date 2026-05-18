@@ -151,7 +151,7 @@ const TaskTimer = ({ task, onUpdate, isCreator }) => {
                                     type="button"
                                     onClick={handleStop}
                                     disabled={loading}
-                                    className="p-2 bg-red-650 rounded-sm text-white hover:bg-red-705 transition shadow-none"
+                                    className="p-2 bg-red-600 rounded-sm text-white hover:bg-red-700 transition shadow-none"
                                     title="Stop Timer (Reset)"
                                 >
                                     <IoStop className="w-4 h-4" />
