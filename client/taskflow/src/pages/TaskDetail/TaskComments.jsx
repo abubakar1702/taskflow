@@ -441,11 +441,7 @@ const TaskComments = ({ taskId, task }) => {
                 <div className="flex justify-center py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
-            ) : topLevelComments.length === 0 ? (
-                <div className="text-center py-12 border border-dashed border-gray-200 dark:border-slate-800/80 rounded-lg">
-                    <p className="text-gray-400 dark:text-slate-500 text-xs font-medium">No comments yet. Be the first to start the discussion!</p>
-                </div>
-            ) : (
+            ) : topLevelComments.length > 0 && (
                 <div className="space-y-4 divide-y divide-gray-200 dark:divide-slate-800/50">
                     {topLevelComments.map((comment) => (
                         <CommentItem
