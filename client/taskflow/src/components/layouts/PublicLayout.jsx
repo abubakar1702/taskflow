@@ -1,8 +1,9 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { isAuthenticated } from "../../utils/auth";
+import useAuthStore from "../../stores/useAuthStore";
 
 const PublicLayout = () => {
-  if (isAuthenticated()) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
+  if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 

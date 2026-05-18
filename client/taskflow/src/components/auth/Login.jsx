@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import loginImg from "../../assets/taskflow-login.png";
-import axios from "axios";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { ClipLoader } from "react-spinners";
 import GoogleAuth from "./GoogleAuth";
 import OTPVerification from "./OTPVerification";
+import { useLogin, useGoogleLogin, useVerifyOtp } from "../../hooks/useAuth";
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -14,46 +14,20 @@ const Login = () => {
         password: "",
         keepLoggedIn: false,
     });
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
-
     const [step, setStep] = useState(0);
     const [otp, setOtp] = useState("");
 
-    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+    // ── TanStack Query mutations ───────────────────────────────────────────────
+    const loginMutation = useLogin();
+    const googleLoginMutation = useGoogleLogin();
+    const verifyOtpMutation = useVerifyOtp();
 
-    const handleStorage = (data) => {
-        try {
-            if (!data?.access) throw new Error("Invalid token received");
-            if (!data?.user) throw new Error("User data not found in response");
+    const loading =
+        loginMutation.isPending ||
+        googleLoginMutation.isPending ||
+        verifyOtpMutation.isPending;
 
-            const storage = formData.keepLoggedIn ? localStorage : sessionStorage;
-            storage.setItem("accessToken", data.access);
-
-            if (data.refresh) {
-                storage.setItem("refreshToken", data.refresh);
-            }
-
-            storage.setItem(
-                "user",
-                JSON.stringify({
-                    id: data.user.id,
-                    email: data.user.email,
-                    name: `${data.user.first_name} ${data.user.last_name}`,
-                    firstName: data.user.first_name,
-                    lastName: data.user.last_name,
-                    avatar: data.user.avatar,
-                })
-            );
-
-            return true;
-        } catch (err) {
-            console.error("Token storage error:", err);
-            setError("Failed to process login. Please try again.");
-            return false;
-        }
-    };
+    // ── Handlers ──────────────────────────────────────────────────────────────
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -61,167 +35,50 @@ const Login = () => {
             ...prev,
             [name]: type === "checkbox" ? checked : value,
         }));
-
-        if (error) setError("");
     };
 
-    const validateForm = () => {
-        if (!formData.email.trim()) {
-            setError("Email is required");
-            return false;
-        }
-        if (!formData.password.trim()) {
-            setError("Password is required");
-            return false;
-        }
-        return true;
-    };
-
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        setError("");
-
-        if (!validateForm()) return;
-
-        setLoading(true);
-
-        try {
-            const response = await axios.post(
-                `${API_BASE_URL}/user/login/`,
-                {
-                    email: formData.email,
-                    password: formData.password,
+        loginMutation.mutate(
+            { email: formData.email, password: formData.password, keepLoggedIn: formData.keepLoggedIn },
+            {
+                onSuccess: (data) => {
+                    if (data?.action === "OTP_REQUIRED") setStep(1);
                 },
-                {
-                    withCredentials: true,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Requested-With": "XMLHttpRequest",
-                    },
-                }
-            );
-
-            if (response.data?.action === 'OTP_REQUIRED') {
-                setStep(1);
-                return;
             }
-
-            if (!response.data?.access) {
-                throw new Error("Invalid response from server");
-            }
-
-            if (handleStorage(response.data)) {
-                navigate("/", { replace: true });
-            }
-        } catch (err) {
-            console.error("Login error:", err);
-
-            let errorMessage = "Login failed. Please check your credentials.";
-            if (err.response) {
-                if (err.response.status === 401) {
-                    errorMessage = "Invalid email or password.";
-                } else if (err.response.data?.detail) {
-                    errorMessage = err.response.data.detail;
-                }
-            } else if (err.request) {
-                errorMessage = "Network error. Please check your connection.";
-            }
-
-            setError(errorMessage);
-        } finally {
-            setLoading(false);
-        }
+        );
     };
 
     const handleGoogleSuccess = async (credentialResponse) => {
-        if (!credentialResponse?.credential) {
-            setError("Google login failed. No token received.");
-            return;
-        }
-
-        setLoading(true);
-        setError("");
-
-        try {
-            const response = await axios.post(
-                `${API_BASE_URL}/user/auth/google/`,
-                {
-                    token: credentialResponse.credential,
-                },
-                {
-                    withCredentials: true,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Requested-With": "XMLHttpRequest",
-                    },
+        if (!credentialResponse?.credential) return;
+        googleLoginMutation.mutate(credentialResponse.credential, {
+            onSuccess: (data) => {
+                if (data?.action === "OTP_REQUIRED") {
+                    setFormData((prev) => ({ ...prev, email: data.email }));
+                    setStep(1);
                 }
-            );
-
-            if (response.data?.action === 'OTP_REQUIRED') {
-                setFormData(prev => ({ ...prev, email: response.data.email }));
-                setStep(1);
-                return;
-            }
-
-            if (!response.data?.access) {
-                throw new Error("Invalid response from server");
-            }
-
-            if (handleStorage(response.data)) {
-                navigate("/", { replace: true });
-            }
-        } catch (err) {
-            console.error("Google login error:", err);
-            setError("Google login failed. Please try again.");
-        } finally {
-            setLoading(false);
-        }
+            },
+        });
     };
 
-    const handleGoogleError = () => {
-        setError("Google login failed. Please try again.");
-    };
+    const handleGoogleError = () => {};
 
-    const handleVerify = async (e) => {
+    const handleVerify = (e) => {
         e.preventDefault();
-        setError("");
-        setLoading(true);
+        verifyOtpMutation.mutate({
+            email: formData.email,
+            otp,
+            keepLoggedIn: formData.keepLoggedIn,
+        });
+    };
 
-        try {
-            const response = await axios.post(
-                `${API_BASE_URL}/user/verify-email/`,
-                {
-                    email: formData.email,
-                    otp: otp
-                },
-                {
-                    withCredentials: true,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Requested-With": "XMLHttpRequest",
-                    },
-                }
-            );
-
-            if (response.status === 200) {
-                if (handleStorage(response.data)) {
-                    navigate("/", { replace: true });
-                }
-            }
-
-        } catch (err) {
-            console.error("Verification error:", err);
-            setError(err.response?.data?.detail || "Verification failed. Invalid OTP.");
-        } finally {
-            setLoading(false);
-        }
-    }
+    // ── Render ────────────────────────────────────────────────────────────────
 
     return (
         <div className="flex items-center justify-center h-screen p-4">
             <div className="max-w-4xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
                 <div className="flex flex-col md:flex-row">
-                    {/* Left Side - Image with Glassmorphism */}
+                    {/* Left Side */}
                     <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 relative items-center justify-center p-12">
                         <div className="absolute inset-0">
                             <img
@@ -248,7 +105,7 @@ const Login = () => {
                         </div>
                     </div>
 
-                    {/* Right Side - Modern Form */}
+                    {/* Right Side */}
                     <div className="w-full md:w-1/2 p-8 md:p-12">
                         <div className="mb-10">
                             <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
@@ -261,7 +118,7 @@ const Login = () => {
 
                         {step === 0 ? (
                             <form className="space-y-5" onSubmit={handleSubmit}>
-                                {/* Email Field */}
+                                {/* Email */}
                                 <div className="group">
                                     <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
                                     <input
@@ -272,12 +129,12 @@ const Login = () => {
                                         value={formData.email}
                                         onChange={handleChange}
                                         disabled={loading}
-                                        className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("email") || error.includes("Email") ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 focus:bg-white"} focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
+                                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
                                         placeholder="you@example.com"
                                     />
                                 </div>
 
-                                {/* Password Field */}
+                                {/* Password */}
                                 <div className="group">
                                     <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
                                     <div className="relative">
@@ -289,7 +146,7 @@ const Login = () => {
                                             value={formData.password}
                                             onChange={handleChange}
                                             disabled={loading}
-                                            className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("password") || error.includes("Password") ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 focus:bg-white"} focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed pr-12`}
+                                            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed pr-12"
                                             placeholder="••••••••"
                                         />
                                         <button
@@ -304,14 +161,7 @@ const Login = () => {
                                     </div>
                                 </div>
 
-                                {/* Error Message */}
-                                {error && (
-                                    <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 rounded-lg animate-in slide-in-from-top-2">
-                                        <p className="text-red-700 text-sm font-medium">{error}</p>
-                                    </div>
-                                )}
-
-                                {/* Keep Logged In & Forgot Password */}
+                                {/* Keep me logged in + Forgot password */}
                                 <div className="flex items-center justify-between pt-1">
                                     <div className="flex items-center group">
                                         <input
@@ -330,7 +180,7 @@ const Login = () => {
                                     <Link to="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">Forgot password?</Link>
                                 </div>
 
-                                {/* Submit Button */}
+                                {/* Submit */}
                                 <button
                                     type="submit"
                                     disabled={loading}
@@ -345,13 +195,12 @@ const Login = () => {
                                 </button>
                             </form>
                         ) : (
-                            // OTP Form
                             <OTPVerification
                                 otp={otp}
                                 setOtp={setOtp}
                                 handleVerify={handleVerify}
                                 loading={loading}
-                                error={error}
+                                error={verifyOtpMutation.error?.response?.data?.detail || ""}
                                 onBack={() => setStep(0)}
                                 backLabel="Back to Sign In"
                                 theme="blue"
@@ -360,14 +209,11 @@ const Login = () => {
 
                         {step === 0 && (
                             <>
-                                {/* Google Authentication */}
                                 <GoogleAuth
                                     onSuccess={handleGoogleSuccess}
                                     onError={handleGoogleError}
                                     disabled={loading}
                                 />
-
-                                {/* Sign Up Link */}
                                 <div className="mt-8 text-center">
                                     <p className="text-sm text-gray-600">
                                         Don't have an account?{" "}

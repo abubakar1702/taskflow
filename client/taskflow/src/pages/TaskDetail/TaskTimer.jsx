@@ -91,6 +91,8 @@ const TaskTimer = ({ task, onUpdate, isCreator }) => {
     const isRunning = !!task?.timer_start_time;
     const isPaused = !isRunning && task.status === 'In Progress' && parseDuration(task.time_taken) > 0;
 
+        const hasIncompleteDependencies = task?.dependencies?.some(dep => dep.status !== "Done" && dep.status !== "Completed");
+
     const getTimeStyle = () => {
         if (isRunning) return "text-green-600 dark:text-green-400 animate-pulse";
         if (isPaused) return "text-amber-500 dark:text-amber-400";
@@ -116,9 +118,9 @@ const TaskTimer = ({ task, onUpdate, isCreator }) => {
                                 <button
                                     type="button"
                                     onClick={handleStart}
-                                    disabled={loading}
-                                    className="p-2 bg-green-500 rounded-full text-white hover:bg-green-600 transition shadow-sm"
-                                    title={isPaused ? "Resume Timer" : "Start Timer"}
+                                    disabled={loading || hasIncompleteDependencies}
+                                    className={`p-2 rounded-full text-white transition shadow-sm ${loading || hasIncompleteDependencies ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"}`}
+                                    title={hasIncompleteDependencies ? "Cannot start: unresolved dependencies" : (isPaused ? "Resume Timer" : "Start Timer")}
                                 >
                                     <IoPlay className="w-5 h-5 pl-0.5" />
                                 </button>

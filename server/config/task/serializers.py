@@ -168,8 +168,30 @@ class TaskSerializer(serializers.ModelSerializer):
 
         return task
 
+    def validate(self, attrs):
+        new_status = attrs.get('status')
+        blocked_statuses = {'In Progress', 'Done', 'Completed'}
+
+        if new_status in blocked_statuses:
+            task = self.instance
+            if task is not None:
+                incomplete_blockers = task.dependencies.exclude(
+                    status__in=['Done', 'Completed']
+                )
+                if incomplete_blockers.exists():
+                    titles = ', '.join(
+                        f'"{t.title}"' for t in incomplete_blockers[:5]
+                    )
+                    raise serializers.ValidationError({
+                        'status': (
+                            f'Cannot set status to "{new_status}". '
+                            f'The following blocking tasks are not yet done: {titles}.'
+                        )
+                    })
+
+        return attrs
+
     def get_total_assets(self, obj):
-        # Use annotation if the view provided it; fallback to a count query
         annotated = getattr(obj, 'total_assets_annotated', None)
         if annotated is not None:
             return annotated

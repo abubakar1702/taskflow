@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { isAuthenticated } from "../../utils/auth";
+import useAuthStore from "../../stores/useAuthStore";
 import Sidebar from "../sidebar/Sidebar";
 import Navbar from "../navbar/Navbar";
 import { UserProvider } from "../../contexts/UserContext";
 
 const PrivateLayout = () => {
+    const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
     const [collapsed, setCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
-    if (!isAuthenticated()) {
+    if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
 

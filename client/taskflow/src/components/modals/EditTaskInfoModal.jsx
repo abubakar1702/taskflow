@@ -25,7 +25,16 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
             toast.success("Task updated successfully");
             onClose();
         },
-        onError: () => toast.error("Failed to update task. Please try again."),
+        onError: (err) => {
+            const data = err?.response?.data;
+            // DRF returns field errors as { field: ["msg"] } or { field: "msg" }
+            const message =
+                (data?.status && (Array.isArray(data.status) ? data.status[0] : data.status)) ||
+                (data?.non_field_errors && (Array.isArray(data.non_field_errors) ? data.non_field_errors[0] : data.non_field_errors)) ||
+                data?.detail ||
+                "Failed to update task. Please try again.";
+            toast.error(message);
+        },
     });
 
     useEffect(() => {
@@ -126,15 +135,25 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
                             </div>
                             <div>
                                 <label className="flex items-center block text-sm font-medium text-gray-600 mb-1"><FaBarsProgress size={16} className="mr-2" />Status</label>
-                                <select
-                                    value={status}
-                                    onChange={(e) => setStatus(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer bg-white"
-                                >
-                                    <option value="To Do">To Do</option>
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="Done">Done</option>
-                                </select>
+                                {(() => {
+                                    const hasIncompleteDependencies = task?.dependencies?.some(dep => dep.status !== "Done" && dep.status !== "Completed");
+                                    return (
+                                        <>
+                                            <select
+                                                value={status}
+                                                onChange={(e) => setStatus(e.target.value)}
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer bg-white"
+                                            >
+                                                <option value="To Do">To Do</option>
+                                                <option value="In Progress" disabled={hasIncompleteDependencies}>In Progress</option>
+                                                <option value="Done" disabled={hasIncompleteDependencies}>Done</option>
+                                            </select>
+                                            {hasIncompleteDependencies && (
+                                                <p className="text-xs text-amber-600 mt-1">Cannot start/complete: blocked by unresolved dependencies.</p>
+                                            )}
+                                        </>
+                                    );
+                                })()}
                             </div>
                         </div>
 

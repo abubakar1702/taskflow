@@ -4,13 +4,14 @@ import { useNavigate } from "react-router-dom";
 import Avatar, { useAvatar } from "../common/Avatar";
 import { useUser } from "../../contexts/UserContext";
 import LogoutLoading from "../modals/LogoutLoading";
+import { useLogout } from "../../hooks/useAuth";
 
 const UserMenu = () => {
-    const { currentUser, clearUser } = useUser();
+    const { currentUser } = useUser();
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef(null);
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
+    const { mutate: logout, isPending: loading } = useLogout();
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -24,21 +25,8 @@ const UserMenu = () => {
     }, []);
 
     const handleLogout = () => {
-        setLoading(true);
         setIsOpen(false);
-
-        setTimeout(() => {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-            localStorage.removeItem("user");
-            sessionStorage.removeItem("accessToken");
-            sessionStorage.removeItem("refreshToken");
-            sessionStorage.removeItem("user");
-
-            clearUser();
-
-            navigate("/login");
-        }, 1000);
+        logout();
     };
 
     const { avatarUrl, initials } = useAvatar(

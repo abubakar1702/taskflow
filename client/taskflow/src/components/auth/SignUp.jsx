@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import loginImg from "../../assets/taskflow-login.png";
-import axios from "axios";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { ClipLoader } from "react-spinners";
 import GoogleAuth from "./GoogleAuth";
 import OTPVerification from "./OTPVerification";
+import { useRegister, useGoogleLogin, useVerifyOtp } from "../../hooks/useAuth";
 
 const SignUp = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -16,13 +16,20 @@ const SignUp = () => {
         password: "",
     });
     const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
-
-    const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-
     const [step, setStep] = useState(0);
     const [otp, setOtp] = useState("");
+
+    // ── TanStack Query mutations ───────────────────────────────────────────────
+    const registerMutation = useRegister();
+    const googleLoginMutation = useGoogleLogin();
+    const verifyOtpMutation = useVerifyOtp();
+
+    const loading =
+        registerMutation.isPending ||
+        googleLoginMutation.isPending ||
+        verifyOtpMutation.isPending;
+
+    // ── Handlers ──────────────────────────────────────────────────────────────
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -62,184 +69,82 @@ const SignUp = () => {
         return true;
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         setError("");
 
         if (!validateForm()) return;
 
-        setLoading(true);
-
-        try {
-            const registerResponse = await axios.post(
-                `${API_BASE_URL}/user/register/`,
-                {
-                    first_name: formData.firstName,
-                    last_name: formData.lastName,
-                    email: formData.email,
-                    password: formData.password,
-                },
-                {
-                    withCredentials: true,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Requested-With": "XMLHttpRequest",
-                    },
-                }
-            );
-
-            if (registerResponse.status === 201 || registerResponse.status === 200) {
-                setStep(1);
-                setError("");
-            }
-        } catch (err) {
-            console.error("Registration error:", err);
-
-            let errorMessage = "Registration failed. Please try again.";
-            if (err.response) {
-                if (err.response.status === 400) {
-                    if (err.response.data?.email) {
-                        errorMessage = "This email is already registered.";
-                    } else if (err.response.data?.detail) {
-                        errorMessage = err.response.data.detail;
-                    } else if (err.response.data?.message) {
-                        errorMessage = err.response.data.message;
+        registerMutation.mutate(
+            {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                email: formData.email,
+                password: formData.password,
+            },
+            {
+                onSuccess: ({ status }) => {
+                    if (status === 201 || status === 200) {
+                        setStep(1);
+                        setError("");
                     }
-                } else if (err.response.data?.detail) {
-                    errorMessage = err.response.data.detail;
-                }
-            } else if (err.request) {
-                errorMessage = "Network error. Please check your connection.";
+                },
+                onError: (err) => {
+                    let errorMessage = "Registration failed. Please try again.";
+                    if (err.response) {
+                        if (err.response.status === 400) {
+                            if (err.response.data?.email) {
+                                errorMessage = "This email is already registered.";
+                            } else if (err.response.data?.detail) {
+                                errorMessage = err.response.data.detail;
+                            } else if (err.response.data?.message) {
+                                errorMessage = err.response.data.message;
+                            }
+                        } else if (err.response.data?.detail) {
+                            errorMessage = err.response.data.detail;
+                        }
+                    } else if (err.request) {
+                        errorMessage = "Network error. Please check your connection.";
+                    }
+                    setError(errorMessage);
+                },
             }
-
-            setError(errorMessage);
-        } finally {
-            setLoading(false);
-        }
+        );
     };
 
     const handleGoogleSuccess = async (credentialResponse) => {
-        if (!credentialResponse?.credential) {
-            setError("Google sign up failed. No token received.");
-            return;
-        }
-
-        setLoading(true);
-        setError("");
-
-        try {
-            const response = await axios.post(
-                `${API_BASE_URL}/user/auth/google/`,
-                {
-                    token: credentialResponse.credential,
-                },
-                {
-                    withCredentials: true,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Requested-With": "XMLHttpRequest",
-                    },
+        if (!credentialResponse?.credential) return;
+        googleLoginMutation.mutate(credentialResponse.credential, {
+            onSuccess: (data) => {
+                if (data?.action === "OTP_REQUIRED") {
+                    setFormData((prev) => ({ ...prev, email: data.email }));
+                    setStep(1);
                 }
-            );
-
-            if (response.data?.action === 'OTP_REQUIRED') {
-                setFormData(prev => ({ ...prev, email: response.data.email }));
-                setStep(1);
-                return;
-            }
-
-            if (!response.data?.access) {
-                throw new Error("Invalid response from server");
-            }
-
-            const storage = sessionStorage;
-            storage.setItem("accessToken", response.data.access);
-
-            if (response.data.refresh) {
-                storage.setItem("refreshToken", response.data.refresh);
-            }
-
-            storage.setItem(
-                "user",
-                JSON.stringify({
-                    id: response.data.user.id,
-                    email: response.data.user.email,
-                    name: `${response.data.user.first_name} ${response.data.user.last_name}`,
-                    firstName: response.data.user.first_name,
-                    lastName: response.data.user.last_name,
-                    avatar: response.data.user.avatar,
-                })
-            );
-
-            navigate("/", { replace: true });
-        } catch (err) {
-            console.error("Google sign up error:", err);
-            setError("Google sign up failed. Please try again.");
-        } finally {
-            setLoading(false);
-        }
+            },
+        });
     };
 
     const handleGoogleError = () => {
         setError("Google sign up failed. Please try again.");
     };
 
-    const handleVerify = async (e) => {
+    const handleVerify = (e) => {
         e.preventDefault();
         setError("");
-        setLoading(true);
+        verifyOtpMutation.mutate({
+            email: formData.email,
+            otp,
+            keepLoggedIn: false, // Session storage for new signups by default
+        });
+    };
 
-        try {
-            const response = await axios.post(
-                `${API_BASE_URL}/user/verify-email/`,
-                {
-                    email: formData.email,
-                    otp: otp
-                },
-                {
-                    withCredentials: true,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Requested-With": "XMLHttpRequest",
-                    },
-                }
-            );
-
-            if (response.status === 200) {
-                const storage = sessionStorage;
-                storage.setItem("accessToken", response.data.access);
-
-                if (response.data.refresh) {
-                    storage.setItem("refreshToken", response.data.refresh);
-                }
-
-                storage.setItem(
-                    "user",
-                    JSON.stringify({
-                        id: response.data.user.id,
-                        email: response.data.user.email,
-                        name: `${response.data.user.first_name} ${response.data.user.last_name}`,
-                        firstName: response.data.user.first_name,
-                        lastName: response.data.user.last_name,
-                        avatar: response.data.user.avatar,
-                    })
-                );
-                navigate("/", { replace: true });
-            }
-
-        } catch (err) {
-            console.error("Verification error:", err);
-            setError(err.response?.data?.detail || "Verification failed. Invalid OTP.");
-        } finally {
-            setLoading(false);
-        }
-    }
+    // ── Render ────────────────────────────────────────────────────────────────
 
     return (
         <div className="flex items-center justify-center h-screen p-4">
             <div className="max-w-4xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
                 <div className="flex flex-col md:flex-row">
-                    {/* Left Side - Image with Glassmorphism */}
+                    {/* Left Side */}
                     <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 relative items-center justify-center p-12">
                         <div className="absolute inset-0">
                             <img
@@ -268,7 +173,7 @@ const SignUp = () => {
                         </div>
                     </div>
 
-                    {/* Right Side - Modern Form */}
+                    {/* Right Side */}
                     <div className="w-full md:w-1/2 p-8 md:p-12">
                         <div className="mb-8">
                             <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
@@ -283,14 +188,8 @@ const SignUp = () => {
                             <form className="space-y-4" onSubmit={handleSubmit}>
                                 {/* Name Fields Row */}
                                 <div className="grid grid-cols-2 gap-4">
-                                    {/* First Name Field */}
                                     <div className="group">
-                                        <label
-                                            htmlFor="firstName"
-                                            className="block text-sm font-semibold text-gray-700 mb-2"
-                                        >
-                                            First Name
-                                        </label>
+                                        <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
                                         <input
                                             id="firstName"
                                             name="firstName"
@@ -299,22 +198,13 @@ const SignUp = () => {
                                             value={formData.firstName}
                                             onChange={handleChange}
                                             disabled={loading}
-                                            className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("First name")
-                                                ? "border-red-400 bg-red-50"
-                                                : "border-gray-200 bg-gray-50 focus:bg-white"
-                                                } focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
+                                            className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("First name") ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 focus:bg-white"} focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
                                             placeholder="John"
                                         />
                                     </div>
 
-                                    {/* Last Name Field */}
                                     <div className="group">
-                                        <label
-                                            htmlFor="lastName"
-                                            className="block text-sm font-semibold text-gray-700 mb-2"
-                                        >
-                                            Last Name
-                                        </label>
+                                        <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
                                         <input
                                             id="lastName"
                                             name="lastName"
@@ -323,10 +213,7 @@ const SignUp = () => {
                                             value={formData.lastName}
                                             onChange={handleChange}
                                             disabled={loading}
-                                            className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("Last name")
-                                                ? "border-red-400 bg-red-50"
-                                                : "border-gray-200 bg-gray-50 focus:bg-white"
-                                                } focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
+                                            className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("Last name") ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 focus:bg-white"} focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
                                             placeholder="Doe"
                                         />
                                     </div>
@@ -334,12 +221,7 @@ const SignUp = () => {
 
                                 {/* Email Field */}
                                 <div className="group">
-                                    <label
-                                        htmlFor="email"
-                                        className="block text-sm font-semibold text-gray-700 mb-2"
-                                    >
-                                        Email Address
-                                    </label>
+                                    <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
                                     <input
                                         id="email"
                                         name="email"
@@ -348,22 +230,14 @@ const SignUp = () => {
                                         value={formData.email}
                                         onChange={handleChange}
                                         disabled={loading}
-                                        className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("email") || error.includes("Email")
-                                            ? "border-red-400 bg-red-50"
-                                            : "border-gray-200 bg-gray-50 focus:bg-white"
-                                            } focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
+                                        className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("email") || error.includes("Email") ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 focus:bg-white"} focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed`}
                                         placeholder="you@example.com"
                                     />
                                 </div>
 
                                 {/* Password Field */}
                                 <div className="group">
-                                    <label
-                                        htmlFor="password"
-                                        className="block text-sm font-semibold text-gray-700 mb-2"
-                                    >
-                                        Password
-                                    </label>
+                                    <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
                                     <div className="relative">
                                         <input
                                             id="password"
@@ -373,10 +247,7 @@ const SignUp = () => {
                                             value={formData.password}
                                             onChange={handleChange}
                                             disabled={loading}
-                                            className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("password") || error.includes("Password")
-                                                ? "border-red-400 bg-red-50"
-                                                : "border-gray-200 bg-gray-50 focus:bg-white"
-                                                } focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed pr-12`}
+                                            className={`w-full px-4 py-3 rounded-xl border-2 ${error.includes("password") || error.includes("Password") ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 focus:bg-white"} focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed pr-12`}
                                             placeholder="••••••••"
                                         />
                                         <button
@@ -384,32 +255,22 @@ const SignUp = () => {
                                             onClick={() => setShowPassword(!showPassword)}
                                             disabled={loading}
                                             className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 focus:outline-none disabled:text-gray-300 transition-colors duration-200"
-                                            aria-label={
-                                                showPassword ? "Hide password" : "Show password"
-                                            }
+                                            aria-label={showPassword ? "Hide password" : "Show password"}
                                         >
-                                            {showPassword ? (
-                                                <IoEyeOff size={20} />
-                                            ) : (
-                                                <IoEye size={20} />
-                                            )}
+                                            {showPassword ? <IoEyeOff size={20} /> : <IoEye size={20} />}
                                         </button>
                                     </div>
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        Must be at least 8 characters long
-                                    </p>
+                                    <p className="text-xs text-gray-500 mt-1">Must be at least 8 characters long</p>
                                 </div>
 
-                                {/* Error Message with Animation */}
+                                {/* Error Message */}
                                 {error && (
                                     <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 rounded-lg animate-in slide-in-from-top-2">
-                                        <p className="text-red-700 text-sm font-medium">
-                                            {error}
-                                        </p>
+                                        <p className="text-red-700 text-sm font-medium">{error}</p>
                                     </div>
                                 )}
 
-                                {/* Submit Button with Gradient */}
+                                {/* Submit Button */}
                                 <button
                                     type="submit"
                                     disabled={loading}
@@ -420,19 +281,16 @@ const SignUp = () => {
                                             <ClipLoader size={20} color="#fff" />
                                             Creating account...
                                         </span>
-                                    ) : (
-                                        "Create Account"
-                                    )}
+                                    ) : "Create Account"}
                                 </button>
                             </form>
                         ) : (
-                            // OTP Verification Form
                             <OTPVerification
                                 otp={otp}
                                 setOtp={setOtp}
                                 handleVerify={handleVerify}
                                 loading={loading}
-                                error={error}
+                                error={verifyOtpMutation.error?.response?.data?.detail || error}
                                 onBack={() => setStep(0)}
                                 backLabel="Back to Sign Up"
                                 theme="purple"
@@ -450,17 +308,11 @@ const SignUp = () => {
                                 <div className="mt-6 text-center space-y-2">
                                     <p className="text-sm text-gray-600">
                                         Already have an account?{" "}
-                                        <Link
-                                            to="/login"
-                                            className="font-semibold text-purple-600 hover:text-purple-700 transition-colors"
-                                        >
+                                        <Link to="/login" className="font-semibold text-purple-600 hover:text-purple-700 transition-colors">
                                             Sign in
                                         </Link>
                                     </p>
-                                    <Link
-                                        to="/forgot-password"
-                                        className="text-sm font-semibold text-purple-600 hover:text-purple-700 transition-colors inline-block"
-                                    >
+                                    <Link to="/forgot-password" className="text-sm font-semibold text-purple-600 hover:text-purple-700 transition-colors inline-block">
                                         Forgot Password?
                                     </Link>
                                 </div>
