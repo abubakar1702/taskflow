@@ -131,11 +131,11 @@ const Tasks = () => {
                     ) : (
                         <>
                             {viewMode === "grid" ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                     {tasks.map((task) => <TaskCard key={task.id} {...task} />)}
                                 </div>
                             ) : (
-                                <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
+                                <div className="bg-white dark:bg-slate-900 rounded-md shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
                                     <div className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-200 dark:border-slate-800 px-6 py-3">
                                         <div className="grid grid-cols-12 gap-4 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
                                             <div className="col-span-4">Title</div>

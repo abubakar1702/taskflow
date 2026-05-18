@@ -53,9 +53,9 @@ const TaskCard = ({
 
     return (
         <Link to={`/tasks/${id}`}>
-            <div className="bg-white dark:bg-slate-900 rounded-sm shadow-none border border-gray-200 dark:border-slate-800/80 hover:border-gray-300 dark:hover:border-slate-700 transition-colors px-6 py-4 cursor-pointer h-full flex flex-col">
+            <div className="bg-white dark:bg-slate-900 rounded-sm shadow-none border border-gray-200 dark:border-slate-800/80 hover:border-gray-300 dark:hover:border-slate-700 transition-colors px-4 py-3 cursor-pointer h-full flex flex-col">
                 {/* Header with Priority and Status */}
-                <div className="space-x-2 mb-3">
+                <div className="space-x-2 mb-2">
                     <span
                         className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${PRIORITY_COLORS[priority]}`}
                     >
@@ -69,25 +69,25 @@ const TaskCard = ({
                 </div>
 
                 {/* Task Title */}
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-2.5 line-clamp-2 leading-snug">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1.5 line-clamp-2 leading-snug">
                     {title}
                 </h3>
 
                 {/* Project Name */}
                 {project && (
-                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1.5">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">
                         <span className="font-semibold text-gray-400 uppercase tracking-wider text-[10px]">Project:</span> <span className="text-gray-700 dark:text-slate-300">{project.name}</span>
                     </p>
                 )}
 
                 {/* Task Creator */}
-                <p className="text-xs text-gray-500 dark:text-slate-400 mb-2">
+                <p className="text-xs text-gray-500 dark:text-slate-400 mb-1.5">
                     <span className="font-semibold text-gray-400 uppercase tracking-wider text-[10px]">Created by:</span> <span className="text-gray-700 dark:text-slate-300">{creator.display_name}</span>
                 </p>
 
                 {/* Subtasks Progress */}
                 {totalSubtasks > 0 && (
-                    <div className="mb-4 mt-1.5">
+                    <div className="mb-2.5 mt-1.5">
                         <div className="flex justify-between items-center mb-1">
                             <span className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider">
                                 Subtasks
@@ -108,7 +108,7 @@ const TaskCard = ({
                 {/* Due Date & Time */}
                 {due_date && (
                     <div
-                        className={`flex items-center gap-4 text-xs mb-4 mt-auto pt-2.5 ${isOverdue() ? "text-red-600 dark:text-red-400" : "text-gray-500 dark:text-slate-400"
+                        className={`flex items-center gap-4 text-xs mb-2 mt-auto pt-1.5 ${isOverdue() ? "text-red-600 dark:text-red-400" : "text-gray-500 dark:text-slate-400"
                             }`}
                     >
                         <div className="flex items-center gap-1.5">
@@ -129,7 +129,7 @@ const TaskCard = ({
 
                 {/* Assignees */}
                 {assignees.length > 0 && (
-                    <div className="flex justify-between items-center border-t border-gray-100 dark:border-slate-800/80 pt-3 mt-auto">
+                    <div className="flex justify-between items-center border-t border-gray-100 dark:border-slate-800/80 pt-2.5 mt-auto">
                         <div className="flex items-center gap-2">
                             <div className="flex -space-x-1.5">
                                 {assignees.slice(0, 4).map((assignee, index) => (
@@ -141,7 +141,7 @@ const TaskCard = ({
                                         <Avatar
                                             name={assignee.display_name}
                                             url={assignee.avatar}
-                                            size={7}
+                                            size={6}
                                             className="border border-white dark:border-slate-900 rounded-full"
                                         />
                                         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
@@ -150,7 +150,7 @@ const TaskCard = ({
                                     </div>
                                 ))}
                                 {assignees.length > 4 && (
-                                    <div className="w-7 h-7 rounded-full border border-white dark:border-slate-900 bg-gray-200 dark:bg-slate-800 flex items-center justify-center text-gray-700 dark:text-slate-300 text-[10px] font-bold">
+                                    <div className="w-6 h-6 rounded-full border border-white dark:border-slate-900 bg-gray-200 dark:bg-slate-800 flex items-center justify-center text-gray-700 dark:text-slate-300 text-[10px] font-bold">
                                         +{assignees.length - 4}
                                     </div>
                                 )}

@@ -20,7 +20,7 @@ const DayTasksModal = ({ isOpen, onClose, date, tasks, currentUser }) => {
     return createPortal(
         <div className="fixed inset-0 bg-black/50 transition-opacity duration-200 flex items-center justify-center z-50 p-4" onClick={onClose}>
             <div
-                className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden transform transition-all scale-100 opacity-100"
+                className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-md shadow-2xl overflow-hidden transform transition-all scale-100 opacity-100"
                 onClick={e => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50">
@@ -53,7 +53,7 @@ const DayTasksModal = ({ isOpen, onClose, date, tasks, currentUser }) => {
                                     key={task.id}
                                     className="block group"
                                 >
-                                    <div className="p-4 rounded-xl border border-gray-100 dark:border-slate-800 hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-md transition-all duration-200 bg-white dark:bg-slate-900 group-hover:bg-blue-50/30 dark:group-hover:bg-blue-900/10">
+                                    <div className="p-4 rounded-md border border-gray-100 dark:border-slate-800 hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-md transition-all duration-200 bg-white dark:bg-slate-900 group-hover:bg-blue-50/30 dark:group-hover:bg-blue-900/10">
                                         <div className="flex justify-between items-start gap-4">
                                             <div className="flex-1">
                                                 <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-1 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">

@@ -94,9 +94,9 @@ function Calendar() {
         <div className="min-h-screen bg-gray-50 dark:bg-slate-950/50 py-6 px-4 font-sans text-gray-900 dark:text-slate-100">
 
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row justify-between items-center mb-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-4 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 sticky top-0 z-10">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-4 rounded-md shadow-sm border border-gray-100 dark:border-slate-800 sticky top-0 z-10">
                 <div className="flex items-center gap-4 mb-4 md:mb-0">
-                    <div className="bg-blue-600 p-3 rounded-xl text-white">
+                    <div className="bg-blue-600 p-3 rounded-md text-white">
                         <FaCalendarAlt className="h-6 w-6" />
                     </div>
                     <div>
@@ -107,22 +107,22 @@ function Calendar() {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 bg-gray-100 dark:bg-slate-800 p-1 rounded-xl">
+                <div className="flex items-center gap-2 bg-gray-100 dark:bg-slate-800 p-1 rounded-md">
                     <button
                         onClick={prevMonth}
-                        className="p-2 hover:bg-white dark:hover:bg-slate-700 hover:shadow-md rounded-lg text-gray-600 dark:text-slate-300 transition-all duration-200"
+                        className="p-2 hover:bg-white dark:hover:bg-slate-700 hover:shadow-md rounded-md text-gray-600 dark:text-slate-300 transition-all duration-200"
                     >
                         <FaChevronLeft />
                     </button>
                     <button
                         onClick={urlToToday}
-                        className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700 hover:shadow-md rounded-lg transition-all duration-200"
+                        className="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700 hover:shadow-md rounded-md transition-all duration-200"
                     >
                         Today
                     </button>
                     <button
                         onClick={nextMonth}
-                        className="p-2 hover:bg-white dark:hover:bg-slate-700 hover:shadow-md rounded-lg text-gray-600 dark:text-slate-300 transition-all duration-200"
+                        className="p-2 hover:bg-white dark:hover:bg-slate-700 hover:shadow-md rounded-md text-gray-600 dark:text-slate-300 transition-all duration-200"
                     >
                         <FaChevronRight />
                     </button>
@@ -130,7 +130,7 @@ function Calendar() {
             </div>
 
             {/* Calendar Grid */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-md shadow-sm border border-gray-200 dark:border-slate-800 overflow-hidden">
 
                 {/* Weekday Headers */}
                 <div className="grid grid-cols-7 border-b border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50">

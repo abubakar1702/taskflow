@@ -30,7 +30,7 @@ const Navbar = () => {
 
             {/* Mobile Search Bar Overlay */}
             {isSearchOpen && (
-                <div className="absolute top-full left-0 right-0 bg-white p-4 shadow-md border-b border-gray-200 md:hidden z-50">
+                <div className="absolute top-full left-0 right-0 bg-white dark:bg-slate-900 p-4 shadow-md dark:shadow-slate-950/50 border-b border-gray-200 dark:border-slate-800 md:hidden z-50">
                     <Search className="w-full !px-0" />
                 </div>
             )}
