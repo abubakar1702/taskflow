@@ -68,16 +68,16 @@ const Home = () => {
     if (tasksLoading || projectsLoading) return <LoadingScreen message="Loading dashboard..." fullscreen />;
 
     return (
-        <div className="min-h-screen bg-gray-50/50 p-6 md:p-8">
+        <div className="min-h-screen bg-gray-50/50 dark:bg-slate-950/50 p-6 md:p-8">
             <div className="max-w-7xl mx-auto space-y-8">
 
                 {/* Welcome Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100 tracking-tight">
                             {getGreeting()}, {currentUser?.first_name || 'User'}! 👋
                         </h1>
-                        <p className="text-gray-500 mt-1">Here's what's happening with your projects today.</p>
+                        <p className="text-gray-500 dark:text-slate-400 mt-1">Here's what's happening with your projects today.</p>
                     </div>
                     <div className="flex gap-3">
                         <Link to="/new-task">
@@ -87,7 +87,7 @@ const Home = () => {
                             </button>
                         </Link>
                         <Link to="/calendar">
-                            <button className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all shadow-sm">
+                            <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm">
                                 <FaCalendar size={14} />
                                 <span>Calendar</span>
                             </button>

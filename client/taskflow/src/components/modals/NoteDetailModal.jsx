@@ -117,11 +117,11 @@ const NoteDetailModal = ({ isOpen, onClose, noteId, onUpdate }) => {
 
     const overlay = (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 transition-opacity duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[70vh] overflow-hidden flex flex-col relative animate-slideUp">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl h-[70vh] overflow-hidden flex flex-col relative animate-slideUp">
                 {/* header */}
-                <div className="flex justify-between items-center p-4 border-b border-gray-100 shrink-0">
-                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                        <BsX size={24} className="text-gray-500" />
+                <div className="flex justify-between items-center p-4 border-b border-gray-100 dark:border-slate-800 shrink-0">
+                    <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+                        <BsX size={24} className="text-gray-500 dark:text-slate-400" />
                     </button>
 
                     <div className="flex items-center gap-2">
@@ -129,7 +129,7 @@ const NoteDetailModal = ({ isOpen, onClose, noteId, onUpdate }) => {
                             <>
                                 <button
                                     onClick={() => setIsEditing(true)}
-                                    className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-colors"
+                                    className="p-2 text-gray-400 dark:text-slate-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-colors"
                                     title="Edit note"
                                 >
                                     <BsPencil size={20} />
@@ -137,14 +137,14 @@ const NoteDetailModal = ({ isOpen, onClose, noteId, onUpdate }) => {
                                 
                                 <button
                                     onClick={handlePinToggle}
-                                    className="p-2 text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 rounded-full transition-colors"
+                                    className="p-2 text-gray-400 dark:text-slate-500 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/30 rounded-full transition-colors"
                                     title={note.is_pinned ? "Unpin note" : "Pin note"}
                                 >
                                     {note.is_pinned ? <BsPinFill className="text-yellow-500" size={20} /> : <BsPin size={20} />}
                                 </button>
                                 <button
                                     onClick={() => setShowDeleteModal(true)}
-                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                                    className="p-2 text-gray-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors"
                                     title="Delete note"
                                 >
                                     <BsTrash size={20} />
@@ -156,7 +156,7 @@ const NoteDetailModal = ({ isOpen, onClose, noteId, onUpdate }) => {
                             <>
                                 <button
                                     onClick={handleCancelEdit}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-gray-700 hover:bg-gray-100"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800"
                                 >
                                     Cancel
                                 </button>
@@ -165,7 +165,7 @@ const NoteDetailModal = ({ isOpen, onClose, noteId, onUpdate }) => {
                                     disabled={!isDirty || actionLoading}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ml-2 ${isDirty
                                             ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
-                                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                            : 'bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500 cursor-not-allowed'
                                         }`}
                                 >
                                     {actionLoading ? 'Saving...' : <><BsSave /> Save</>}
@@ -189,10 +189,10 @@ const NoteDetailModal = ({ isOpen, onClose, noteId, onUpdate }) => {
                                     value={title}
                                     onChange={handleTitleChange}
                                     placeholder="Title"
-                                    className="text-3xl font-bold text-gray-800 w-full border-b border-gray-200 focus:border-blue-500 focus:ring-0 px-0 bg-transparent placeholder-gray-400 mb-6 pb-2 outline-none"
+                                    className="text-3xl font-bold text-gray-800 dark:text-slate-100 w-full border-b border-gray-200 dark:border-slate-700 focus:border-blue-500 focus:ring-0 px-0 bg-transparent placeholder-gray-400 dark:placeholder-slate-500 mb-6 pb-2 outline-none"
                                 />
                             ) : (
-                                <h2 className="text-3xl font-bold text-gray-800 mb-6 border-b border-transparent pb-2">{note.title || 'Untitled'}</h2>
+                                <h2 className="text-3xl font-bold text-gray-800 dark:text-slate-100 mb-6 border-b border-transparent pb-2">{note.title || 'Untitled'}</h2>
                             )}
 
                             {isEditing ? (
@@ -200,16 +200,16 @@ const NoteDetailModal = ({ isOpen, onClose, noteId, onUpdate }) => {
                                     value={content}
                                     onChange={handleContentChange}
                                     placeholder="Start typing..."
-                                    className="w-full flex-grow text-lg text-gray-600 leading-relaxed resize-none border-none focus:ring-0 px-0 bg-transparent placeholder-gray-300 outline-none"
+                                    className="w-full flex-grow text-lg text-gray-600 dark:text-slate-300 leading-relaxed resize-none border-none focus:ring-0 px-0 bg-transparent placeholder-gray-300 dark:placeholder-slate-600 outline-none"
                                 />
                             ) : (
-                                <p className="w-full flex-grow text-lg text-gray-800 leading-relaxed whitespace-pre-wrap">
+                                <p className="w-full flex-grow text-lg text-gray-800 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
                                     {note.content || 'No content'}
                                 </p>
                             )}
                         </div>
                     ) : (
-                        <div className="flex justify-center items-center h-full text-gray-500">
+                        <div className="flex justify-center items-center h-full text-gray-500 dark:text-slate-400">
                             Note not found
                         </div>
                     )}

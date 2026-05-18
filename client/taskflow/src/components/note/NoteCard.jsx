@@ -5,20 +5,20 @@ const NoteCard = ({ note, onPin, onDelete, onClick }) => {
     return (
         <div
             onClick={() => onClick(note.id)}
-            className="group bg-white p-5 rounded-xl shadow-sm hover:shadow-md border border-gray-200 transition-all cursor-pointer relative flex flex-col h-60"
+            className="group bg-white dark:bg-slate-800 p-5 rounded-xl shadow-sm hover:shadow-md border border-gray-200 dark:border-slate-700 transition-all cursor-pointer relative flex flex-col h-60"
         >
             <div className="flex justify-between items-start mb-3">
-                <h3 className="font-semibold text-lg text-gray-800 line-clamp-1 pr-8">
+                <h3 className="font-semibold text-lg text-gray-800 dark:text-slate-100 line-clamp-1 pr-8">
                     {note.title || 'Untitled'}
                 </h3>
             </div>
 
-            <p className="text-gray-600 text-sm line-clamp-6 whitespace-pre-wrap flex-grow">
+            <p className="text-gray-600 dark:text-slate-400 text-sm line-clamp-6 whitespace-pre-wrap flex-grow">
                 {note.content || 'No content'}
             </p>
 
             <div className="flex justify-between items-center pt-2 mt-auto">
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-gray-400 dark:text-slate-500">
                     {new Date(note.updated_at).toLocaleDateString()}
                 </div>
 
@@ -28,7 +28,7 @@ const NoteCard = ({ note, onPin, onDelete, onClick }) => {
                             e.stopPropagation();
                             onPin(note);
                         }}
-                        className="p-1.5 text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 rounded-full transition-colors"
+                        className="p-1.5 text-gray-400 dark:text-slate-500 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/30 rounded-full transition-colors"
                         title={note.is_pinned ? "Unpin note" : "Pin note"}
                     >
                         {note.is_pinned ? (
@@ -43,7 +43,7 @@ const NoteCard = ({ note, onPin, onDelete, onClick }) => {
                             e.stopPropagation();
                             onDelete(note);
                         }}
-                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                        className="p-1.5 text-gray-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors"
                         title="Delete note"
                     >
                         <BsTrash size={18} />

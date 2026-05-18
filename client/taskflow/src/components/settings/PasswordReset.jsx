@@ -55,19 +55,19 @@ const PasswordReset = ({ user, makeRequest }) => {
     return (
         <div className="max-w-xl mx-auto space-y-8 py-4">
             <div className="text-center">
-                <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <FaLock size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Password Settings</h3>
-                <p className="text-gray-500">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Password Settings</h3>
+                <p className="text-gray-500 dark:text-slate-400">
                     Manage your password and security preferences.
                 </p>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <div className="bg-gray-50 dark:bg-slate-900/50 rounded-xl p-6 border border-gray-200 dark:border-slate-800">
                 {resetStep === 0 && (
                     <div className="text-center space-y-4">
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 dark:text-slate-400">
                             To change your password, we'll send a One-Time Password (OTP) to your registered email address <strong>{user?.email}</strong>.
                         </p>
                         <button
@@ -83,39 +83,39 @@ const PasswordReset = ({ user, makeRequest }) => {
 
                 {(resetStep === 3) && (
                     <form onSubmit={handlePasswordResetConfirm} className="space-y-4 text-left">
-                        <div className="bg-blue-50 text-blue-800 p-3 rounded-lg text-sm mb-4">
+                        <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 p-3 rounded-lg text-sm mb-4">
                             OTP sent to {user?.email}. Please check your inbox.
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Enter OTP</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Enter OTP</label>
                             <input
                                 type="text"
                                 value={resetOtp}
                                 onChange={(e) => setResetOtp(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 outline-none"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:border-blue-500 outline-none"
                                 placeholder="6-digit code"
                                 maxLength={6}
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">New Password</label>
                             <input
                                 type="password"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 outline-none"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:border-blue-500 outline-none"
                                 placeholder="Min 8 characters"
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Confirm Password</label>
                             <input
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 outline-none"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:border-blue-500 outline-none"
                                 placeholder="Repeat password"
                                 required
                             />
@@ -124,7 +124,7 @@ const PasswordReset = ({ user, makeRequest }) => {
                             <button
                                 type="button"
                                 onClick={() => setResetStep(0)}
-                                className="flex-1 py-2.5 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50"
+                                className="flex-1 py-2.5 rounded-lg border border-gray-300 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800"
                             >
                                 Cancel
                             </button>
@@ -142,11 +142,11 @@ const PasswordReset = ({ user, makeRequest }) => {
 
                 {resetStep === 4 && (
                     <div className="text-center space-y-4 py-4">
-                        <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
+                        <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto">
                             <FaLock size={20} />
                         </div>
-                        <h4 className="text-lg font-bold text-gray-900">Success!</h4>
-                        <p className="text-gray-600">Your password has been securely updated.</p>
+                        <h4 className="text-lg font-bold text-gray-900 dark:text-white">Success!</h4>
+                        <p className="text-gray-600 dark:text-slate-400">Your password has been securely updated.</p>
                         <button
                             onClick={() => {
                                 setResetStep(0);
@@ -154,7 +154,7 @@ const PasswordReset = ({ user, makeRequest }) => {
                                 setNewPassword("");
                                 setConfirmPassword("");
                             }}
-                            className="text-blue-600 font-medium hover:underline"
+                            className="text-blue-600 dark:text-blue-400 font-medium hover:underline"
                         >
                             Close
                         </button>

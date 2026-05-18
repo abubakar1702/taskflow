@@ -249,23 +249,23 @@ const NewTask = () => {
             <MdTaskAlt className="text-white" size={28} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Create New Task</h1>
-            <p className="text-gray-600">Add task details and subtasks below</p>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Create New Task</h1>
+            <p className="text-gray-600 dark:text-gray-400">Add task details and subtasks below</p>
           </div>
         </div>
 
         <div className="space-y-8">
           {/* Task Details */}
-          <section className="bg-white shadow p-6 rounded-xl border border-gray-200">
+          <section className="bg-white dark:bg-gray-800 shadow p-6 rounded-xl border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2 mb-6">
-              <FiList className="text-blue-600" size={20} />
-              <h2 className="text-xl font-semibold text-gray-800">Task Details</h2>
+              <FiList className="text-blue-600 dark:text-blue-400" size={20} />
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Task Details</h2>
             </div>
 
             <div className="space-y-6">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Title <span className="text-red-500">*</span>
                   </label>
                   <span
@@ -273,7 +273,7 @@ const NewTask = () => {
                       ? 'text-red-600'
                       : taskFormData.title.length >= 150
                         ? 'text-yellow-600'
-                        : 'text-gray-500'
+                        : 'text-gray-500 dark:text-gray-400'
                       }`}
                   >
                     {taskFormData.title.length}/200
@@ -285,32 +285,32 @@ const NewTask = () => {
                   value={taskFormData.title}
                   onChange={handleInputChange}
                   maxLength={200}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 dark:bg-gray-700 dark:text-gray-100"
                   placeholder="Enter task title"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
                 <textarea
                   name="description"
                   value={taskFormData.description}
                   onChange={handleInputChange}
                   rows="4"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 dark:bg-gray-700 dark:text-gray-100"
                   placeholder="Describe the task details..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Project (Optional)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Project (Optional)</label>
                 <div className="relative">
                   <select
                     name="project_id"
                     value={taskFormData.project_id}
                     onChange={handleProjectChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer transition-all duration-200 dark:bg-gray-700 dark:text-gray-100"
                   >
                     <option value="">No Project (Global Task)</option>
                     {projects.map((project) => (
@@ -328,7 +328,7 @@ const NewTask = () => {
               {/* Date, Time, Priority */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                     <FiCalendar className="text-gray-400" />
                     Due Date
                   </label>
@@ -337,11 +337,11 @@ const NewTask = () => {
                     name="due_date"
                     value={taskFormData.due_date || ""}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all duration-200 dark:bg-gray-700 dark:text-gray-100"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                     <FiClock className="text-gray-400" />
                     Due Time
                   </label>
@@ -350,11 +350,11 @@ const NewTask = () => {
                     name="due_time"
                     value={taskFormData.due_time || ""}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all duration-200 dark:bg-gray-700 dark:text-gray-100"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
                     <FiFlag className="text-gray-400" />
                     Priority
                   </label>
@@ -362,7 +362,7 @@ const NewTask = () => {
                     name="priority"
                     value={taskFormData.priority}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all duration-200 dark:bg-gray-700 dark:text-gray-100"
                   >
                     <option value="Low" className="text-green-600">Low</option>
                     <option value="Medium" className="text-yellow-600">Medium</option>

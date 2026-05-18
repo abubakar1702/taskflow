@@ -57,10 +57,10 @@ const Notes = () => {
         <div className="p-8 max-w-7xl mx-auto min-h-screen">
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="bg-yellow-100 p-3 rounded-xl">
-                        <FaStickyNote className="w-6 h-6 text-yellow-600" />
+                    <div className="bg-yellow-100 dark:bg-yellow-900/30 p-3 rounded-xl">
+                        <FaStickyNote className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-800">Notes</h1>
+                    <h1 className="text-3xl font-bold text-gray-800 dark:text-slate-100">Notes</h1>
                 </div>
 
                 <div className="flex items-center gap-4 w-full md:w-auto">
@@ -87,7 +87,7 @@ const Notes = () => {
                 <div className="space-y-10">
                     {pinnedNotes.length > 0 && (
                         <section>
-                            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 pl-1">Pinned</h2>
+                            <h2 className="text-sm font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-4 pl-1">Pinned</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {pinnedNotes.map(note => (
                                     <NoteCard
@@ -105,7 +105,7 @@ const Notes = () => {
                     {otherNotes.length > 0 && (
                         <section>
                             {pinnedNotes.length > 0 && (
-                                <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 pl-1">Others</h2>
+                                <h2 className="text-sm font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-4 pl-1">Others</h2>
                             )}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {otherNotes.map(note => (
@@ -122,12 +122,12 @@ const Notes = () => {
                     )}
 
                     {filteredNotes.length === 0 && (
-                        <div className="text-center py-20 text-gray-500">
-                            <FaStickyNote className="w-16 h-16 mx-auto mb-4 text-gray-200" />
+                        <div className="text-center py-20 text-gray-500 dark:text-slate-400">
+                            <FaStickyNote className="w-16 h-16 mx-auto mb-4 text-gray-200 dark:text-slate-700" />
                             <p className="text-lg">No notes found</p>
                             <button
                                 onClick={() => setShowCreateModal(true)}
-                                className="text-blue-600 hover:underline mt-2"
+                                className="text-blue-600 dark:text-blue-400 hover:underline mt-2"
                             >
                                 Create your first note
                             </button>

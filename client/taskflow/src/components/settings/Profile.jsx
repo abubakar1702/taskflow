@@ -88,7 +88,7 @@ const Profile = ({ user, makeRequest, refetch }) => {
             {/* Avatar Section */}
             <div className="flex flex-col items-center mb-8">
                 <div className="relative group">
-                    <div className="p-1 bg-white rounded-full border-2 border-gray-100 shadow-sm">
+                    <div className="p-1 bg-white dark:bg-slate-800 rounded-full border-2 border-gray-100 dark:border-slate-700 shadow-sm">
                         <Avatar
                             name={user?.display_name || formData.first_name}
                             url={avatarPreview || user?.avatar}
@@ -99,7 +99,7 @@ const Profile = ({ user, makeRequest, refetch }) => {
                     <button
                         type="button"
                         onClick={triggerFileInput}
-                        className="absolute bottom-1 right-1 p-2.5 bg-white rounded-full shadow-lg border border-gray-100 text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-all z-10"
+                        className="absolute bottom-1 right-1 p-2.5 bg-white dark:bg-slate-700 rounded-full shadow-lg border border-gray-100 dark:border-slate-600 text-gray-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-slate-600 transition-all z-10"
                         title="Upload New Avatar"
                     >
                         <FaCamera size={16} />
@@ -113,10 +113,10 @@ const Profile = ({ user, makeRequest, refetch }) => {
                     />
                 </div>
                 <div className="mt-4 text-center">
-                    <h2 className="text-xl font-bold text-gray-900">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                         {user?.display_name || "User"}
                     </h2>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
                         {user?.is_superuser ? "Super Admin" : user?.is_staff ? "Staff" : "Member"}
                     </p>
                 </div>
@@ -125,19 +125,19 @@ const Profile = ({ user, makeRequest, refetch }) => {
             <form onSubmit={handleSubmit} className="space-y-8">
                 {/* Personal Information Group */}
                 <section className="space-y-6">
-                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                        <FaUser className="text-gray-400" />
-                        <h3 className="text-lg font-semibold text-gray-800">Identify</h3>
+                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100 dark:border-slate-800">
+                        <FaUser className="text-gray-400 dark:text-slate-500" />
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-slate-200">Identify</h3>
                     </div>
 
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                            <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                                 Username
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <FaAt className="text-gray-400" />
+                                    <FaAt className="text-gray-400 dark:text-slate-500" />
                                 </div>
                                 <input
                                     type="text"
@@ -145,7 +145,7 @@ const Profile = ({ user, makeRequest, refetch }) => {
                                     name="username"
                                     value={formData.username}
                                     onChange={handleChange}
-                                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all bg-gray-50 focus:bg-white outline-none"
+                                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 dark:border-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all bg-gray-50 dark:bg-slate-900/50 focus:bg-white dark:focus:bg-slate-800 text-gray-900 dark:text-white outline-none"
                                     placeholder="username"
                                 />
                             </div>
@@ -153,7 +153,7 @@ const Profile = ({ user, makeRequest, refetch }) => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                                     First Name
                                 </label>
                                 <input
@@ -162,12 +162,12 @@ const Profile = ({ user, makeRequest, refetch }) => {
                                     name="first_name"
                                     value={formData.first_name}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all bg-gray-50 focus:bg-white outline-none"
+                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all bg-gray-50 dark:bg-slate-900/50 focus:bg-white dark:focus:bg-slate-800 text-gray-900 dark:text-white outline-none"
                                     placeholder="Enter your first name"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                                     Last Name
                                 </label>
                                 <input
@@ -176,7 +176,7 @@ const Profile = ({ user, makeRequest, refetch }) => {
                                     name="last_name"
                                     value={formData.last_name}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all bg-gray-50 focus:bg-white outline-none"
+                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-slate-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all bg-gray-50 dark:bg-slate-900/50 focus:bg-white dark:focus:bg-slate-800 text-gray-900 dark:text-white outline-none"
                                     placeholder="Enter your last name"
                                 />
                             </div>
@@ -186,13 +186,13 @@ const Profile = ({ user, makeRequest, refetch }) => {
 
                 {/* Contact Information Group */}
                 <section className="space-y-6">
-                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                        <FaEnvelope className="text-gray-400" />
-                        <h3 className="text-lg font-semibold text-gray-800">Contact</h3>
+                    <div className="flex items-center gap-2 pb-2 border-b border-gray-100 dark:border-slate-800">
+                        <FaEnvelope className="text-gray-400 dark:text-slate-500" />
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-slate-200">Contact</h3>
                     </div>
 
                     <div className="space-y-2">
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                             Email Address
                         </label>
                         <div className="relative">
@@ -202,9 +202,9 @@ const Profile = ({ user, makeRequest, refetch }) => {
                                 name="email"
                                 value={formData.email}
                                 readOnly
-                                className="w-full px-4 py-2.5 pl-10 rounded-lg border border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed outline-none select-none"
+                                className="w-full px-4 py-2.5 pl-10 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 cursor-not-allowed outline-none select-none"
                             />
-                            <FaLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+                            <FaLock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 text-sm" />
 
                         </div>
                     </div>
