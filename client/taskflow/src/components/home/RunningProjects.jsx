@@ -9,7 +9,7 @@ const RunningProjects = ({ projects }) => (
                 View All ({projects.length}) <FaChevronRight size={10} />
             </Link>
         </div>
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden p-4 space-y-3">
+        <div className="bg-white dark:bg-slate-800 rounded-md shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden p-4 space-y-3">
             {projects.length > 0 ? (
                 projects.slice(0, 4).map(project => (
                     <Link key={project.id} to={`/projects/${project.id}`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors border border-transparent hover:border-gray-100 dark:hover:border-slate-600">

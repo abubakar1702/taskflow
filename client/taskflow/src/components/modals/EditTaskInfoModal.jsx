@@ -65,12 +65,12 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 transition-opacity duration-200">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
-                <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50">
-                    <span className="font-semibold uppercase">Edit Task</span>
+            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh] border border-transparent dark:border-slate-800">
+                <div className="flex justify-between items-center p-5 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50">
+                    <span className="font-semibold uppercase text-gray-900 dark:text-slate-100">Edit Task</span>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-200"
+                        className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-200 transition-colors p-1 rounded-full hover:bg-gray-200 dark:hover:bg-slate-800"
                     >
                         <FaXmark className="w-5 h-5" />
                     </button>
@@ -78,14 +78,14 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
 
                 <div className="p-6 overflow-y-auto">
                     {error && (
-                        <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">
+                        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm rounded-lg border border-red-200 dark:border-red-900/50">
                             {error.message || "An error occurred while updating the task"}
                         </div>
                     )}
                     <form id="edit-task-form" onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <div className="flex items-center justify-between mb-1">
-                                <label className="block text-sm font-medium text-gray-700">Title</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Title</label>
                                 <span
                                     className={`text-xs font-medium ${title.length >= 200
                                         ? 'text-red-600'
@@ -97,35 +97,35 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
                                     {title.length}/200
                                 </span>
                             </div>
-                            <input
+                                <input
                                 type="text"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 maxLength={200}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100"
                                 placeholder="Task title"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Description</label>
                             <textarea
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 rows="12"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none"
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100"
                                 placeholder="Add a description..."
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="flex items-center block text-sm font-medium text-gray-600 mb-1"><FaArrowRightArrowLeft size={16} className="mr-2 rotate-180" />Priority</label>
+                                <label className="flex items-center block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"><FaArrowRightArrowLeft size={16} className="mr-2 rotate-180" />Priority</label>
                                 <select
                                     value={priority}
                                     onChange={(e) => setPriority(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer bg-white"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100"
                                 >
                                     <option value="Urgent">Urgent</option>
                                     <option value="High">High</option>
@@ -134,7 +134,7 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
                                 </select>
                             </div>
                             <div>
-                                <label className="flex items-center block text-sm font-medium text-gray-600 mb-1"><FaBarsProgress size={16} className="mr-2" />Status</label>
+                                <label className="flex items-center block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"><FaBarsProgress size={16} className="mr-2" />Status</label>
                                 {(() => {
                                     const hasIncompleteDependencies = task?.dependencies?.some(dep => dep.status !== "Done" && dep.status !== "Completed");
                                     return (
@@ -142,7 +142,7 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
                                             <select
                                                 value={status}
                                                 onChange={(e) => setStatus(e.target.value)}
-                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer bg-white"
+                                                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100"
                                             >
                                                 <option value="To Do">To Do</option>
                                                 <option value="In Progress" disabled={hasIncompleteDependencies}>In Progress</option>
@@ -159,32 +159,32 @@ const EditTaskInfoModal = ({ isOpen, onClose, task, onUpdate }) => {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="flex items-center block text-sm font-medium text-gray-600 mb-1"><FaCalendarDays size={16} className="mr-2" />Due Date</label>
+                                <label className="flex items-center block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"><FaCalendarDays size={16} className="mr-2" />Due Date</label>
                                 <input
                                     type="date"
                                     value={dueDate}
                                     onChange={(e) => setDueDate(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100 color-scheme-light dark:color-scheme-dark"
                                 />
                             </div>
                             <div>
-                                <label className="flex items-center block text-sm font-medium text-gray-600 mb-1"><FaClock size={16} className="mr-2" />Due Time</label>
+                                <label className="flex items-center block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1"><FaClock size={16} className="mr-2" />Due Time</label>
                                 <input
                                     type="time"
                                     value={dueTime}
                                     onChange={(e) => setDueTime(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer bg-white dark:bg-slate-950 text-gray-900 dark:text-slate-100 color-scheme-light dark:color-scheme-dark"
                                 />
                             </div>
                         </div>
                     </form>
                 </div>
 
-                <div className="p-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                <div className="p-5 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 flex justify-end gap-3">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-5 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors font-medium shadow-sm"
+                        className="px-5 py-2 text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transition-colors font-medium shadow-sm"
                         disabled={loading}
                     >
                         Cancel
