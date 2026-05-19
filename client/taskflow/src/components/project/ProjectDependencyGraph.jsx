@@ -10,6 +10,9 @@ import {
   MarkerType,
   Handle,
   Position,
+  BaseEdge,
+  EdgeLabelRenderer,
+  getBezierPath
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import dagre from 'dagre';
@@ -92,6 +95,45 @@ const nodeTypes = {
   custom: CustomNode,
 };
 
+const CustomEdge = ({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, style = {}, markerEnd, selected, animated }) => {
+  const [edgePath, labelX, labelY] = getBezierPath({
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetX,
+    targetY,
+    targetPosition,
+  });
+
+  const strokeColor = selected ? '#ef4444' : (style.stroke || '#3b82f6');
+  const edgeStyle = { ...style, stroke: strokeColor, strokeWidth: selected ? 3 : (style.strokeWidth || 2) };
+
+  return (
+    <>
+      <BaseEdge path={edgePath} markerEnd={markerEnd} style={edgeStyle} className={animated ? 'react-flow__edge-path animated' : 'react-flow__edge-path'} />
+      {selected && (
+        <EdgeLabelRenderer>
+          <div
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+              pointerEvents: 'all',
+              zIndex: 20,
+            }}
+            className="nodrag nopan bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 text-xs px-2.5 py-1 rounded shadow-lg border border-slate-700 dark:border-slate-200 whitespace-nowrap font-medium"
+          >
+            Press <kbd className="font-mono bg-slate-700 dark:bg-slate-200 px-1 rounded mx-1">Backspace</kbd> to delete
+          </div>
+        </EdgeLabelRenderer>
+      )}
+    </>
+  );
+};
+
+const edgeTypes = {
+  custom: CustomEdge,
+};
+
 const ProjectDependencyGraph = ({ tasks, projectId }) => {
   const queryClient = useQueryClient();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -140,6 +182,7 @@ const ProjectDependencyGraph = ({ tasks, projectId }) => {
             id: `e${depId}-${task.id}`,
             source: depId,
             target: task.id.toString(),
+            type: 'custom',
             markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' },
             animated: task.status !== 'Done',
             style: { stroke: '#3b82f6', strokeWidth: 2 }
@@ -161,6 +204,7 @@ const ProjectDependencyGraph = ({ tasks, projectId }) => {
     (params) => {
       setEdges((eds) => addEdge({
         ...params,
+        type: 'custom',
         markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' },
         animated: true,
         style: { stroke: '#3b82f6', strokeWidth: 2 }
@@ -214,6 +258,7 @@ const ProjectDependencyGraph = ({ tasks, projectId }) => {
         onConnect={onConnect}
         onEdgesDelete={onEdgesDelete}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         connectionLineStyle={{ stroke: '#3b82f6', strokeWidth: 2 }}
         fitView
         attributionPosition="bottom-right"
