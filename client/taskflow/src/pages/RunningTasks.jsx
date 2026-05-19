@@ -71,24 +71,23 @@ const RunningTasks = () => {
                                     <div className="mt-1 text-sm text-gray-500 dark:text-slate-400 flex flex-wrap items-center gap-3">
                                         <span className="font-medium text-gray-700 dark:text-slate-300">{task.project?.name || "No Project"}</span>
                                         <span className="text-gray-300 dark:text-slate-600">•</span>
-                                        <Avatar name={task.creator.display_name} url={task.creator.avatar} size={6} />
-                                        <span className="text-gray-300 dark:text-slate-600">•</span>
-                                        <div>
-                                            {task.assignees?.length ? (
+
+                                        <div className="flex items-center gap-2">
+                                            {task.active_timers?.length ? (
                                                 <div className="flex items-center -space-x-2">
-                                                    {task.assignees.slice(0, 3).map((user, index) => (
+                                                    {task.active_timers.slice(0, 3).map((user, index) => (
                                                         <div key={user.id} className="relative ring-2 ring-white dark:ring-slate-800 rounded-full" style={{ zIndex: 3 - index }}>
                                                             <Avatar name={user.display_name} url={user.avatar} size={6} />
                                                         </div>
                                                     ))}
-                                                    {task.assignees.length > 3 && (
+                                                    {task.active_timers.length > 3 && (
                                                         <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-slate-700 ring-2 ring-white dark:ring-slate-800 flex items-center justify-center text-xs font-semibold text-gray-600 dark:text-slate-300">
-                                                            +{task.assignees.length - 3}
+                                                            +{task.active_timers.length - 3}
                                                         </div>
                                                     )}
                                                 </div>
                                             ) : (
-                                                <span className="text-sm text-gray-400 dark:text-slate-500 italic">Unassigned</span>
+                                                <span className="text-sm text-gray-400 dark:text-slate-500 italic">No one</span>
                                             )}
                                         </div>
                                         <span className="text-gray-300 dark:text-slate-600">•</span>
@@ -96,13 +95,13 @@ const RunningTasks = () => {
                                     </div>
                                 </div>
                                 <div className="flex justify-end md:min-w-[150px]">
-                                    <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${task.timer_start_time ? "bg-blue-50 dark:bg-blue-900/30 border-blue-100 dark:border-blue-800" : "bg-amber-50 dark:bg-amber-900/30 border-amber-100 dark:border-amber-800"}`}>
-                                        <FaClock className={`w-4 h-4 ${task.timer_start_time ? "text-blue-600 dark:text-blue-400 animate-spin-slow" : "text-amber-500 dark:text-amber-400"}`} />
-                                        <span className={`font-mono text-lg font-bold ${task.timer_start_time ? "text-blue-700 dark:text-blue-400" : "text-amber-600 dark:text-amber-400"}`}>
+                                    <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${task.active_timer_start ? "bg-blue-50 dark:bg-blue-900/30 border-blue-100 dark:border-blue-800" : "bg-amber-50 dark:bg-amber-900/30 border-amber-100 dark:border-amber-800"}`}>
+                                        <FaClock className={`w-4 h-4 ${task.active_timer_start ? "text-blue-600 dark:text-blue-400 animate-spin-slow" : "text-amber-500 dark:text-amber-400"}`} />
+                                        <span className={`font-mono text-lg font-bold ${task.active_timer_start ? "text-blue-700 dark:text-blue-400" : "text-amber-600 dark:text-amber-400"}`}>
                                             <MiniTaskTimer task={task} showTitle={false} />
                                         </span>
-                                        {!task.timer_start_time && (
-                                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500 dark:text-amber-400">Paused</span>
+                                        {!task.active_timer_start && (
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Stopped</span>
                                         )}
                                     </div>
                                 </div>

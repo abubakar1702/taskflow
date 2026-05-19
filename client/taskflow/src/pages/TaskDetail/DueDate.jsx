@@ -49,7 +49,7 @@ const DueDate = ({ task, onUpdate, isCreator }) => {
                 {label}
             </div>
 
-            <TaskTimer task={task} onUpdate={onUpdate} isCreator={isCreator} />
+            <TaskTimer task={task} onUpdate={onUpdate} />
         </div>
     );
 };

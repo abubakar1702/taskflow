@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from django.db.models import Count
 
-from .models import Task, Subtask, ImportantTask, TaskComment, TaskActivity
+from .models import Task, Subtask, ImportantTask, TaskComment, TaskActivity, TimeLog
 from project.models import Project
 from project.serializers import ProjectSerializer
 from user.serializers import UserSerializer
@@ -120,6 +120,10 @@ class TaskSerializer(serializers.ModelSerializer):
     blocking = DependencyTaskSerializer(many=True, read_only=True)
 
     total_assets = serializers.SerializerMethodField()
+    
+    total_time_taken = serializers.SerializerMethodField()
+    active_timer_start = serializers.SerializerMethodField()
+    active_timers = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
@@ -128,8 +132,8 @@ class TaskSerializer(serializers.ModelSerializer):
             'assignees_ids', 'assignees', 'status', 'priority',
             'subtasks', 'subtasks_data', 'total_assets',
             'dependencies', 'dependencies_ids', 'blocking',
-            'due_date', 'due_time', 'time_taken', 'timer_start_time',
-            'completed_at', 'created_at', 'updated_at'
+            'due_date', 'due_time', 'completed_at', 'created_at', 'updated_at',
+            'total_time_taken', 'active_timer_start', 'active_timers'
         ]
 
     def create(self, validated_data):
@@ -196,6 +200,36 @@ class TaskSerializer(serializers.ModelSerializer):
         if annotated is not None:
             return annotated
         return obj.assets.count()
+        
+    def get_total_time_taken(self, obj):
+        total_seconds = sum((log.duration.total_seconds() for log in obj.time_logs.all() if log.duration), 0)
+        return total_seconds
+        
+    def get_active_timer_start(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return None
+        active_log = obj.time_logs.filter(user=request.user, end_time__isnull=True).first()
+        return active_log.start_time if active_log else None
+
+    def get_active_timers(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return []
+        
+        # Get users with active time logs for this task
+        active_logs = obj.time_logs.filter(end_time__isnull=True).select_related('user')
+        users = [log.user for log in active_logs]
+        
+        return UserSerializer(users, many=True, context=self.context).data
+
+class TimeLogSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = TimeLog
+        fields = ['id', 'task', 'user', 'start_time', 'end_time', 'duration', 'description']
+        read_only_fields = ['id', 'user', 'start_time']
 
 
 class ImportantTaskSerializer(serializers.ModelSerializer):

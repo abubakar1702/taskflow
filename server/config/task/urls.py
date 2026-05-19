@@ -5,12 +5,14 @@ from .views import (
     LeaveTaskAPIView, UserTasksAPIView, ImportantTaskAPIView,
     UnmarkImportantAPIView, RunningTasksAPIView,
     TaskCommentAPIView, TaskCommentDetailAPIView, TaskActivityAPIView,
-    TaskCommentLikeDislikeAPIView
+    TaskCommentLikeDislikeAPIView, TaskTimerStartAPIView, TaskTimerStopAPIView
 )
 
 urlpatterns = [
     path('tasks/', TaskAPIView.as_view(), name='task-list-create'),
     path('tasks/running/', RunningTasksAPIView.as_view(), name='running-tasks'),
+    path('tasks/<uuid:task_id>/timer/start/', TaskTimerStartAPIView.as_view(), name='timer-start'),
+    path('tasks/<uuid:task_id>/timer/stop/', TaskTimerStopAPIView.as_view(), name='timer-stop'),
     path('tasks/<uuid:pk>/', TaskDetailAPIView.as_view(), name='task-detail'),
     path('tasks/<uuid:parent_task_id>/subtasks/', SubtasksApiView.as_view(), name='subtask-list-create'),
     path('tasks/<uuid:parent_task_id>/subtasks/<uuid:pk>/', SubtaskActionAPIView.as_view(), name='subtask-detail'),

@@ -25,8 +25,6 @@ class Task(models.Model):
     dependencies = models.ManyToManyField('self', symmetrical=False, related_name='blocking', blank=True)
     due_date = models.DateField(null=True, blank=True)
     due_time = models.TimeField(null=True, blank=True)
-    time_taken = models.DurationField(null=True, blank=True)
-    timer_start_time = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -36,6 +34,19 @@ class Task(models.Model):
 
     class Meta:
         db_table = 'api_task'
+
+class TimeLog(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='time_logs')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='time_logs')
+    start_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    duration = models.DurationField(null=True, blank=True)
+    description = models.CharField(max_length=255, blank=True)
+    
+    class Meta:
+        db_table = 'api_timelog'
+        ordering = ['-start_time']
 
 class Subtask(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

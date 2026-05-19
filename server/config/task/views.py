@@ -12,7 +12,7 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 
-from .models import Task, Subtask, ImportantTask, TaskComment, TaskActivity
+from .models import Task, Subtask, ImportantTask, TaskComment, TaskActivity, TimeLog
 from .serializers import TaskSerializer, SubtaskSerializer, SearchForAssigneeSerializer, ImportantTaskSerializer, TaskCommentSerializer, TaskActivitySerializer
 from .filters import TaskFilter
 
@@ -487,15 +487,53 @@ class RunningTasksAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        from datetime import timedelta
         return (
             _task_queryset_for_user(self.request.user)
             .filter(
-                Q(timer_start_time__isnull=False) |
-                (Q(status='In Progress') & Q(time_taken__gt=timedelta(0)))
+                time_logs__end_time__isnull=True
             )
-            .order_by('-timer_start_time', '-updated_at')
+            .distinct()
+            .order_by('-updated_at')
         )
+
+from django.utils import timezone
+
+class TaskTimerStartAPIView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        task_id = kwargs.get('task_id')
+        queryset = _task_queryset_for_user(request.user)
+        task = get_object_or_404(queryset, id=task_id)
+
+        # Check if already running
+        if TimeLog.objects.filter(task=task, user=request.user, end_time__isnull=True).exists():
+            return Response({"detail": "Timer is already running for this task."}, status=400)
+
+        # Start timer
+        TimeLog.objects.create(task=task, user=request.user)
+
+        return Response({"detail": "Timer started successfully."})
+
+class TaskTimerStopAPIView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        task_id = kwargs.get('task_id')
+        queryset = _task_queryset_for_user(request.user)
+        task = get_object_or_404(queryset, id=task_id)
+
+        # Find running timer
+        time_log = TimeLog.objects.filter(task=task, user=request.user, end_time__isnull=True).first()
+        if not time_log:
+            return Response({"detail": "No active timer found for this task."}, status=400)
+
+        # Stop timer
+        time_log.end_time = timezone.now()
+        time_log.duration = time_log.end_time - time_log.start_time
+        time_log.save()
+
+        return Response({"detail": "Timer stopped successfully."})
 
 class TaskCommentAPIView(generics.ListCreateAPIView):
     serializer_class = TaskCommentSerializer
